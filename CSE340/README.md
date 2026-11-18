@@ -4,7 +4,9 @@
 
 Click bits and watch a floating-point number change. Type RISC-V code and run it against tests. Step through a loop and watch the PC jump. Every Practice Sheet question for Chapters 1–3 is solved, and every page has a self-test.
 
-![The CSE340 start page](media/index.png)
+![CSE340 tour: the PC running an if/else, the IEEE 754 bit explorer, a multiplication that overflows, and the midterm True/False drill](media/cse340-tour.gif)
+
+▶ [Full-quality video (MP4)](media/cse340-tour.mp4)
 
 ---
 

@@ -20,7 +20,9 @@ More courses will be added folder by folder.
 
 ▶ [Watch the CSE422 demo in full quality (MP4)](CSE422/media/theory-search-stepper.mp4) · [more CSE422 videos](CSE422/)
 
-![CSE340 study pages](CSE340/media/index.png)
+![CSE340: watch the PC run an if/else, click the bits of a float, multiply two floats and catch the overflow](CSE340/media/cse340-tour.gif)
+
+▶ [Watch the CSE340 demo in full quality (MP4)](CSE340/media/cse340-tour.mp4) · [more CSE340](CSE340/)
 
 ![CSE370: change a relationship's cardinality and watch the diagram update](CSE370/media/er-cardinality-sim.gif)
 
@@ -36,11 +38,19 @@ Each course folder has its own README with what's inside, the exam syllabus it t
 
 ---
 
-## Why trust it
+## Resources used to make the notes
 
-- Built from the actual course slides, handouts and practice sheets, with typos in the course material pointed out and fixed.
-- Every worked answer is checked by running it, not just written out.
-- Still a study aid, not official course material. When in doubt, ask your faculty.
+Every page and PDF is built from the course's own material, then checked line by line:
+
+- **Lecture slides** for every chapter and topic covered.
+- **Faculty notes and handouts**, such as the PBK handouts for CSE340.
+- **Practice sheets with the faculty's own solutions**, plus worksheets like the CSE340 Loop Examples sheet.
+- **Textbooks** the courses follow, such as Patterson & Hennessy's *Computer Organization and Design, RISC-V Edition*, and their chapter-wise solutions.
+- **Past questions, assignments, quizzes and lab resources** shared by the faculty.
+- **Careful inspection:** every worked answer is checked by running it (in code, in a simulator, as SQL or as Python), not just written out. Typos found in the course material are pointed out with the fix.
+- **Pro AI tools:** researched, written and cross-checked with Claude Fable 5.1 and Claude Opus 5.5.
+
+Still a study aid, not official course material. When in doubt, ask your faculty.
 
 ---
 
