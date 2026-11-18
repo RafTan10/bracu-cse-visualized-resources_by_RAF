@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CSE370 Study Pages</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{--bg:#f4f6fa;--surface:#fff;--ink:#141a26;--muted:#5a6375;--line:#d8dde8;--accent:#2f5be0;--accent-soft:#e6ecfc;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10141c;--surface:#171d28;--ink:#e6eaf2;--muted:#9aa4b8;--line:#2a3242;--accent:#8aa8ff;--accent-soft:#1e2a48;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10141c;--surface:#171d28;--ink:#e6eaf2;--muted:#9aa4b8;--line:#2a3242;--accent:#8aa8ff;--accent-soft:#1e2a48;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:48px 64px}
+main{max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:32px}
+.eyebrow{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+h1{font-family:"Chakra Petch","Arial Narrow",sans-serif;font-size:clamp(32px,6vw,48px);line-height:1.05;margin:8px 0 12px;text-wrap:balance}
+h2{font-family:"Chakra Petch","Arial Narrow",sans-serif;font-size:22px;margin:0 0 12px}
+p{margin:0;max-width:66ch}
+.sub{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:14px}
+a.card{display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;color:inherit;text-decoration:none;min-width:0}
+a.card:hover,a.card:focus-visible{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.tag{align-self:flex-start;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;padding:2px 9px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
+.card b{font-family:"Chakra Petch","Arial Narrow",sans-serif;font-size:20px}
+.card span{color:var(--muted);font-size:15px}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-size:15px;color:var(--muted)}
+.note b{color:var(--ink)}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="eyebrow">BRAC University · CSE370 Database Systems</div>
+  <h1>CSE370 study pages</h1>
+  <p class="sub">Interactive notes, simulators and practice for the theory part (ER, EER, constraints, schema mapping, storage, normalization) and the SQL lab exam, plus printable exam notes. Each page works offline in any browser and remembers your progress on your own device.</p>
+</header>
+
+<div class="note"><b>Not sure how a page works?</b> Every interactive part has a short demo video in this folder's README. Watch the 20-second clip first, then try it yourself.</div>
+
+<section>
+  <h2>Theory · ER and EER models (Lectures 1–3)</h2>
+  <div class="grid">
+    <a class="card" href="er-eer-exam-prep.html"><span class="tag">Start here</span><b>ER &amp; EER Exam Prep</b><span>Illustrated notation, quick definitions, 3 simulators (cardinality and participation, disjoint/overlapping × total/partial, data independence), exam traps, all Chapter 3 and 4 practice-sheet scenarios solved step by step, a 25-question self-test and 36 flashcards.</span></a>
+    <a class="card" href="pdf/CSE370_ER_EER_Notes.pdf"><span class="tag">PDF</span><b>ER &amp; EER exam notes (printable)</b><span>14 pages: database basics, the three-schema architecture, ER and EER notation, and every practice-sheet answer.</span></a>
+  </div>
+</section>
+
+<section>
+  <h2>Theory · Lectures 4–7 (quiz and mid)</h2>
+  <div class="grid">
+    <a class="card" href="lectures-4-7-exam-prep.html"><span class="tag">Start here</span><b>Lectures 4–7 Exam Prep</b><span>Database constraints, ER/EER → relational schema (all 8 steps), storage architecture and normalization. Six simulators, 14 practice questions with full solutions, a 20-question self-test, topic filters and a cram mode.</span></a>
+    <a class="card" href="pdf/CSE370_Lectures_4-7_Notes.pdf"><span class="tag">PDF</span><b>Lectures 4–7 exam notes (printable)</b><span>26 pages: concepts, answer recipes, definitions, exam traps and every practice question with its solution, plus a self-test with answer key.</span></a>
+  </div>
+</section>
+
+<section>
+  <h2>Lab · SQL (Lab 1 and Lab 2)</h2>
+  <div class="grid">
+    <a class="card" href="lab-exam-drill.html"><span class="tag">Practise</span><b>Lab Exam Drill</b><span>A 10-minute cheat sheet, a 29-question mock paper on one Cricket League table (DDL, DML, aggregates, subqueries) with a 75-minute timer, and 10 spot-the-bug questions. Every answer was run on MariaDB, the database XAMPP uses.</span></a>
+  </div>
+</section>
+
+<div class="note" style="margin-top:0"><b>Study aid, not official material.</b> Built from the BRACU CSE370 slides and practice sheets. When something here and your faculty disagree, follow your faculty.</div>
+</main>
+</body>
+</html>

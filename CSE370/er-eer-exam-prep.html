@@ -1,0 +1,1187 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>ER &amp; EER Exam Prep</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: drafting-sheet study app — sticky tab bar, one panel at a time, diagrams on a faint grid */
+:root{
+  --bg:#E9EDF1; --surface:#FFFFFF; --sunk:#F3F5F8; --ink:#17202B; --muted:#596677; --line:#CCD4DD; --grid:rgba(36,87,197,.07);
+  --ent:#2457C5; --rel:#C2410C; --attr:#0F7B5F; --good:#15803D; --bad:#B91C1C; --goodbg:#E7F5EC; --badbg:#FBEAEA; --hl:#FFF2C2;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#10151B; --surface:#182029; --sunk:#131A22; --ink:#E5EAF0; --muted:#97A3B2; --line:#2B3542; --grid:rgba(126,166,255,.06);
+  --ent:#7EA6FF; --rel:#FF9A5C; --attr:#4FD1A8; --good:#4ADE80; --bad:#F87171; --goodbg:#12301F; --badbg:#3A1717; --hl:#3B3212; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#10151B; --surface:#182029; --sunk:#131A22; --ink:#E5EAF0; --muted:#97A3B2; --line:#2B3542; --grid:rgba(126,166,255,.06);
+  --ent:#7EA6FF; --rel:#FF9A5C; --attr:#4FD1A8; --good:#4ADE80; --bad:#F87171; --goodbg:#12301F; --badbg:#3A1717; --hl:#3B3212; color-scheme:dark }
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15.5px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:12px;padding-block:10px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:800;font-size:19px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;margin-right:auto}
+.brand .tag{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ent);border:1.5px solid var(--ent);padding:1px 6px;border-radius:3px}
+.ctrls{display:flex;gap:8px}
+.btn{font:600 13px var(--body);border:1px solid var(--line);background:var(--sunk);color:var(--ink);padding:7px 12px;border-radius:7px;cursor:pointer}
+.btn:hover{border-color:var(--ent)}
+.btn.primary{background:var(--ent);border-color:var(--ent);color:var(--surface)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.btn:focus-visible,.tab:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--ent);outline-offset:2px}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+.tab{font:600 13.5px var(--body);background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);padding:9px 12px;cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ent)}
+.tab .n{font-family:var(--mono);font-size:11px;color:var(--muted);margin-right:5px}
+main{padding-block:26px 80px}
+section.panel{display:grid;gap:22px}
+h1,h2,h3{font-family:var(--display);letter-spacing:-.015em;text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(28px,5vw,40px);font-weight:800}
+h2{font-size:24px;font-weight:800}
+h3{font-size:18px;font-weight:600}
+p{margin:0;max-width:68ch}
+.lede{font-size:17px;color:var(--muted);max-width:62ch}
+.eyebrow{font:700 11.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px}
+.stack{display:grid;gap:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.grid2>*{min-width:0}
+.k{font-weight:700}
+.e{color:var(--ent);font-family:var(--mono);font-weight:700;font-size:.92em}
+.r{color:var(--rel);font-family:var(--mono);font-weight:700;font-size:.92em}
+.a{color:var(--attr);font-weight:700}
+code,.mono{font-family:var(--mono);font-size:.9em}
+ul.tight{margin:0;padding-left:20px;display:grid;gap:4px}
+.diagram{background-color:var(--sunk);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:20px 20px;border:1px solid var(--line);border-radius:8px;overflow-x:auto;padding:8px}
+.diagram svg{display:block;width:100%;min-width:560px;height:auto}
+.diagram.small svg{min-width:0}
+.caption{font-size:13.5px;color:var(--muted)}
+.notice{font-size:13.5px;color:var(--muted);background:var(--sunk);border:1px dashed var(--line);border-radius:8px;padding:10px 14px}
+/* svg classes */
+.er-line{stroke:var(--ink);stroke-width:1.4;fill:none}
+.er-ent{fill:var(--surface);stroke:var(--ent);stroke-width:2}
+.er-rel{fill:var(--surface);stroke:var(--rel);stroke-width:2}
+.er-attr{fill:var(--surface);stroke:var(--attr);stroke-width:1.6}
+.er-circ{fill:var(--surface);stroke:var(--ink);stroke-width:1.6}
+.er-t{fill:var(--ink);font:700 12px var(--mono)}
+.er-ta{fill:var(--ink);font:500 12.5px var(--body)}
+.er-card{fill:var(--rel);font:700 13px var(--mono)}
+.er-role{fill:var(--muted);font:italic 500 11.5px var(--body)}
+.er-ul{stroke:var(--ink);stroke-width:1.2}
+.dash{stroke-dasharray:5 4}
+/* flow */
+.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:720px){.flow{grid-template-columns:1fr 1fr}}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:6px;align-content:start}
+.step.on{border:2px solid var(--ent)}
+.step .num{font:700 12px var(--mono);color:var(--muted)}
+.step .ttl{font-family:var(--display);font-weight:800;font-size:17px}
+.step p{font-size:13.5px;color:var(--muted)}
+.pill{display:inline-block;font:700 11px var(--mono);padding:2px 7px;border-radius:99px;background:var(--hl);color:var(--ink)}
+/* legend */
+.legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.lg{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px 10px;display:grid;gap:4px}
+.lg svg{width:100%;height:64px;display:block}
+.lg b{font-size:13.5px}
+.lg span{font-size:12.5px;color:var(--muted);line-height:1.35}
+/* defs */
+.defs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.def{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;gap:4px;align-content:start}
+.def .t{font-weight:700}
+.def .d{font-size:13.5px}
+.def .x{font:500 12px var(--mono);color:var(--muted)}
+.def .grp{font:700 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.grp.db{color:var(--muted)} .grp.er{color:var(--ent)} .grp.eer{color:var(--rel)}
+/* tables */
+table.t{border-collapse:collapse;width:100%;font-size:14px}
+table.t th,table.t td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+table.t th{font:700 11.5px var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.tablewrap{overflow-x:auto}
+/* sims */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{font:600 13px var(--mono);border:0;background:var(--surface);color:var(--ink);padding:7px 12px;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ent);color:var(--surface)}
+.ctlrow{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:end}
+.ctl{display:grid;gap:5px}
+.ctl label{font:700 11px var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.notice-line{font-size:14px;border-left:3px solid var(--ent);padding:6px 12px;background:var(--sunk);border-radius:0 6px 6px 0}
+.ok{color:var(--good);font-weight:700}
+.no{color:var(--bad);font-weight:700}
+tr.badrow td{background:var(--badbg)}
+.chk{width:18px;height:18px;accent-color:var(--ent)}
+.scen{display:grid;gap:8px}
+.scen button{text-align:left;font:500 14px var(--body);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 12px;color:var(--ink);cursor:pointer}
+.scen button[aria-pressed="true"]{border:2px solid var(--ent);padding:8px 11px}
+.lvl{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+.lvl.chg{stroke:var(--rel);stroke-width:3;fill:var(--badbg)}
+.lvl.safe{stroke:var(--good);stroke-width:3;fill:var(--goodbg)}
+.lvt{fill:var(--ink);font:700 13px var(--mono)}
+.lvs{fill:var(--muted);font:500 11.5px var(--body)}
+/* traps */
+.trap{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.trap>div{padding:12px 14px;min-width:0}
+.trap .w{background:var(--badbg);border-right:1px solid var(--line)}
+.trap .w::before{content:"Wrong";display:block;font:700 10.5px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--bad);margin-bottom:3px}
+.trap .c::before{content:"Correct";display:block;font:700 10.5px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--good);margin-bottom:3px}
+@media (max-width:560px){.trap{grid-template-columns:1fr}.trap .w{border-right:0;border-bottom:1px solid var(--line)}}
+/* hooks */
+.hook{border-left:4px solid var(--rel);background:var(--surface);border-radius:0 10px 10px 0;padding:14px 16px;display:grid;gap:4px}
+.hook b{font-family:var(--display);font-size:17px}
+/* practice */
+.prob{display:grid;gap:12px}
+.prob .q{background:var(--hl);border-radius:8px;padding:12px 14px}
+.reveal{display:grid;gap:10px}
+.rstep{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:12px 14px;display:grid;gap:8px}
+.rstep h4{margin:0;font:700 12px var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--ent)}
+/* quiz */
+.qbox{display:grid;gap:14px}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.score{font:700 14px var(--mono)}
+.opts{display:grid;gap:8px}
+.opt{font:500 15px var(--body);text-align:left;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);padding:11px 14px;border-radius:8px;cursor:pointer}
+.opt:hover:not([disabled]){border-color:var(--ent)}
+.opt.right{border-color:var(--good);background:var(--goodbg)}
+.opt.wrong{border-color:var(--bad);background:var(--badbg)}
+.opt[disabled]{cursor:default}
+.expl{border-radius:8px;padding:11px 14px;background:var(--sunk);font-size:14.5px}
+.progress{height:6px;background:var(--line);border-radius:99px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--ent);width:0;transition:width .3s}
+/* flashcards */
+.fc{perspective:1000px;cursor:pointer;max-width:520px;width:100%;margin:0 auto}
+.fc-in{position:relative;min-height:190px;transition:transform .45s;transform-style:preserve-3d}
+.fc.flip .fc-in{transform:rotateY(180deg)}
+.fc-f,.fc-b{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;text-align:center;padding:22px}
+.fc-f b{font-family:var(--display);font-size:24px}
+.fc-b{transform:rotateY(180deg);background:var(--sunk)}
+.fcnav{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.hidden-cram{}
+body.cram .nocram{display:none!important}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="bar">
+      <div class="brand"><span class="tag">CSE370</span> ER &amp; EER Exam Prep</div>
+      <div class="ctrls">
+        <button class="btn" id="cramBtn" aria-pressed="false" title="Show only Quick definitions and Self-test">Cram mode</button>
+        <button class="btn" id="themeBtn" title="Switch light / dark">Theme</button>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" id="tabs"></nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- 1 BIG PICTURE -->
+<section class="panel" id="p-big" data-title="Big picture">
+  <div class="stack">
+    <div class="eyebrow">Theory exam scope · L1 Database basics · L2 ER model · L3 EER model</div>
+    <h1>From a messy real-world story to a clean diagram</h1>
+    <p class="lede">A <b>database</b> stores related data; a <b>DBMS</b> is the software that manages it. Before we build tables, we design on paper with the <b>ER model</b>. The <b>EER model</b> adds inheritance (superclass/subclass) for when entity types share features.</p>
+  </div>
+  <div class="flow">
+    <div class="step"><span class="num">STEP 1</span><span class="ttl">Requirements</span><p>Read the scenario. Underline nouns and verbs.</p></div>
+    <div class="step on"><span class="num">STEP 2 · <span class="pill">THIS EXAM</span></span><span class="ttl">Conceptual design</span><p>Draw ER / EER: entities, attributes, relationships, constraints.</p></div>
+    <div class="step"><span class="num">STEP 3</span><span class="ttl">Logical design</span><p>Map the ER diagram to relational tables (next chapter).</p></div>
+    <div class="step"><span class="num">STEP 4</span><span class="ttl">Physical design</span><p>Files, indexes, storage. Handled by the DBMS internals.</p></div>
+  </div>
+  <div class="card stack">
+    <h3>The whole topic on one sheet</h3>
+    <div class="diagram"><svg id="bigmap"></svg></div>
+    <p class="caption">Blue = entity types, orange = relationship types, green = attributes. That color code is used on every diagram in this page.</p>
+  </div>
+  <div class="card stack">
+    <h3>How to use this tonight (≈ 90 minutes)</h3>
+    <ul class="tight">
+      <li><b>10 min</b> · Quick definitions, then flip through the flashcards once.</li>
+      <li><b>20 min</b> · Core concepts: read the notation legend until you can draw each symbol without looking.</li>
+      <li><b>15 min</b> · Play with both simulators. They target the two most-tested ideas: cardinality vs participation, and d/o + total/partial.</li>
+      <li><b>30 min</b> · Design practice: attempt each scenario on paper before revealing.</li>
+      <li><b>15 min</b> · Self-test, then hit "Retry my mistakes" until it's clean.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 2 CONCEPTS -->
+<section class="panel nocram" id="p-concepts" data-title="Concepts" hidden>
+  <h2>Core concepts, illustrated</h2>
+
+  <div class="card stack">
+    <div class="eyebrow">L1 · Database basics</div>
+    <h3>Database system = Database + DBMS software</h3>
+    <div class="grid2">
+      <div class="stack">
+        <p>A <b>database</b> is a collection of related data. A <b>DBMS</b> is the software to define, construct, manipulate and share it. The DBMS also stores a description of the data, the <b>catalog</b> (<b>metadata</b>).</p>
+        <p><b>Why not plain files?</b> File processing gives redundancy and inconsistency, hard access, isolated data, integrity and atomicity problems, concurrent-access anomalies and weak security.</p>
+        <p class="k">Characteristics of the database approach</p>
+        <ul class="tight">
+          <li><b>Self-describing</b>: the catalog holds the structure.</li>
+          <li><b>Program–data independence</b>: structure is not hard-coded in programs.</li>
+          <li><b>Data abstraction</b>: users see a conceptual model, not storage details.</li>
+          <li><b>Multiple views</b> of the same data.</li>
+          <li><b>Sharing &amp; multi-user transaction processing</b> (concurrency control).</li>
+        </ul>
+      </div>
+      <div class="stack">
+        <p class="k">Schema vs state</p>
+        <p>The <b>schema</b> is the design (intension). It rarely changes. The <b>database state</b> (instance, snapshot, extension) is the data at one moment and changes all the time.</p>
+        <p class="k">Data models</p>
+        <ul class="tight">
+          <li><b>Conceptual / high-level</b>: close to how users think, e.g. ER.</li>
+          <li><b>Representational / implementation</b>: e.g. relational.</li>
+          <li><b>Physical / low-level</b>: how data is stored on disk.</li>
+        </ul>
+        <p class="k">Languages</p>
+        <p><b>DDL</b> defines schemas, <b>DML</b> retrieves and updates data. Also SDL (storage) and VDL (views).</p>
+        <p class="k">When NOT to use a DBMS</p>
+        <p>High initial cost, simple single-user apps that won't change, strict real-time needs.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card stack">
+    <div class="eyebrow">L1 · Three-schema architecture</div>
+    <h3>Three levels, two kinds of independence</h3>
+    <div class="grid2">
+      <div class="diagram small"><svg viewBox="0 0 360 300" id="threeLevel"></svg></div>
+      <div class="stack">
+        <p><b>External level</b>: the views different user groups see.</p>
+        <p><b>Conceptual level</b>: the whole database for everyone (entities, relationships, constraints), with no storage detail.</p>
+        <p><b>Internal level</b>: physical storage structures and access paths.</p>
+        <p><b>Physical data independence</b>: change the internal schema without changing the conceptual schema.</p>
+        <p><b>Logical data independence</b>: change the conceptual schema without changing external schemas or application programs. This one is <b>harder</b> to achieve.</p>
+        <p class="caption">Try it live in Simulators → "Which level changed?"</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card stack">
+    <div class="eyebrow">L1 · People around a database</div>
+    <div class="tablewrap"><table class="t">
+      <tr><th>Actor</th><th>Job</th></tr>
+      <tr><td><b>DBA</b></td><td>Authorizes access, coordinates and monitors use, acquires resources, handles security and performance.</td></tr>
+      <tr><td><b>Database designers</b></td><td>Identify the data and choose structures; talk to user groups.</td></tr>
+      <tr><td><b>End users</b></td><td>Casual (occasional ad-hoc queries), naive/parametric (canned transactions, e.g. bank teller), sophisticated (engineers, analysts), stand-alone (personal DB).</td></tr>
+      <tr><td><b>System analysts &amp; programmers</b></td><td>Analysts set requirements and specify canned transactions; programmers implement them.</td></tr>
+    </table></div>
+  </div>
+
+  <div class="card stack">
+    <div class="eyebrow">L2 · ER notation (Chen, as used in Elmasri &amp; Navathe)</div>
+    <h3>Every symbol you need to draw</h3>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="card stack">
+    <div class="eyebrow">L2 · Entities and attributes</div>
+    <div class="grid2">
+      <div class="stack">
+        <p>An <b>entity</b> is a thing with independent existence (a particular student). An <b>entity type</b> is the set of all entities with the same attributes (STUDENT). The collection at one moment is the <b>entity set</b>.</p>
+        <p>A <b>key attribute</b> has a value unique for every entity. Underline it. An entity type can have more than one key, and a key can be composite.</p>
+        <p>Each attribute has a <b>value set</b> (domain). A missing or not-applicable value is <b>NULL</b>.</p>
+      </div>
+      <div class="tablewrap"><table class="t">
+        <tr><th>Attribute kind</th><th>Example</th><th>Symbol</th></tr>
+        <tr><td>Simple vs <b>composite</b></td><td>Name → First, Last</td><td>ellipse with sub-ellipses</td></tr>
+        <tr><td>Single vs <b>multivalued</b></td><td>Phone numbers, Colors</td><td>double ellipse</td></tr>
+        <tr><td>Stored vs <b>derived</b></td><td>Age from BirthDate</td><td>dashed ellipse</td></tr>
+        <tr><td><b>Complex</b></td><td>{Degrees(College, Year, Degree)}</td><td>{ } = multivalued, ( ) = composite</td></tr>
+      </table></div>
+    </div>
+  </div>
+
+  <div class="card stack">
+    <div class="eyebrow">L2 · Relationships and constraints</div>
+    <div class="grid2">
+      <div class="stack">
+        <p>A <b>relationship type</b> links entity types. Its <b>degree</b> is how many entity types take part: unary (recursive), binary, ternary.</p>
+        <p>In a <b>recursive</b> relationship the same entity type plays two roles, so write <b>role names</b> on the lines (supervisor / supervisee, Host / Guest, referrer / referee).</p>
+        <p>In a <b>ternary</b> relationship one diamond has three lines. Your sheets label them n, k, m (e.g. Borrows: BOOKS, LIBRARY, BORROWER).</p>
+        <p>The same two entity types can share <b>several relationships</b> (PLAYERS–TEAMS: belong_to and captain_of).</p>
+        <p><b>Cardinality ratio</b> = the maximum: 1:1, 1:N, M:N.</p>
+        <p><b>Participation</b> = the minimum. <b>Total</b> (double line): every entity must take part, also called existence dependency. <b>Partial</b> (single line): some may not.</p>
+        <p><b>Relationship attributes</b>: in 1:1 they can move to either entity, in 1:N only to the N-side entity, and in M:N they must stay on the relationship.</p>
+      </div>
+      <div class="stack">
+        <p class="k">(min, max) notation</p>
+        <p>Write (min,max) on the line next to entity E. It means each E takes part in at least min and at most max relationship instances. min = 0 → partial; min ≥ 1 → total.</p>
+        <p class="notice-line">Placement flips! Ratio labels: the "N" sits next to EMPLOYEE in DEPARTMENT 1 : N EMPLOYEE. In (min,max), EMPLOYEE gets (1,1) because each employee is in at most one department.</p>
+        <p class="k">Weak entity type</p>
+        <p>Has no key of its own. It is identified through an <b>owner</b> (identifying) entity via an <b>identifying relationship</b>. It always has <b>total participation</b> in that relationship. Its <b>partial key</b> (dashed underline) identifies it only within one owner.</p>
+      </div>
+    </div>
+    <div class="diagram"><svg id="companyER"></svg></div>
+    <p class="caption">What to notice: WORKS_FOR has StartDate. It's N:1, so StartDate could migrate to EMPLOYEE (the N side). DEPENDENT is weak: double box, double diamond, double line, dashed-underlined Dep_name.</p>
+  </div>
+
+  <div class="card stack">
+    <div class="eyebrow">L3 · Enhanced ER (EER)</div>
+    <div class="grid2">
+      <div class="stack">
+        <p>A <b>subclass</b> is a subset of a <b>superclass</b> (an IS-A relationship: an ENGINEER is an EMPLOYEE). A subclass <b>inherits</b> all attributes and relationships of its superclass. It can add <b>specific (local) attributes</b> and its own relationships.</p>
+        <p><b>Specialization</b> is top-down: split a superclass into subclasses. <b>Generalization</b> is bottom-up: combine CAR and TRUCK into VEHICLE.</p>
+        <p>Membership can be <b>predicate-defined</b> (a condition on an attribute, e.g. JobType = 'Engineer'), <b>attribute-defined</b> (all subclasses use the same defining attribute, written on the line) or <b>user-defined</b>.</p>
+      </div>
+      <div class="stack">
+        <p class="k">Two independent constraints</p>
+        <div class="tablewrap"><table class="t">
+          <tr><th></th><th>Meaning</th><th>Symbol</th></tr>
+          <tr><td><b>Disjoint</b></td><td>at most one subclass</td><td>circle with <code>d</code></td></tr>
+          <tr><td><b>Overlapping</b></td><td>can be in several</td><td>circle with <code>o</code></td></tr>
+          <tr><td><b>Total</b></td><td>must be in at least one</td><td>double line superclass→circle</td></tr>
+          <tr><td><b>Partial</b></td><td>may be in none</td><td>single line</td></tr>
+        </table></div>
+        <p>So there are four combinations: disjoint-total, disjoint-partial, overlapping-total, overlapping-partial.</p>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="stack">
+        <p class="k">Hierarchy vs lattice</p>
+        <p>In a <b>hierarchy</b> every subclass has one superclass (single inheritance). In a <b>lattice</b> a subclass can have several superclasses. Such a <b>shared subclass</b> (e.g. STUDENT_ASSISTANT under EMPLOYEE and STUDENT) is in the <b>intersection</b>. It inherits from all of its superclasses (multiple inheritance).</p>
+      </div>
+      <div class="stack">
+        <p class="k">Union type / category</p>
+        <p>A <b>category</b> is a subclass of the <b>union</b> of different superclasses. Example: OWNER is a PERSON, a BANK or a COMPANY. Draw it as a circle with <code>∪</code>. Each member belongs to <b>at least one</b> superclass and inherits only from the one it belongs to (selective inheritance). A category can be total or partial.</p>
+      </div>
+    </div>
+    <div class="diagram"><svg id="eerUni"></svg></div>
+    <p class="caption">What to notice: PERSON → {EMPLOYEE, STUDENT} is overlapping and partial (o, single line). STUDENT → {GRAD, UNDERGRAD} is disjoint and total (d, double line). STUDENT_ASSISTANT is a shared subclass: no circle, a subset line from each superclass.</p>
+  </div>
+</section>
+
+<!-- 3 QUICK DEFS -->
+<section class="panel" id="p-defs" data-title="Quick defs" hidden>
+  <div class="stack">
+    <h2>Quick definitions</h2>
+    <p class="lede">The night-before list. Read each card and say the definition out loud before you read it.</p>
+  </div>
+  <div class="defs" id="defs"></div>
+</section>
+
+<!-- 4 SIMS -->
+<section class="panel nocram" id="p-sims" data-title="Simulators" hidden>
+  <h2>Simulators</h2>
+
+  <div class="card stack">
+    <div class="eyebrow">Sim 1 · Cardinality ratio + participation</div>
+    <h3>Change the constraints and see what's allowed</h3>
+    <div class="ctlrow">
+      <div class="ctl"><label>Ratio DEPARTMENT : EMPLOYEE</label><div class="seg" id="ratioSeg"></div></div>
+      <div class="ctl"><label>DEPARTMENT participation</label><div class="seg" id="tdSeg"></div></div>
+      <div class="ctl"><label>EMPLOYEE participation</label><div class="seg" id="teSeg"></div></div>
+    </div>
+    <div class="grid2">
+      <div class="stack"><div class="eyebrow">Chen notation (ratio)</div><div class="diagram small"><svg id="simChen"></svg></div></div>
+      <div class="stack"><div class="eyebrow">Same thing in (min,max)</div><div class="diagram small"><svg id="simMinMax"></svg></div></div>
+    </div>
+    <div class="grid2">
+      <div class="stack"><div class="eyebrow">One valid set of instances</div><div class="diagram small"><svg id="simInst"></svg></div></div>
+      <div class="stack" id="simText"></div>
+    </div>
+    <p class="caption">What to notice: participation changes only whether a dot may sit alone (grey). The ratio changes how many lines may meet at one dot.</p>
+  </div>
+
+  <div class="card stack">
+    <div class="eyebrow">Sim 2 · Specialization constraints</div>
+    <h3>Disjoint/overlapping × total/partial checker</h3>
+    <div class="ctlrow">
+      <div class="ctl"><label>Disjointness</label><div class="seg" id="djSeg"></div></div>
+      <div class="ctl"><label>Completeness</label><div class="seg" id="cpSeg"></div></div>
+    </div>
+    <div class="grid2">
+      <div class="diagram small"><svg id="eerSim"></svg></div>
+      <div class="stack">
+        <div class="tablewrap"><table class="t" id="eerTable"></table></div>
+        <div id="eerSummary" class="notice-line"></div>
+      </div>
+    </div>
+    <p class="caption">What to notice: tick and untick memberships. "d" forbids two ticks in a row, "total" forbids zero ticks. The two rules never interact.</p>
+  </div>
+
+  <div class="card stack">
+    <div class="eyebrow">Sim 3 · Data independence</div>
+    <h3>Which level changed, and what is protected?</h3>
+    <div class="grid2">
+      <div class="scen" id="scenList"></div>
+      <div class="stack">
+        <div class="diagram small"><svg viewBox="0 0 360 300" id="indepSvg"></svg></div>
+        <div id="indepText" class="notice-line"></div>
+      </div>
+    </div>
+    <p class="caption">What to notice: each kind of independence protects the level just above the change. Red = changed, green = untouched.</p>
+  </div>
+</section>
+
+<!-- 5 TRAPS -->
+<section class="panel" id="p-traps" data-title="Exam traps" hidden>
+  <h2>Common mistakes &amp; exam traps</h2>
+  <div class="stack" id="traps"></div>
+</section>
+
+<!-- 6 HOOKS -->
+<section class="panel nocram" id="p-hooks" data-title="Memory hooks" hidden>
+  <h2>Memory hooks</h2>
+  <div class="grid2" id="hooks"></div>
+</section>
+
+<!-- 7 PRACTICE -->
+<section class="panel nocram" id="p-practice" data-title="Design practice" hidden>
+  <div class="stack">
+    <h2>Design practice</h2>
+    <p class="lede">All 10 questions from your Chapter 3 and Chapter 4 practice sheets, plus one bonus on categories. Draw on paper first, then reveal one step at a time and compare. Diagrams follow the sheet's own answers and use its labels (lower-case n, m, and k for the third side of a ternary).</p>
+  </div>
+  <div class="card stack">
+    <h3>The 5-step method (use it on every scenario)</h3>
+    <ul class="tight">
+      <li><b>Nouns with their own attributes</b> → entity types. Find each one's key; no key of its own → weak entity.</li>
+      <li><b>Describing words</b> → attributes. Check for composite, multivalued and derived.</li>
+      <li><b>Verbs between nouns</b> → relationship types. Check for recursive (same type twice) and ternary.</li>
+      <li><b>"each / at most / many"</b> → cardinality ratio. <b>"must / every / at least one"</b> → total participation.</li>
+      <li><b>Data that belongs to the pair</b> (grade, hours, start date, medicines per visit) → relationship attribute. It can even be multivalued.</li>
+      <li><b>Write assumptions</b> under the diagram, but only about cardinality or participation that the question doesn't state (the sheet's rule).</li>
+    </ul>
+    <p class="k">Signal phrases your sheets use</p>
+    <div class="tablewrap"><table class="t">
+      <tr><th>Phrase in the question</th><th>Draw</th></tr>
+      <tr><td>"a set of…", "one or more authors", "all medicines"</td><td>multivalued attribute (double ellipse)</td></tr>
+      <tr><td>"composed of street, city, zip"</td><td>composite attribute</td></tr>
+      <tr><td>"calculated…, not stored"</td><td>derived attribute (dashed ellipse)</td></tr>
+      <tr><td>"not unique unless combined with the building number"</td><td>weak entity + partial key + identifying relationship</td></tr>
+      <tr><td>"between two teams (host and guest)", "refer other customers"</td><td>recursive relationship with role names</td></tr>
+      <tr><td>"borrower borrows a book from a library", "manager assigns a consultant to a customer"</td><td>ternary relationship (three lines, n / k / m)</td></tr>
+      <tr><td>"need not belong to any" / "may belong to two or more"</td><td>partial / overlapping (o)</td></tr>
+      <tr><td>"is either A or B", "of two types", "three types of…"</td><td>disjoint (d), usually total</td></tr>
+      <tr><td>"many types of employees… two special types are…"</td><td>partial (others exist)</td></tr>
+    </table></div>
+  </div>
+  <div class="stack" id="problems"></div>
+</section>
+
+<!-- 8 SELF TEST -->
+<section class="panel" id="p-test" data-title="Self-test" hidden>
+  <div class="qhead">
+    <h2>Self-test</h2>
+    <div class="seg" id="modeSeg"></div>
+  </div>
+  <div id="quizArea" class="card qbox"></div>
+  <div id="flashArea" class="stack" hidden></div>
+</section>
+
+</main>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e}
+function txtW(s,size){return s.length*size*0.62}
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+/* ---------- ER renderer ---------- */
+function drawER(svg,spec){
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  svg.setAttribute('viewBox',`0 0 ${spec.w} ${spec.h}`);
+  const N={};spec.nodes.forEach(n=>N[n.id]=n);
+  const gE=el('g',{},svg),gN=el('g',{},svg),gL=el('g',{},svg);
+  (spec.edges||[]).forEach(ed=>{
+    const a=N[ed.a],b=N[ed.b];
+    const ax=a.x+(ed.ao?ed.ao[0]:0),ay=a.y+(ed.ao?ed.ao[1]:0),bx=b.x+(ed.bo?ed.bo[0]:0),by=b.y+(ed.bo?ed.bo[1]:0);
+    const dx=bx-ax,dy=by-ay,L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L,px=-uy,py=ux;
+    if(ed.total){[1,-1].forEach(s=>el('line',{x1:ax+px*2.6*s,y1:ay+py*2.6*s,x2:bx+px*2.6*s,y2:by+py*2.6*s,class:'er-line'},gE))}
+    else el('line',{x1:ax,y1:ay,x2:bx,y2:by,class:'er-line'},gE);
+    const t=ed.t??0.5,mx=ax+dx*t,my=ay+dy*t,off=ed.off??12;
+    if(ed.label){const lx=mx+px*off,ly=my+py*off;el('text',{x:lx,y:ly+4.5,class:'er-card','text-anchor':'middle'},gL).textContent=ed.label}
+    if(ed.role){const ro=ed.roff??-14;el('text',{x:mx+px*ro,y:my+py*ro+4,class:'er-role','text-anchor':'middle'},gL).textContent=ed.role}
+    if(ed.subset){const sm=ed.st??0.5,sx=ax+dx*sm,sy=ay+dy*sm;
+      el('path',{d:`M ${sx+px*7-ux*5} ${sy+py*7-uy*5} Q ${sx+ux*9} ${sy+uy*9} ${sx-px*7-ux*5} ${sy-py*7-uy*5}`,class:'er-line','stroke-width':1.8},gL)}
+  });
+  spec.nodes.forEach(n=>{
+    const lab=n.label||n.id;
+    if(n.k==='E'||n.k==='WE'){
+      const w=Math.max(96,txtW(lab,12)+24),h=38;
+      el('rect',{x:n.x-w/2,y:n.y-h/2,width:w,height:h,class:'er-ent'},gN);
+      if(n.k==='WE')el('rect',{x:n.x-w/2+4,y:n.y-h/2+4,width:w-8,height:h-8,class:'er-ent','stroke-width':1.5},gN);
+      el('text',{x:n.x,y:n.y+4.5,class:'er-t','text-anchor':'middle'},gN).textContent=lab;
+    }else if(n.k==='R'||n.k==='IR'){
+      const hw=Math.max(50,txtW(lab,12)/2+26),hh=26;
+      el('polygon',{points:`${n.x},${n.y-hh} ${n.x+hw},${n.y} ${n.x},${n.y+hh} ${n.x-hw},${n.y}`,class:'er-rel'},gN);
+      if(n.k==='IR'){const i=7,j=i*hh/hw;el('polygon',{points:`${n.x},${n.y-hh+j+2} ${n.x+hw-i-2},${n.y} ${n.x},${n.y+hh-j-2} ${n.x-hw+i+2},${n.y}`,class:'er-rel','stroke-width':1.5},gN)}
+      el('text',{x:n.x,y:n.y+4.5,class:'er-t','text-anchor':'middle','font-size':'11'},gN).textContent=lab;
+    }else if(n.k==='A'){
+      const rx=txtW(lab,12.5)/2+14,ry=16;
+      const e=el('ellipse',{cx:n.x,cy:n.y,rx,ry,class:'er-attr'+(n.derived?' dash':'')},gN);
+      if(n.multi)el('ellipse',{cx:n.x,cy:n.y,rx:rx-4,ry:ry-4,class:'er-attr'},gN);
+      el('text',{x:n.x,y:n.y+4.5,class:'er-ta','text-anchor':'middle'},gN).textContent=lab;
+      if(n.key||n.partial){const w=txtW(lab,12.5);el('line',{x1:n.x-w/2,y1:n.y+7,x2:n.x+w/2,y2:n.y+7,class:'er-ul'+(n.partial?' dash':'')},gN)}
+    }else if(n.k==='C'){
+      el('circle',{cx:n.x,cy:n.y,r:14,class:'er-circ'},gN);
+      el('text',{x:n.x,y:n.y+5,class:'er-t','text-anchor':'middle','font-size':'14'},gN).textContent=lab;
+    }else if(n.k==='T'){
+      el('text',{x:n.x,y:n.y,class:n.cls||'er-role','text-anchor':n.anchor||'middle'},gN).textContent=lab;
+    }
+  });
+}
+
+/* ---------- big map ---------- */
+drawER(document.getElementById('bigmap'),{w:820,h:250,nodes:[
+ {id:'t1',k:'T',x:110,y:22,label:'L1 · DATABASE BASICS',cls:'er-t'},
+ {id:'t2',k:'T',x:410,y:22,label:'L2 · ER MODEL',cls:'er-t'},
+ {id:'t3',k:'T',x:700,y:22,label:'L3 · EER MODEL',cls:'er-t'},
+ {id:'DBMS',k:'E',x:110,y:80},{id:'Catalog',k:'A',x:110,y:160,label:'catalog / metadata'},{id:'lv',k:'A',x:110,y:215,label:'3 schema levels'},
+ {id:'ENTITY',k:'E',x:330,y:80},{id:'REL',k:'R',x:490,y:80,label:'RELATIONSHIP'},
+ {id:'attrs',k:'A',x:300,y:160,label:'attributes + key'},{id:'weak',k:'WE',x:330,y:215,label:'WEAK ENTITY'},
+ {id:'cons',k:'A',x:500,y:170,label:'ratio + participation'},
+ {id:'SUPER',k:'E',x:700,y:70,label:'SUPERCLASS'},{id:'c',k:'C',x:700,y:135,label:'d'},
+ {id:'SUB1',k:'E',x:625,y:210,label:'SUBCLASS'},{id:'SUB2',k:'E',x:775,y:210,label:'SUBCLASS'}
+],edges:[{a:'DBMS',b:'Catalog'},{a:'Catalog',b:'lv'},{a:'ENTITY',b:'REL'},{a:'ENTITY',b:'attrs'},{a:'ENTITY',b:'weak'},{a:'REL',b:'cons'},
+ {a:'SUPER',b:'c',total:true},{a:'c',b:'SUB1',subset:true},{a:'c',b:'SUB2',subset:true}]});
+
+/* ---------- three level ---------- */
+function drawLevels(svg,chg,safe){
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  const cls=l=>'lvl'+(chg===l?' chg':'')+(safe&&safe.includes(l)?' safe':'');
+  el('text',{x:10,y:18,class:'lvs'},svg).textContent='End users';
+  [0,1,2].forEach(i=>{el('rect',{x:20+i*112,y:30,width:96,height:48,rx:6,class:cls('ext')},svg);el('text',{x:68+i*112,y:59,class:'lvt','text-anchor':'middle'},svg).textContent='View '+(i+1)});
+  el('text',{x:180,y:96,class:'lvs','text-anchor':'middle'},svg).textContent='external / conceptual mapping  ·  logical independence';
+  el('rect',{x:20,y:106,width:320,height:60,rx:6,class:cls('con')},svg);
+  el('text',{x:180,y:132,class:'lvt','text-anchor':'middle'},svg).textContent='CONCEPTUAL SCHEMA';
+  el('text',{x:180,y:151,class:'lvs','text-anchor':'middle'},svg).textContent='entities, relationships, constraints';
+  el('text',{x:180,y:186,class:'lvs','text-anchor':'middle'},svg).textContent='conceptual / internal mapping  ·  physical independence';
+  el('rect',{x:20,y:196,width:320,height:60,rx:6,class:cls('int')},svg);
+  el('text',{x:180,y:222,class:'lvt','text-anchor':'middle'},svg).textContent='INTERNAL SCHEMA';
+  el('text',{x:180,y:241,class:'lvs','text-anchor':'middle'},svg).textContent='files, indexes, storage';
+  el('text',{x:180,y:284,class:'lvs','text-anchor':'middle'},svg).textContent='Stored database (disk)';
+}
+drawLevels(document.getElementById('threeLevel'));
+
+/* ---------- legend ---------- */
+const legendItems=[
+ ['Entity type','Rectangle. A thing with its own existence.',{w:200,h:64,nodes:[{id:'STUDENT',k:'E',x:100,y:32}]}],
+ ['Weak entity type','Double rectangle. No key of its own.',{w:200,h:64,nodes:[{id:'DEPENDENT',k:'WE',x:100,y:32}]}],
+ ['Relationship type','Diamond. Links entity types.',{w:200,h:64,nodes:[{id:'ENROLLS',k:'R',x:100,y:32}]}],
+ ['Identifying relationship','Double diamond. Links a weak entity to its owner.',{w:200,h:64,nodes:[{id:'HAS',k:'IR',x:100,y:32}]}],
+ ['Attribute','Ellipse.',{w:200,h:64,nodes:[{id:'Title',k:'A',x:100,y:32}]}],
+ ['Key attribute','Underlined. Unique for every entity.',{w:200,h:64,nodes:[{id:'StudentID',k:'A',x:100,y:32,key:true}]}],
+ ['Partial key','Dashed underline. Unique only within one owner.',{w:200,h:64,nodes:[{id:'FlatNo',k:'A',x:100,y:32,partial:true}]}],
+ ['Multivalued','Double ellipse. Can hold many values.',{w:200,h:64,nodes:[{id:'Phone',k:'A',x:100,y:32,multi:true}]}],
+ ['Derived','Dashed ellipse. Computed, not stored.',{w:200,h:64,nodes:[{id:'Age',k:'A',x:100,y:32,derived:true}]}],
+ ['Composite','Ellipse with its own sub-attributes.',{w:200,h:64,nodes:[{id:'Name',k:'A',x:100,y:48},{id:'First',k:'A',x:45,y:17},{id:'Last',k:'A',x:155,y:17}],edges:[{a:'Name',b:'First'},{a:'Name',b:'Last'}]}],
+ ['Total participation','Double line. Every entity must take part.',{w:200,h:64,nodes:[{id:'E',k:'E',x:50,y:32,label:'EMP'},{id:'R',k:'R',x:155,y:32,label:'R'}],edges:[{a:'E',b:'R',total:true}]}],
+ ['Cardinality 1 : N','Numbers on the lines, near each entity.',{w:320,h:64,nodes:[{id:'A',k:'E',x:52,y:32,label:'DEPT'},{id:'R',k:'R',x:160,y:32,label:'R'},{id:'B',k:'E',x:268,y:32,label:'EMP'}],edges:[{a:'R',b:'A',label:'1',off:-12},{a:'R',b:'B',label:'N'}]}],
+ ['Specialization (d / o)','Circle under superclass. d = disjoint, o = overlap.',{w:200,h:64,nodes:[{id:'c',k:'C',x:100,y:16,label:'d'},{id:'S1',k:'T',x:40,y:58,label:'sub'},{id:'S2',k:'T',x:160,y:58,label:'sub'}],edges:[{a:'c',b:'S1',subset:true,bo:[0,-12]},{a:'c',b:'S2',subset:true,bo:[0,-12]}]}],
+ ['Category (union)','Circle with ∪. Member of at least one superclass.',{w:200,h:64,nodes:[{id:'c',k:'C',x:100,y:46,label:'∪'},{id:'S1',k:'T',x:35,y:14,label:'PERSON'},{id:'S2',k:'T',x:165,y:14,label:'BANK'}],edges:[{a:'S1',b:'c',ao:[0,6]},{a:'S2',b:'c',ao:[0,6]}]}],
+];
+const lgEl=document.getElementById('legend');
+legendItems.forEach(([t,d,spec])=>{const div=document.createElement('div');div.className='lg';const s=el('svg',{});div.appendChild(s);drawER(s,spec);div.insertAdjacentHTML('beforeend',`<b>${t}</b><span>${d}</span>`);lgEl.appendChild(div)});
+
+/* ---------- company ER ---------- */
+drawER(document.getElementById('companyER'),{w:780,h:430,nodes:[
+ {id:'EMPLOYEE',k:'E',x:200,y:190},{id:'WORKS_FOR',k:'R',x:410,y:190},{id:'DEPARTMENT',k:'E',x:610,y:190},
+ {id:'Ssn',k:'A',x:70,y:115,key:true},{id:'Name',k:'A',x:200,y:88},{id:'Fname',k:'A',x:130,y:30},{id:'Lname',k:'A',x:270,y:30},
+ {id:'Bdate',k:'A',x:60,y:190},{id:'Age',k:'A',x:75,y:262,derived:true},
+ {id:'StartDate',k:'A',x:410,y:105},
+ {id:'Dnumber',k:'A',x:545,y:100,key:true},{id:'Dname',k:'A',x:690,y:100},{id:'Locations',k:'A',x:690,y:280,multi:true},
+ {id:'DEPENDENTS_OF',k:'IR',x:200,y:298},{id:'DEPENDENT',k:'WE',x:200,y:395},
+ {id:'Dep_name',k:'A',x:60,y:395,partial:true},{id:'Birth_date',k:'A',x:350,y:395}
+],edges:[
+ {a:'WORKS_FOR',b:'EMPLOYEE',label:'N',total:true},{a:'WORKS_FOR',b:'DEPARTMENT',label:'1',total:true,off:-12},
+ {a:'EMPLOYEE',b:'Ssn'},{a:'EMPLOYEE',b:'Name'},{a:'Name',b:'Fname'},{a:'Name',b:'Lname'},{a:'EMPLOYEE',b:'Bdate'},{a:'EMPLOYEE',b:'Age'},
+ {a:'WORKS_FOR',b:'StartDate'},{a:'DEPARTMENT',b:'Dnumber'},{a:'DEPARTMENT',b:'Dname'},{a:'DEPARTMENT',b:'Locations'},
+ {a:'DEPENDENTS_OF',b:'EMPLOYEE',label:'1',off:14},{a:'DEPENDENTS_OF',b:'DEPENDENT',label:'N',total:true,off:14},
+ {a:'DEPENDENT',b:'Dep_name'},{a:'DEPENDENT',b:'Birth_date'}
+]});
+
+/* ---------- EER university ---------- */
+const eerUniSpec={w:780,h:540,nodes:[
+ {id:'PERSON',k:'E',x:390,y:60},{id:'SSN',k:'A',x:240,y:60,key:true},{id:'Name',k:'A',x:540,y:60},
+ {id:'c1',k:'C',x:390,y:150,label:'o'},
+ {id:'EMPLOYEE',k:'E',x:210,y:240},{id:'Salary',k:'A',x:75,y:240},
+ {id:'STUDENT',k:'E',x:570,y:240},{id:'Major',k:'A',x:710,y:240},
+ {id:'c2',k:'C',x:570,y:330,label:'d'},
+ {id:'GRAD_STUDENT',k:'E',x:460,y:420},{id:'Program',k:'A',x:460,y:500},
+ {id:'UNDERGRAD',k:'E',x:690,y:420},{id:'Class',k:'A',x:690,y:500},
+ {id:'STUDENT_ASSISTANT',k:'E',x:220,y:420},{id:'PercentTime',k:'A',x:220,y:500}
+],edges:[
+ {a:'PERSON',b:'SSN'},{a:'PERSON',b:'Name'},{a:'PERSON',b:'c1'},
+ {a:'c1',b:'EMPLOYEE',subset:true},{a:'c1',b:'STUDENT',subset:true},
+ {a:'EMPLOYEE',b:'Salary'},{a:'STUDENT',b:'Major'},{a:'STUDENT',b:'c2',total:true},
+ {a:'c2',b:'GRAD_STUDENT',subset:true},{a:'c2',b:'UNDERGRAD',subset:true},
+ {a:'GRAD_STUDENT',b:'Program'},{a:'UNDERGRAD',b:'Class'},
+ {a:'EMPLOYEE',b:'STUDENT_ASSISTANT',subset:true},{a:'STUDENT',b:'STUDENT_ASSISTANT',subset:true,st:0.55},
+ {a:'STUDENT_ASSISTANT',b:'PercentTime'}
+]};
+drawER(document.getElementById('eerUni'),eerUniSpec);
+
+/* ---------- defs ---------- */
+const DEFS=[
+ ['db','Database','A collection of related data with an implicit meaning.','e.g. a university\'s student records'],
+ ['db','DBMS','Software to define, construct, manipulate and share databases.','MySQL, Oracle, PostgreSQL'],
+ ['db','Database system','The database plus the DBMS software (plus applications).','DB + DBMS = DB system'],
+ ['db','Catalog / metadata','Data about the data: structure, types, constraints. Stored by the DBMS.','"self-describing"'],
+ ['db','Schema','The description (design) of a database. Changes rarely. Also called intension.','STUDENT(ID, Name, …)'],
+ ['db','Database state','The actual data at one moment. Also instance, snapshot, extension.','today\'s 12 000 rows'],
+ ['db','Three-schema architecture','Internal, conceptual and external levels, separated by mappings.','storage → whole DB → views'],
+ ['db','Physical data independence','Change the internal schema without changing the conceptual schema.','add an index'],
+ ['db','Logical data independence','Change the conceptual schema without changing external schemas or programs. Harder.','add a column'],
+ ['db','DDL / DML','DDL defines the schema; DML retrieves, inserts, deletes and updates data.','CREATE vs SELECT'],
+ ['er','Entity type','A set of entities that share the same attributes.','STUDENT'],
+ ['er','Key attribute','An attribute whose value is unique for each entity. Underlined.','StudentID'],
+ ['er','Composite attribute','Can be divided into smaller sub-attributes.','Name → First, Last'],
+ ['er','Multivalued attribute','Can have several values for one entity. Double ellipse.','Phones'],
+ ['er','Derived attribute','Computed from other attributes, not stored. Dashed ellipse.','Age ← BirthDate'],
+ ['er','Complex attribute','Composite and multivalued nested together.','{Degrees(College, Year)}'],
+ ['er','Relationship degree','The number of entity types taking part.','unary, binary, ternary'],
+ ['er','Recursive relationship','The same entity type takes part twice in different roles.','EMPLOYEE supervises EMPLOYEE'],
+ ['er','Cardinality ratio','The maximum number of relationship instances an entity can take part in.','1:1, 1:N, M:N'],
+ ['er','Total participation','Every entity must take part. Double line. Existence dependency.','every course has a dept'],
+ ['er','Partial participation','Some entities may not take part. Single line.','not every employee manages'],
+ ['er','Weak entity type','Has no key of its own; identified by an owner entity. Double rectangle.','DEPENDENT of EMPLOYEE'],
+ ['er','Partial key','Identifies a weak entity only within its owner. Dashed underline.','Dep_name'],
+ ['er','Identifying relationship','Links a weak entity to its owner. Double diamond.','DEPENDENTS_OF'],
+ ['er','(min, max)','Each entity takes part in at least min and at most max instances.','(0,N), (1,1)'],
+ ['eer','Superclass / subclass','A subclass is a subset of the superclass: an IS-A link.','ENGINEER IS-A EMPLOYEE'],
+ ['eer','Inheritance','A subclass gets all attributes and relationships of its superclass.','Engineer has Salary'],
+ ['eer','Specialization','Top-down: define subclasses of a superclass.','EMPLOYEE → SECRETARY, ENGINEER'],
+ ['eer','Generalization','Bottom-up: combine common features into a superclass.','CAR, TRUCK → VEHICLE'],
+ ['eer','Disjoint (d)','An entity can be in at most one subclass.','a vehicle is a car OR a truck'],
+ ['eer','Overlapping (o)','An entity can be in several subclasses.','a person is a student AND an employee'],
+ ['eer','Total specialization','Every superclass entity must be in some subclass. Double line.','every student is grad or undergrad'],
+ ['eer','Partial specialization','A superclass entity may be in no subclass. Single line.','a person may be neither'],
+ ['eer','Shared subclass','A subclass of several superclasses (lattice); member of all of them (intersection).','STUDENT_ASSISTANT'],
+ ['eer','Category / union type','A subclass of the union of different superclasses; member of at least one. ∪ circle.','OWNER = PERSON ∪ BANK ∪ COMPANY'],
+ ['eer','Predicate-defined subclass','Membership decided by a condition on a superclass attribute.','JobType = \'Engineer\''],
+];
+document.getElementById('defs').innerHTML=DEFS.map(([g,t,d,x])=>`<div class="def"><span class="grp ${g}">${g==='db'?'L1 · DB':g==='er'?'L2 · ER':'L3 · EER'}</span><span class="t">${t}</span><span class="d">${d}</span><span class="x">${x}</span></div>`).join('');
+
+/* ---------- Sim 1 ---------- */
+const S1={ratio:'1:N',tD:false,tE:true};
+function seg(id,opts,get,set){const s=document.getElementById(id);s.innerHTML='';opts.forEach(([v,l])=>{const b=document.createElement('button');b.textContent=l;b.setAttribute('aria-pressed',String(get()===v));b.onclick=()=>{set(v);[...s.children].forEach(c=>c.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true')};s.appendChild(b)})}
+seg('ratioSeg',[['1:1','1:1'],['1:N','1:N'],['N:1','N:1'],['M:N','M:N']],()=>S1.ratio,v=>{S1.ratio=v;sim1()});
+seg('tdSeg',[[false,'partial'],[true,'total']],()=>S1.tD,v=>{S1.tD=v;sim1()});
+seg('teSeg',[[false,'partial'],[true,'total']],()=>S1.tE,v=>{S1.tE=v;sim1()});
+function sim1(){
+  const [dl,,el2]=S1.ratio.split('');const dLab=S1.ratio.split(':')[0],eLab=S1.ratio.split(':')[1];
+  drawER(document.getElementById('simChen'),{w:520,h:90,nodes:[{id:'DEPARTMENT',k:'E',x:80,y:45},{id:'WORKS_IN',k:'R',x:260,y:45},{id:'EMPLOYEE',k:'E',x:440,y:45}],
+    edges:[{a:'WORKS_IN',b:'DEPARTMENT',label:dLab,total:S1.tD,off:-12},{a:'WORKS_IN',b:'EMPLOYEE',label:eLab,total:S1.tE}]});
+  const maxD=eLab==='1'?'1':'N',maxE=dLab==='1'?'1':'N';
+  const mmD=`(${S1.tD?1:0},${maxD})`,mmE=`(${S1.tE?1:0},${maxE})`;
+  drawER(document.getElementById('simMinMax'),{w:520,h:90,nodes:[{id:'DEPARTMENT',k:'E',x:80,y:45},{id:'WORKS_IN',k:'R',x:260,y:45},{id:'EMPLOYEE',k:'E',x:440,y:45}],
+    edges:[{a:'WORKS_IN',b:'DEPARTMENT',label:mmD,off:-12},{a:'WORKS_IN',b:'EMPLOYEE',label:mmE}]});
+  // instances
+  let links=[],nD,nE;
+  if(S1.ratio==='1:1'){links=[[0,0],[1,1],[2,2]];nD=3;nE=3}
+  else if(S1.ratio==='1:N'){links=[[0,0],[0,1],[0,2],[1,3]];nD=2;nE=4}
+  else if(S1.ratio==='N:1'){links=[[0,0],[1,0],[2,0],[3,1]];nD=4;nE=2}
+  else {links=[[0,0],[0,1],[1,0],[1,2],[2,2],[2,3]];nD=3;nE=4}
+  if(!S1.tD)nD++; if(!S1.tE)nE++;
+  const svg=document.getElementById('simInst');while(svg.firstChild)svg.removeChild(svg.firstChild);
+  const H=Math.max(nD,nE)*42+40;svg.setAttribute('viewBox',`0 0 340 ${H}`);
+  const yD=i=>40+i*((H-60)/Math.max(1,nD-1||1)),yE=i=>40+i*((H-60)/Math.max(1,nE-1||1));
+  const yd=i=>nD===1?H/2:yD(i),ye=i=>nE===1?H/2:yE(i);
+  el('text',{x:70,y:20,class:'er-t','text-anchor':'middle',fill:'var(--ent)'},svg).textContent='DEPARTMENT';
+  el('text',{x:270,y:20,class:'er-t','text-anchor':'middle'},svg).textContent='EMPLOYEE';
+  links.forEach(([d,e])=>el('line',{x1:90,y1:yd(d),x2:250,y2:ye(e),stroke:'var(--rel)','stroke-width':2},svg));
+  const usedD=new Set(links.map(l=>l[0])),usedE=new Set(links.map(l=>l[1]));
+  for(let i=0;i<nD;i++){const u=usedD.has(i);el('circle',{cx:80,cy:yd(i),r:10,fill:u?'var(--ent)':'var(--surface)',stroke:u?'var(--ent)':'var(--muted)','stroke-width':2,'stroke-dasharray':u?'':'3 3'},svg);el('text',{x:58,y:yd(i)+4,class:'er-ta','text-anchor':'end'},svg).textContent='d'+(i+1)}
+  for(let i=0;i<nE;i++){const u=usedE.has(i);el('circle',{cx:260,cy:ye(i),r:10,fill:u?'var(--ent)':'var(--surface)',stroke:u?'var(--ent)':'var(--muted)','stroke-width':2,'stroke-dasharray':u?'':'3 3'},svg);el('text',{x:282,y:ye(i)+4,class:'er-ta'},svg).textContent='e'+(i+1)}
+  const attrWhere={'1:1':'either DEPARTMENT or EMPLOYEE (both are "1" sides)','1:N':'EMPLOYEE, the N side','N:1':'DEPARTMENT, the N side','M:N':'nowhere. It must stay on WORKS_IN'}[S1.ratio];
+  document.getElementById('simText').innerHTML=`
+    <div class="notice-line"><b>Each department</b> works with ${S1.tD?'<b>at least one</b>':'<b>zero or more</b>'} and ${maxD==='1'?'<b>at most one</b>':'<b>many</b>'} employee${maxD==='1'?'':'s'}.</div>
+    <div class="notice-line"><b>Each employee</b> works in ${S1.tE?'<b>at least one</b>':'<b>zero or more</b>'} and ${maxE==='1'?'<b>at most one</b>':'<b>many</b>'} department${maxE==='1'?'':'s'}.</div>
+    <p>DEPARTMENT line: <b>${S1.tD?'double (total)':'single (partial)'}</b>. EMPLOYEE line: <b>${S1.tE?'double (total)':'single (partial)'}</b>.</p>
+    <p>(min,max): DEPARTMENT <code>${mmD}</code>, EMPLOYEE <code>${mmE}</code>. The max next to an entity is the ratio number written on the <i>other</i> side.</p>
+    <p>A relationship attribute like <span class="a">StartDate</span> can move to: <b>${attrWhere}</b>.</p>
+    <p class="caption">Grey dashed dots are entities with no relationship. They only appear on partial sides.</p>`;
+}
+sim1();
+
+/* ---------- Sim 2 ---------- */
+const S2={dj:'d',total:false,rows:[['Rahim',[0,1,0]],['Karim',[0,1,1]],['Sadia',[0,0,0]],['Nabila',[1,0,0]],['Tanvir',[0,0,1]]]};
+seg('djSeg',[['d','d · disjoint'],['o','o · overlapping']],()=>S2.dj,v=>{S2.dj=v;sim2()});
+seg('cpSeg',[[false,'partial'],[true,'total']],()=>S2.total,v=>{S2.total=v;sim2()});
+function sim2(){
+  drawER(document.getElementById('eerSim'),{w:600,h:340,nodes:[
+    {id:'EMPLOYEE',k:'E',x:300,y:45},{id:'c',k:'C',x:300,y:135,label:S2.dj},
+    {id:'SECRETARY',k:'E',x:105,y:235},{id:'ENGINEER',k:'E',x:300,y:235},{id:'TECHNICIAN',k:'E',x:495,y:235},
+    {id:'TypingSpeed',k:'A',x:105,y:305},{id:'EngType',k:'A',x:300,y:305},{id:'TGrade',k:'A',x:495,y:305},
+    {id:'Ssn',k:'A',x:150,y:45,key:true},{id:'Salary',k:'A',x:450,y:45}],
+   edges:[{a:'EMPLOYEE',b:'c',total:S2.total},{a:'c',b:'SECRETARY',subset:true},{a:'c',b:'ENGINEER',subset:true},{a:'c',b:'TECHNICIAN',subset:true},
+    {a:'SECRETARY',b:'TypingSpeed'},{a:'ENGINEER',b:'EngType'},{a:'TECHNICIAN',b:'TGrade'},{a:'EMPLOYEE',b:'Ssn'},{a:'EMPLOYEE',b:'Salary'}]});
+  const t=document.getElementById('eerTable');
+  let bad=0;
+  t.innerHTML='<tr><th>Employee</th><th>Sec</th><th>Eng</th><th>Tech</th><th>Status</th></tr>'+S2.rows.map(([n,m],i)=>{
+    const c=m.reduce((a,b)=>a+b,0);let st='<span class="ok">✓ allowed</span>';let b=false;
+    if(S2.dj==='d'&&c>1){st='<span class="no">✗ in '+c+' subclasses, but d = disjoint</span>';b=true}
+    else if(S2.total&&c===0){st='<span class="no">✗ in no subclass, but total</span>';b=true}
+    if(b)bad++;
+    return `<tr class="${b?'badrow':''}"><td><b>${n}</b></td>${m.map((v,j)=>`<td><input type="checkbox" class="chk" id="m${i}${j}" data-i="${i}" data-j="${j}" ${v?'checked':''} aria-label="${n} subclass ${j}"></td>`).join('')}<td>${st}</td></tr>`}).join('');
+  t.querySelectorAll('input').forEach(cb=>cb.onchange=()=>{S2.rows[+cb.dataset.i][1][+cb.dataset.j]=cb.checked?1:0;sim2()});
+  const name=(S2.dj==='d'?'Disjoint':'Overlapping')+', '+(S2.total?'total':'partial');
+  document.getElementById('eerSummary').innerHTML=`<b>${name}</b>: ${S2.dj==='d'?'each employee is in at most one subclass':'an employee may be in several subclasses'}, and ${S2.total?'every employee must be in at least one':'an employee may be in none'}. ${bad?`<span class="no">${bad} row${bad>1?'s':''} break${bad>1?'':'s'} the rules.</span>`:'<span class="ok">All rows are valid.</span>'}`;
+}
+sim2();
+
+/* ---------- Sim 3 ---------- */
+const SC=[
+ ['Create an index on STUDENT.Name to speed up searches','int',['con','ext'],'Change at the <b>internal</b> level. The conceptual schema and views stay the same: <b>physical data independence</b>.'],
+ ['Move the database to a new disk with a different file organization','int',['con','ext'],'An <b>internal</b> change. Only the conceptual/internal mapping is updated: <b>physical data independence</b>.'],
+ ['Add a new attribute Email to STUDENT','con',['ext'],'A <b>conceptual</b> change. Views that don\'t use Email and their programs don\'t change: <b>logical data independence</b>.'],
+ ['Split EMPLOYEE into EMPLOYEE and EMP_ADDRESS','con',['ext'],'A <b>conceptual</b> change. Redefine the external/conceptual mapping so old views still work: <b>logical data independence</b>. Harder to achieve.'],
+ ['Give the accounts office a new view with only names and fees','ext',[],'Only the <b>external</b> level changes (a new view). Nothing below it is touched.']
+];
+const scl=document.getElementById('scenList');
+SC.forEach((s,i)=>{const b=document.createElement('button');b.textContent=s[0];b.setAttribute('aria-pressed','false');b.onclick=()=>{[...scl.children].forEach(c=>c.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');drawLevels(document.getElementById('indepSvg'),s[1],s[2]);document.getElementById('indepText').innerHTML=s[3]};scl.appendChild(b)});
+scl.children[0].click();
+
+/* ---------- traps ---------- */
+const TRAPS=[
+ ['In DEPT 1 : N EMPLOYEE, write (1,N) next to EMPLOYEE because the "N" is there.','(min,max) placement is the opposite of ratio labels. EMPLOYEE gets (0,1) or (1,1): one employee works in at most one department.'],
+ ['"Total participation" means the ratio is 1.','Participation is the minimum (0 or at least 1). The ratio is the maximum. Every combination is possible, e.g. total + M:N.'],
+ ['Put Hours (of WORKS_ON, M:N) inside EMPLOYEE.','An M:N relationship attribute must stay on the relationship. Only 1:1 and 1:N attributes can migrate (1:N → to the N side).'],
+ ['Add DeptNo as an attribute of EMPLOYEE in the ER diagram.','No foreign keys in ER. The link is shown by the relationship WORKS_FOR. Foreign keys appear only after mapping to tables.'],
+ ['Model DEPENDENT as a multivalued attribute of EMPLOYEE.','If it has its own attributes and takes part in relationships, it is a weak entity type (double box + identifying relationship).'],
+ ['Underline a weak entity\'s partial key with a solid line.','Partial key = dashed underline. It is unique only together with the owner\'s key.'],
+ ['Draw the weak entity\'s identifying relationship with partial participation.','The weak entity side is always total (double line). It can\'t exist without its owner.'],
+ ['Derived attribute = dashed underline.','Derived = dashed ellipse. Dashed underline = partial key.'],
+ ['"d" means the specialization is total.','d/o is disjointness. Total/partial is the double/single line from the superclass to the circle. They are independent.'],
+ ['A shared subclass and a category are the same thing.','Shared subclass = intersection (member of ALL superclasses, inherits from all). Category = union (member of AT LEAST ONE, inherits selectively).'],
+ ['Logical data independence is easier than physical.','Physical is easier. Logical is harder because application programs depend on the logical structure.'],
+ ['A ternary relationship equals three binary ones.','Not in general. Three binaries can lose information about which triple occurred together.'],
+ ['Only one relationship is allowed between two entity types.','Draw as many as the story needs: PLAYERS–TEAMS has both belong_to (n:1) and captain_of (1:1) in sheet Q1.'],
+ ['Relationships in EER can only attach to the superclass.','A subclass can have its own relationships: DONOR–Donates–ITEM, MAIN_LIBRARY–Has–BRANCH_LIBRARY, CAREER_ADVISOR–Talks_to–CUSTOMER.'],
+ ['Make a separate MEDICINE or AUTHOR entity when nothing is stored about it.','If only the value is stored, use a multivalued attribute (medicines on visits, author on BOOKS). Make an entity only when it has its own attributes or relationships.'],
+ ['Write assumptions that change the given facts ("assume a book has no author").','Assumptions may only fix cardinality or participation the question leaves open, and they must be logical.'],
+ ['Forget the key on a strong entity in an open-design question (sheet Q5/Q6).','Every strong entity needs at least one underlined key, and every entity needs attributes. That is the grading rule for the open questions.'],
+];
+document.getElementById('traps').innerHTML=TRAPS.map(([w,c])=>`<div class="trap"><div class="w">${w}</div><div class="c">${c}</div></div>`).join('');
+
+/* ---------- hooks ---------- */
+const HOOKS=[
+ ['Double = "must" or "many"','Double line → must take part. Double rectangle and double diamond → must depend on an owner. Double ellipse → many values.'],
+ ['Dashed = "not fully real"','Dashed ellipse → not stored (derived). Dashed underline → not a full key (partial key).'],
+ ['The ICE stack','From the bottom: Internal, Conceptual, External. Each independence protects the level just above the change. Physical protects Conceptual; logical protects External.'],
+ ['Ratio label = "how many of me"','The N next to EMPLOYEE says "N employees per one department". The number counts the entity it sits beside.'],
+ ['(min,max) = "how often can I join?"','The pair next to EMPLOYEE answers for one employee: in how many WORKS_FOR instances can I appear?'],
+ ['d = "decide one", o = "or more"','Disjoint: pick one subclass. Overlapping: you may wear several hats.'],
+ ['∪ = union = "any one of"; shared subclass = "all of"','OWNER can be a person or a bank or a company. STUDENT_ASSISTANT is a student and an employee.'],
+ ['Spec goes down, Gen goes up','Specialization: top-down, split into subclasses. Generalization: bottom-up, merge into a superclass.'],
+ ['M:N attributes are "glue"','Grade belongs to the pair (student, course), not to either one. Glue stays in the diamond.'],
+];
+document.getElementById('hooks').innerHTML=HOOKS.map(([t,d])=>`<div class="hook"><b>${t}</b><span>${d}</span></div>`).join('');
+
+/* ---------- practice ---------- */
+const PROBS=[
+ {group:'Chapter 3 sheet · ER models',title:'ER Q1 · National Hockey League',
+  q:'The NHL has many <b>teams</b>. Each team has a unique name, a city and a coach. Each <b>player</b> belongs to only one team. Each player has a unique phone number, name, a position (such as left wing or goalie), a skill level, and a set of injury records. Each team has exactly 1 <b>captain</b> who is a player. A <b>game</b> is played between two teams (referred to as host_team and guest_team) and has a date (such as May 11th, 1999) and a score (such as 4 to 2).',
+  steps:[
+   ['Entity types','<span class="e">PLAYERS</span> (key Phone), <span class="e">TEAMS</span> (key Name). Coach is just an attribute of TEAMS because nothing else is stored about coaches. "A set of injury records" → <b>multivalued</b> injuryRecords.'],
+   ['Two relationships between the same pair','<span class="r">belong_to</span> PLAYERS n : 1 TEAMS. Both sides are total: every player is on a team, and a team must have players.<br><span class="r">captain_of</span> PLAYERS 1 : 1 TEAMS. TEAMS is total ("exactly 1 captain"); PLAYERS is partial (most players aren\'t captain). Two different relationships between the same two entity types is fine.'],
+   ['Game = recursive relationship','A game links a team to another team, so <span class="r">plays_with</span> is <b>recursive</b> on TEAMS with role names <b>Host</b> and <b>Guest</b>, M:N (n, m). Date and Score depend on the pair of teams, so they sit on the relationship.'],
+  ],
+  spec:{w:780,h:470,nodes:[
+   {id:'PLAYERS',k:'E',x:190,y:170},{id:'TEAMS',k:'E',x:570,y:170},
+   {id:'belong_to',k:'R',x:380,y:85},{id:'captain_of',k:'R',x:380,y:255},
+   {id:'skill_level',k:'A',x:190,y:45},{id:'Phone',k:'A',x:65,y:100,key:true},{id:'Name',k:'A',x:55,y:170},{id:'Position',k:'A',x:70,y:240},{id:'injuryRecords',k:'A',x:180,y:300,multi:true},
+   {id:'TName',k:'A',x:570,y:60,key:true,label:'Name'},{id:'City',k:'A',x:705,y:125},{id:'coach',k:'A',x:705,y:215},
+   {id:'plays_with',k:'R',x:570,y:370},{id:'Date',k:'A',x:420,y:430},{id:'Score',k:'A',x:715,y:430}
+  ],edges:[
+   {a:'belong_to',b:'PLAYERS',label:'n',total:true},{a:'belong_to',b:'TEAMS',label:'1',total:true,off:-12},
+   {a:'captain_of',b:'PLAYERS',label:'1',off:-12},{a:'captain_of',b:'TEAMS',label:'1',total:true},
+   {a:'PLAYERS',b:'skill_level'},{a:'PLAYERS',b:'Phone'},{a:'PLAYERS',b:'Name'},{a:'PLAYERS',b:'Position'},{a:'PLAYERS',b:'injuryRecords'},
+   {a:'TEAMS',b:'TName'},{a:'TEAMS',b:'City'},{a:'TEAMS',b:'coach'},
+   {a:'plays_with',b:'TEAMS',ao:[-22,-10],bo:[-30,19],label:'n',off:12,role:'Host',roff:-26},
+   {a:'plays_with',b:'TEAMS',ao:[22,-10],bo:[30,19],label:'m',off:-12,role:'Guest',roff:28},
+   {a:'plays_with',b:'Date'},{a:'plays_with',b:'Score'}
+  ]}},
+ {group:'Chapter 3 sheet · ER models',title:'ER Q2 · Online bookstore',
+  q:'Books have year, title, price, unique ISBN and at least 1 author. Books are published by exactly 1 <b>publisher</b>. Each publisher has a unique name, address, phone, email and unique website. <b>Customers</b> have a unique userID, name, phone number, email and billing address. Billing address is composed of street, city, zip, country. Each customer has one <b>shopping cart</b>, the shopping cart has a unique id. Books can be added to shopping carts. They can add more than one book of the same title at the same time, so quantity and date attributes are required. All copies of the same book are stored in one of the <b>warehouses</b> owned by the bookstore; the warehouse has a unique id, an address, a phone number and a manager.',
+  steps:[
+   ['Entity types','<span class="e">BOOKS</span> (ISBN), <span class="e">PUBLISHER</span> (two keys: Name <i>and</i> website, both underlined), <span class="e">CUSTOMER</span> (UserID), <span class="e">SHOPPING_CART</span> (CartID), <span class="e">WAREHOUSE</span> (ID). Author has no details of its own → <b>multivalued</b> attribute. Address → <b>composite</b> (street, city, zip, country).'],
+   ['1:N and 1:1','<span class="r">published_by</span> BOOKS n : 1 PUBLISHER, BOOKS total ("exactly 1"). <span class="r">Stored_In</span> BOOKS n : 1 WAREHOUSE, BOOKS total. <span class="r">Has</span> CUSTOMER 1 : 1 SHOPPING_CART, total on both sides ("each customer has one cart", and a cart belongs to a customer).'],
+   ['M:N with attributes','<span class="r">Added_To</span> BOOKS m : n SHOPPING_CART. Quantity and Date belong to the pair (this book in this cart), so they stay on the diamond.'],
+  ],
+  spec:{w:880,h:710,nodes:[
+   {id:'BOOKS',k:'E',x:190,y:150},{id:'price',k:'A',x:200,y:40},{id:'ISBN',k:'A',x:80,y:65,key:true},{id:'Title',k:'A',x:60,y:130},{id:'year',k:'A',x:60,y:195},{id:'author',k:'A',x:90,y:265,multi:true},
+   {id:'published_by',k:'R',x:420,y:80},{id:'PUBLISHER',k:'E',x:660,y:110},
+   {id:'PName',k:'A',x:580,y:30,key:true,label:'Name'},{id:'email',k:'A',x:725,y:25},{id:'address',k:'A',x:780,y:85},{id:'website',k:'A',x:785,y:150,key:true},{id:'phone',k:'A',x:665,y:190},
+   {id:'Added_To',k:'R',x:400,y:250},{id:'quantity',k:'A',x:500,y:185},{id:'Date',k:'A',x:375,y:335},
+   {id:'SHOPPING_CART',k:'E',x:580,y:330},{id:'CartID',k:'A',x:730,y:330,key:true},
+   {id:'Has',k:'R',x:580,y:440},{id:'CUSTOMER',k:'E',x:580,y:545},
+   {id:'UserID',k:'A',x:440,y:510,key:true},{id:'CName',k:'A',x:450,y:585,label:'Name'},{id:'cphone',k:'A',x:720,y:480,label:'phone'},{id:'cemail',k:'A',x:745,y:535,label:'email'},
+   {id:'caddress',k:'A',x:690,y:610,label:'address'},{id:'street',k:'A',x:590,y:675},{id:'city',k:'A',x:675,y:680},{id:'zip',k:'A',x:750,y:675},{id:'country',k:'A',x:835,y:665},
+   {id:'Stored_In',k:'R',x:190,y:345},{id:'WAREHOUSE',k:'E',x:190,y:455},{id:'ID',k:'A',x:65,y:450,key:true},{id:'manager',k:'A',x:85,y:525},{id:'waddress',k:'A',x:200,y:545,label:'address'},{id:'wphone',k:'A',x:315,y:505,label:'phone'}
+  ],edges:[
+   {a:'BOOKS',b:'price'},{a:'BOOKS',b:'ISBN'},{a:'BOOKS',b:'Title'},{a:'BOOKS',b:'year'},{a:'BOOKS',b:'author'},
+   {a:'published_by',b:'BOOKS',label:'n',total:true,off:-12},{a:'published_by',b:'PUBLISHER',label:'1',total:true},
+   {a:'PUBLISHER',b:'PName'},{a:'PUBLISHER',b:'email'},{a:'PUBLISHER',b:'address'},{a:'PUBLISHER',b:'website'},{a:'PUBLISHER',b:'phone'},
+   {a:'Added_To',b:'BOOKS',label:'m',off:12},{a:'Added_To',b:'SHOPPING_CART',label:'n',off:-12},{a:'Added_To',b:'quantity'},{a:'Added_To',b:'Date'},
+   {a:'SHOPPING_CART',b:'CartID'},
+   {a:'Has',b:'SHOPPING_CART',label:'1',total:true,off:14},{a:'Has',b:'CUSTOMER',label:'1',total:true,off:14},
+   {a:'CUSTOMER',b:'UserID'},{a:'CUSTOMER',b:'CName'},{a:'CUSTOMER',b:'cphone'},{a:'CUSTOMER',b:'cemail'},{a:'CUSTOMER',b:'caddress'},
+   {a:'caddress',b:'street'},{a:'caddress',b:'city'},{a:'caddress',b:'zip'},{a:'caddress',b:'country'},
+   {a:'Stored_In',b:'BOOKS',label:'n',total:true,off:14},{a:'Stored_In',b:'WAREHOUSE',label:'1',total:true,off:14},
+   {a:'WAREHOUSE',b:'ID'},{a:'WAREHOUSE',b:'manager'},{a:'WAREHOUSE',b:'waddress'},{a:'WAREHOUSE',b:'wphone'}
+  ]}},
+ {group:'Chapter 3 sheet · ER models',title:'ER Q3 · Pet store (write assumptions)',
+  q:'The store sells <b>pets</b> with a name, type, description, unique tag number, price and cost. The <b>profit</b> is calculated from price and cost; it is not stored but must be shown with the right symbol. Different <b>suppliers</b> supply the pets (name, location, unique phone numbers); the shipping time and date for each pet is recorded. <b>Customers</b> (national_id, name, address, email, contact) buy 1 or more pets; the delivery date and time is recorded. Pets are taken to the <b>vet</b> (address, name, unique phone, fees); for each visit the date, time, all medicines and reason are recorded. A customer can <b>refer</b> other customers; the referrer gets points for each referral. Show at least 1 multivalued and 1 composite attribute. Assumptions may only be about relationship constraints that the question does not state.',
+  steps:[
+   ['Special attributes','profit → <b>derived</b> (dashed ellipse). location → <b>composite</b> (street, city, zip, country). medicines → <b>multivalued</b>, and it sits on the <i>relationship</i> visits, because it is recorded per visit.'],
+   ['Relationships','<span class="r">supplied_by</span> PET n : 1 SUPPLIER (Time, Date). <span class="r">purchased_by</span> PET n : 1 CUSTOMER (Date, Time), CUSTOMER total ("buy 1 or more"). <span class="r">visits</span> PET n : m VET (Date, Time, reason, medicines). <span class="r">referred</span> is <b>recursive</b> on CUSTOMER: referrer 1, referee n, with attribute points.'],
+   ['Assumptions (as in the sheet answer)','1. Referral is not mandatory (partial on both roles).<br>2. Every vet in the database has treated at least one pet (VET total in visits).<br>3. The store only sells pets, so a person becomes a customer only by buying (CUSTOMER total in purchased_by).<br>Write assumptions like these in the exam whenever the text doesn\'t fix a constraint.'],
+  ],
+  spec:{w:880,h:610,nodes:[
+   {id:'PET',k:'E',x:230,y:200},{id:'description',k:'A',x:110,y:45},{id:'price',k:'A',x:245,y:70},{id:'TagNo',k:'A',x:75,y:115,key:true},{id:'Name',k:'A',x:65,y:180},{id:'type',k:'A',x:75,y:245},{id:'cost',k:'A',x:120,y:300},{id:'profit',k:'A',x:360,y:185,derived:true},
+   {id:'supplied_by',k:'R',x:450,y:95},{id:'sTime',k:'A',x:350,y:30,label:'Time'},{id:'sDate',k:'A',x:455,y:22,label:'Date'},
+   {id:'SUPPLIER',k:'E',x:620,y:125},{id:'SName',k:'A',x:565,y:40,label:'Name'},{id:'Phone',k:'A',x:620,y:205,key:true},
+   {id:'location',k:'A',x:765,y:125},{id:'zip',k:'A',x:715,y:40},{id:'city',k:'A',x:815,y:45},{id:'street',k:'A',x:715,y:205},{id:'country',k:'A',x:825,y:200},
+   {id:'purchased_by',k:'R',x:450,y:305},{id:'pDate',k:'A',x:405,y:380,label:'Date'},{id:'pTime',k:'A',x:515,y:380,label:'Time'},
+   {id:'CUSTOMER',k:'E',x:690,y:370},{id:'NID',k:'A',x:600,y:285,key:true},{id:'caddress',k:'A',x:715,y:280,label:'address'},{id:'CName',k:'A',x:820,y:315,label:'Name'},{id:'Contact',k:'A',x:825,y:375},{id:'email',k:'A',x:815,y:435},
+   {id:'referred',k:'R',x:690,y:500},{id:'points',k:'A',x:535,y:520},
+   {id:'visits',k:'R',x:230,y:375},{id:'vDate',k:'A',x:85,y:340,label:'Date'},{id:'vTime',k:'A',x:365,y:345,label:'Time'},{id:'reason',k:'A',x:90,y:410},{id:'medicines',k:'A',x:370,y:425,multi:true},
+   {id:'VET',k:'E',x:230,y:505},{id:'vname',k:'A',x:95,y:505,label:'name'},{id:'VPhone',k:'A',x:370,y:505,key:true,label:'Phone'},{id:'vaddress',k:'A',x:150,y:575,label:'address'},{id:'fees',k:'A',x:300,y:575}
+  ],edges:[
+   {a:'PET',b:'description'},{a:'PET',b:'price'},{a:'PET',b:'TagNo'},{a:'PET',b:'Name'},{a:'PET',b:'type'},{a:'PET',b:'cost'},{a:'PET',b:'profit'},
+   {a:'supplied_by',b:'PET',label:'n',total:true,off:-12},{a:'supplied_by',b:'SUPPLIER',label:'1',total:true,off:-12},{a:'supplied_by',b:'sTime'},{a:'supplied_by',b:'sDate'},
+   {a:'SUPPLIER',b:'SName'},{a:'SUPPLIER',b:'Phone'},{a:'SUPPLIER',b:'location'},{a:'location',b:'zip'},{a:'location',b:'city'},{a:'location',b:'street'},{a:'location',b:'country'},
+   {a:'purchased_by',b:'PET',label:'n',off:12},{a:'purchased_by',b:'CUSTOMER',label:'1',total:true,off:12},{a:'purchased_by',b:'pDate'},{a:'purchased_by',b:'pTime'},
+   {a:'CUSTOMER',b:'NID'},{a:'CUSTOMER',b:'caddress'},{a:'CUSTOMER',b:'CName'},{a:'CUSTOMER',b:'Contact'},{a:'CUSTOMER',b:'email'},
+   {a:'referred',b:'CUSTOMER',ao:[-22,-10],bo:[-32,19],label:'1',off:12,role:'referrer',roff:-34},
+   {a:'referred',b:'CUSTOMER',ao:[22,-10],bo:[32,19],label:'n',off:-12,role:'referee',roff:34},
+   {a:'referred',b:'points'},
+   {a:'visits',b:'PET',label:'n',off:12},{a:'visits',b:'VET',label:'m',total:true,off:12},{a:'visits',b:'vDate'},{a:'visits',b:'vTime'},{a:'visits',b:'reason'},{a:'visits',b:'medicines'},
+   {a:'VET',b:'vname'},{a:'VET',b:'VPhone'},{a:'VET',b:'vaddress'},{a:'VET',b:'fees'}
+  ]}},
+ {group:'Chapter 3 sheet · ER models',title:'ER Q4 · Exam room scheduling (weak entity)',
+  q:'<b>Courses</b> have unique name, department, credits and unique course code. The university has <b>buildings</b> with a unique number, address, building manager name and manager phone number. Each building has several <b>rooms</b>. A room number is composed of floor number (1, 2, 3) and serial number (01, 02, 03). The same floor and serial exist in all buildings, so the room number is not unique unless combined with the building number. Rooms also have a total capacity and type. Course <b>exams</b> are held in rooms; the date, time and type of exam (mid or final) are recorded.',
+  steps:[
+   ['Spot the weak entity','"Not unique unless combined with the building number" is the textbook signal: <span class="e">ROOMS</span> is a <b>weak entity</b> owned by BUILDINGS. Its <b>partial key</b> RoomNo is also <b>composite</b> (FloorNo, SerialNo): dashed underline on RoomNo.'],
+   ['Identifying relationship','<span class="r">Belongs_to</span> (double diamond): ROOMS n : 1 BUILDINGS. ROOMS is total (always, for a weak entity); BUILDINGS is total too ("each building has several rooms"). The manager is stored as two attributes, Mgr_Name and Mgr_Phone, since the text gives no separate manager entity.'],
+   ['Exam relationship','<span class="r">Exam_of</span> ROOMS n : m COURSES with Etype, Date and Time on the relationship. COURSES has two keys: CCode and Name.'],
+  ],
+  spec:{w:800,h:420,nodes:[
+   {id:'ROOMS',k:'WE',x:180,y:150},{id:'capacity',k:'A',x:180,y:45},{id:'type',k:'A',x:55,y:150},{id:'RoomNo',k:'A',x:110,y:245,partial:true},{id:'FloorNo',k:'A',x:50,y:320},{id:'SerialNo',k:'A',x:175,y:325},
+   {id:'Belongs_to',k:'IR',x:420,y:95},
+   {id:'BUILDINGS',k:'E',x:640,y:125},{id:'Mgr_Phone',k:'A',x:560,y:35},{id:'Mgr_Name',k:'A',x:705,y:40},{id:'address',k:'A',x:745,y:150},{id:'BNumber',k:'A',x:640,y:205,key:true},
+   {id:'Exam_of',k:'R',x:380,y:270},{id:'Etype',k:'A',x:295,y:360},{id:'Date',k:'A',x:395,y:370},{id:'Time',k:'A',x:495,y:360},
+   {id:'COURSES',k:'E',x:640,y:300},{id:'CCode',k:'A',x:530,y:215,key:true,label:'CCode'},{id:'CName',k:'A',x:760,y:255,key:true,label:'Name'},{id:'credits',k:'A',x:755,y:330},{id:'department',k:'A',x:650,y:390}
+  ],edges:[
+   {a:'ROOMS',b:'capacity'},{a:'ROOMS',b:'type'},{a:'ROOMS',b:'RoomNo'},{a:'RoomNo',b:'FloorNo'},{a:'RoomNo',b:'SerialNo'},
+   {a:'Belongs_to',b:'ROOMS',label:'n',total:true,off:-12},{a:'Belongs_to',b:'BUILDINGS',label:'1',total:true,off:-12},
+   {a:'BUILDINGS',b:'Mgr_Phone'},{a:'BUILDINGS',b:'Mgr_Name'},{a:'BUILDINGS',b:'address'},{a:'BUILDINGS',b:'BNumber'},
+   {a:'Exam_of',b:'ROOMS',label:'n',off:12},{a:'Exam_of',b:'COURSES',label:'m',off:12},{a:'Exam_of',b:'Etype'},{a:'Exam_of',b:'Date'},{a:'Exam_of',b:'Time'},
+   {a:'COURSES',b:'CCode'},{a:'COURSES',b:'CName'},{a:'COURSES',b:'credits'},{a:'COURSES',b:'department'}
+  ]}},
+ {group:'Chapter 4 sheet · EER models',title:'EER Q1 · Persons: employees, volunteers, donors',
+  q:'All <b>persons</b> have SSN, Name, Address and Telephone; a person may have multiple telephone numbers. Three types are of interest: <b>employees</b> (only Date Hired), <b>volunteers</b> (only Skill) and <b>donors</b>. Donors only have a relationship (named <b>Donates</b>) with an <b>Item</b> that has a unique number and name. A donor must have donated one or more items, and an item may have no donors, or one or many donors. A person need not belong to any of the three groups, and a person may belong to two or more of them at the same time.',
+  steps:[
+   ['Read the two constraint sentences','"Need not belong to any" → <b>partial</b> (single line PERSON → circle). "May belong to two or more" → <b>overlapping</b> (o). So: overlapping-partial.'],
+   ['Subclasses','<span class="e">EMPLOYEE</span> (date_hired), <span class="e">VOLUNTEER</span> (Skill), <span class="e">DONOR</span> (no local attribute, only a relationship). Telephone → <b>multivalued</b> on PERSON. Every subclass inherits SSN, Name, Address and Telephone.'],
+   ['A subclass with its own relationship','<span class="r">Donates</span> DONOR n : m ITEM. DONOR total ("must have donated one or more"); ITEM partial ("may have no donors"). Relationships can attach to a subclass; only donors take part, not every person.'],
+  ],
+  spec:{w:760,h:480,nodes:[
+   {id:'PERSON',k:'E',x:370,y:65},{id:'Telephone',k:'A',x:190,y:30,multi:true},{id:'Address',k:'A',x:215,y:100},{id:'Name',k:'A',x:530,y:30},{id:'SSN',k:'A',x:540,y:100,key:true},
+   {id:'c',k:'C',x:370,y:155,label:'o'},
+   {id:'EMPLOYEE',k:'E',x:150,y:255},{id:'date_hired',k:'A',x:150,y:335},
+   {id:'VOLUNTEER',k:'E',x:370,y:255},{id:'Skill',k:'A',x:370,y:335},
+   {id:'DONOR',k:'E',x:590,y:255},{id:'Donates',k:'R',x:590,y:350},{id:'ITEM',k:'E',x:590,y:445},{id:'Number',k:'A',x:445,y:445,key:true},{id:'IName',k:'A',x:715,y:445,label:'Name'}
+  ],edges:[
+   {a:'PERSON',b:'Telephone'},{a:'PERSON',b:'Address'},{a:'PERSON',b:'Name'},{a:'PERSON',b:'SSN'},{a:'PERSON',b:'c'},
+   {a:'c',b:'EMPLOYEE',subset:true},{a:'c',b:'VOLUNTEER',subset:true},{a:'c',b:'DONOR',subset:true},
+   {a:'EMPLOYEE',b:'date_hired'},{a:'VOLUNTEER',b:'Skill'},
+   {a:'Donates',b:'DONOR',label:'n',total:true,off:14},{a:'Donates',b:'ITEM',label:'m',off:14},
+   {a:'ITEM',b:'Number'},{a:'ITEM',b:'IName'}
+  ]}},
+ {group:'Chapter 4 sheet · EER models',title:'EER Q2 · Art gallery',
+  q:'Each <b>exhibition</b> event has an id, theme, title, date, time, registration fees for artists and ticket price. Each exhibition hosts several <b>items</b> (id, title, description, selling price if for sale, location in the gallery). A single item may be showcased in several exhibitions. Items are of two types: <b>paintings</b> (with a type such as oil or acrylic) and <b>sculptures</b>. All items are created by <b>artists</b> (store their personal and contact information). <b>Visitors</b> register online to buy a ticket to the event (store personal/contact info). Visitors can also buy items from the exhibition.',
+  steps:[
+   ['Specialization','"Items are of two types" → ITEM → {PAINTING, SCULPTURE}, <b>disjoint</b> and <b>total</b> (d, double line). Only PAINTING has a local attribute (type).'],
+   ['Relationships','<span class="r">showcased</span> EXHIBITION m : n ITEM, EXHIBITION total ("hosts several items"). <span class="r">created_by</span> ITEM n : 1 ARTIST, ITEM total ("all items are created by artists"). <span class="r">buys</span> ITEM n : 1 VISITOR. <span class="r">tkt_purchased</span> EXHIBITION m : n VISITOR, VISITOR total (they register to buy a ticket).'],
+   ['Assumptions the sheet allows','Artist and visitor attributes are assumed (id, name, phone, email). created_by may also be M:N if you assume items can have several artists, and ARTIST may be total. State whichever you choose.'],
+  ],
+  spec:{w:900,h:610,nodes:[
+   {id:'EXHIBITION_EVENT',k:'E',x:175,y:95},{id:'theme',k:'A',x:70,y:25},{id:'eid',k:'A',x:190,y:25,key:true,label:'id'},{id:'date',k:'A',x:40,y:95},{id:'time',k:'A',x:55,y:160},{id:'registration_fees',k:'A',x:320,y:170},{id:'ticket_price',k:'A',x:320,y:25},
+   {id:'showcased',k:'R',x:450,y:95},
+   {id:'ITEM',k:'E',x:720,y:95},{id:'selling_price',k:'A',x:520,y:25},{id:'location',k:'A',x:650,y:25},{id:'Item_id',k:'A',x:820,y:30,key:true},{id:'title',k:'A',x:845,y:95},{id:'description',k:'A',x:820,y:155},
+   {id:'c',k:'C',x:720,y:185,label:'d'},{id:'PAINTING',k:'E',x:665,y:280},{id:'ptype',k:'A',x:665,y:350,label:'type'},{id:'SCULPTURE',k:'E',x:820,y:280},
+   {id:'created_by',k:'R',x:470,y:235},{id:'ARTIST',k:'E',x:320,y:345},{id:'ArtistID',k:'A',x:260,y:270,key:true},{id:'aname',k:'A',x:455,y:340,label:'name'},{id:'aphone',k:'A',x:250,y:425,label:'phone'},{id:'aemail',k:'A',x:380,y:430,label:'email'},
+   {id:'buys',k:'R',x:500,y:410},
+   {id:'TKT_PURCHASED',k:'R',x:200,y:500},
+   {id:'VISITOR',k:'E',x:530,y:510},{id:'VisitorID',k:'A',x:400,y:565,key:true},{id:'vname',k:'A',x:670,y:480,label:'name'},{id:'vphone',k:'A',x:680,y:545,label:'phone'},{id:'vemail',k:'A',x:560,y:585,label:'email'}
+  ],edges:[
+   {a:'EXHIBITION_EVENT',b:'theme'},{a:'EXHIBITION_EVENT',b:'eid'},{a:'EXHIBITION_EVENT',b:'date'},{a:'EXHIBITION_EVENT',b:'time'},{a:'EXHIBITION_EVENT',b:'registration_fees'},{a:'EXHIBITION_EVENT',b:'ticket_price'},
+   {a:'showcased',b:'EXHIBITION_EVENT',label:'m',total:true,off:-12},{a:'showcased',b:'ITEM',label:'n',off:-12},
+   {a:'ITEM',b:'selling_price'},{a:'ITEM',b:'location'},{a:'ITEM',b:'Item_id'},{a:'ITEM',b:'title'},{a:'ITEM',b:'description'},
+   {a:'ITEM',b:'c',total:true},{a:'c',b:'PAINTING',subset:true},{a:'c',b:'SCULPTURE',subset:true},{a:'PAINTING',b:'ptype'},
+   {a:'created_by',b:'ITEM',label:'n',total:true,off:-12},{a:'created_by',b:'ARTIST',label:'1',off:-12},
+   {a:'ARTIST',b:'ArtistID'},{a:'ARTIST',b:'aname'},{a:'ARTIST',b:'aphone'},{a:'ARTIST',b:'aemail'},
+   {a:'buys',b:'ITEM',label:'n',off:-12,t:.3},{a:'buys',b:'VISITOR',label:'1',off:-12},
+   {a:'TKT_PURCHASED',b:'EXHIBITION_EVENT',label:'m',off:-12},{a:'TKT_PURCHASED',b:'VISITOR',label:'n',total:true,off:-12},
+   {a:'VISITOR',b:'VisitorID'},{a:'VISITOR',b:'vname'},{a:'VISITOR',b:'vphone'},{a:'VISITOR',b:'vemail'}
+  ]}},
+ {group:'Chapter 4 sheet · EER models',title:'EER Q3 · Library service (ternary)',
+  q:'The service has several <b>libraries</b>, each with a unique name, phone and location. A library is either a <b>main library</b> or a <b>branch library</b>. A main library may have zero or more branch libraries and every branch library is a branch of exactly one main library. <b>Books</b> are stored in the libraries; a book has a unique ISBN, title, year and one or more authors. Each library may have several copies of the same book, so the copy number and price of each copy is stored for each library. A <b>borrower</b> has a name, phone and unique ID and can borrow many books from any library. The copy_number, borrow_date, returned_date and due date are recorded. A borrower may borrow the same book on several occasions, each on a different date.',
+  steps:[
+   ['Specialization','"Either a main library or a branch library" → LIBRARY → {MAIN_LIBRARY, BRANCH_LIBRARY}, <b>disjoint, total</b>.'],
+   ['Relationship between two subclasses','<span class="r">Has</span> MAIN_LIBRARY 1 : n BRANCH_LIBRARY. MAIN is partial ("zero or more"), BRANCH total ("exactly one main library"). The relationship connects the <i>subclasses</i>, not LIBRARY, because only branches have a main library.'],
+   ['Stored_In and the ternary Borrows','<span class="r">Stored_In</span> BOOKS n : m LIBRARY with copy_no and Price, total on both sides. <span class="r">Borrows</span> needs all three of borrower, book and library together, so it is a <b>ternary</b> relationship: BOOKS n, LIBRARY k, BORROWER m, with borrow_date, return_date, due_date and copy_no on it.'],
+  ],
+  spec:{w:860,h:580,nodes:[
+   {id:'BOOKS',k:'E',x:190,y:140},{id:'author',k:'A',x:250,y:40,multi:true},{id:'ISBN',k:'A',x:75,y:85,key:true},{id:'Title',k:'A',x:60,y:150},{id:'year',k:'A',x:80,y:215},
+   {id:'Stored_In',k:'R',x:440,y:95},{id:'Price',k:'A',x:530,y:25},{id:'copy_no',k:'A',x:440,y:185},
+   {id:'LIBRARY',k:'E',x:660,y:140},{id:'LName',k:'A',x:660,y:45,key:true,label:'Name'},{id:'location',k:'A',x:790,y:110},{id:'phone',k:'A',x:790,y:175},
+   {id:'c',k:'C',x:660,y:240,label:'d'},{id:'MAIN_LIBRARY',k:'E',x:540,y:340},{id:'BRANCH_LIBRARY',k:'E',x:770,y:340},{id:'Has',k:'R',x:660,y:445},
+   {id:'Borrows',k:'R',x:300,y:360},{id:'borrow_date',k:'A',x:130,y:300},{id:'return_date',k:'A',x:125,y:370},{id:'due_date',k:'A',x:385,y:265},{id:'bcopy',k:'A',x:420,y:430,label:'copy_no'},
+   {id:'BORROWER',k:'E',x:300,y:480},{id:'BID',k:'A',x:165,y:480,key:true,label:'ID'},{id:'bname',k:'A',x:250,y:550,label:'name'},{id:'bphone',k:'A',x:380,y:550,label:'phone'}
+  ],edges:[
+   {a:'BOOKS',b:'author'},{a:'BOOKS',b:'ISBN'},{a:'BOOKS',b:'Title'},{a:'BOOKS',b:'year'},
+   {a:'Stored_In',b:'BOOKS',label:'n',total:true,off:-12},{a:'Stored_In',b:'LIBRARY',label:'m',total:true,off:-12},{a:'Stored_In',b:'Price'},{a:'Stored_In',b:'copy_no'},
+   {a:'LIBRARY',b:'LName'},{a:'LIBRARY',b:'location'},{a:'LIBRARY',b:'phone'},
+   {a:'LIBRARY',b:'c',total:true},{a:'c',b:'MAIN_LIBRARY',subset:true},{a:'c',b:'BRANCH_LIBRARY',subset:true},
+   {a:'Has',b:'MAIN_LIBRARY',label:'1',off:12},{a:'Has',b:'BRANCH_LIBRARY',label:'n',total:true,off:-12},
+   {a:'Borrows',b:'BOOKS',label:'n',off:12},{a:'Borrows',b:'LIBRARY',label:'k',off:12,t:.25},{a:'Borrows',b:'BORROWER',label:'m',total:true,off:14},
+   {a:'Borrows',b:'borrow_date'},{a:'Borrows',b:'return_date'},{a:'Borrows',b:'due_date'},{a:'Borrows',b:'bcopy'},
+   {a:'BORROWER',b:'BID'},{a:'BORROWER',b:'bname'},{a:'BORROWER',b:'bphone'}
+  ]}},
+ {group:'Chapter 4 sheet · EER models',title:'EER Q4 · Inside Inc. career services',
+  q:'Three types of <b>services</b>: resume, interview practice and mentorship. Services have a unique id, start date, start time, duration and price. <b>Customers</b> purchase any number of services. The company has many types of <b>employees</b> (unique employee id, name, email, phone). Two special types are <b>Career Advisor</b> and <b>Client Manager</b>. A career advisor talks with a customer to determine their name, unique NID, phone, email, strengths, skills and weaknesses. The client manager assigns an <b>industry consultant</b> to the customer; consultants have a unique NID, phone number, expertise and email address.',
+  steps:[
+   ['Two specializations','SERVICES → {RESUME, INTERVIEW, MENTORSHIP}: "three types" → <b>disjoint, total</b>. EMPLOYEE → {CAREER_ADVISOR, CLIENT_MANAGER}: "many types… two special types" → <b>disjoint, partial</b> (other employees exist).'],
+   ['Binary relationships','<span class="r">Purchase</span> SERVICES n : m CUSTOMER, CUSTOMER total. <span class="r">Talks_to</span> CAREER_ADVISOR 1 : n CUSTOMER, total on both sides: every customer is profiled by an advisor, which is how their details get recorded.'],
+   ['Ternary','"The client manager assigns a consultant to the customer" involves three participants at once → <span class="r">assigned</span> is <b>ternary</b>: CUSTOMER n, CLIENT_MANAGER k, INDUSTRY_EXPERT m (expert total in the sheet answer).'],
+  ],
+  spec:{w:900,h:630,nodes:[
+   {id:'SERVICES',k:'E',x:140,y:95},{id:'StartTime',k:'A',x:70,y:25},{id:'StartDate',k:'A',x:200,y:25},{id:'SID',k:'A',x:35,y:95,key:true,label:'ID'},{id:'Price',k:'A',x:40,y:155},{id:'duration',k:'A',x:255,y:150},
+   {id:'c1',k:'C',x:140,y:190,label:'d'},{id:'RESUME',k:'E',x:50,y:275},{id:'INTERVIEW',k:'E',x:160,y:275},{id:'MENTORSHIP',k:'E',x:275,y:275},
+   {id:'Purchase',k:'R',x:390,y:95},
+   {id:'CUSTOMER',k:'E',x:600,y:95},{id:'cphone',k:'A',x:480,y:30,label:'phone'},{id:'cname',k:'A',x:590,y:22,label:'name'},{id:'NID',k:'A',x:695,y:25,key:true},{id:'cemail',k:'A',x:805,y:40,label:'email'},{id:'skills',k:'A',x:820,y:100},{id:'weakness',k:'A',x:805,y:160},{id:'strength',k:'A',x:455,y:170},
+   {id:'Talks_to',k:'R',x:770,y:255},
+   {id:'assigned',k:'R',x:420,y:400},
+   {id:'EMPLOYEE',k:'E',x:630,y:385},{id:'employee_id',k:'A',x:525,y:320},{id:'ename',k:'A',x:720,y:330,label:'name'},{id:'eemail',k:'A',x:545,y:440,label:'email'},{id:'ephone',k:'A',x:725,y:420,label:'phone'},
+   {id:'c2',k:'C',x:630,y:465,label:'d'},{id:'CAREER_ADVISOR',k:'E',x:780,y:550},{id:'CLIENT_MANAGER',k:'E',x:490,y:550},
+   {id:'INDUSTRY_EXPERT',k:'E',x:200,y:470},{id:'INID',k:'A',x:75,y:420,key:true,label:'NID'},{id:'expertise',k:'A',x:70,y:520},{id:'iphone',k:'A',x:180,y:580,label:'phone'},{id:'iemail',k:'A',x:300,y:580,label:'email'}
+  ],edges:[
+   {a:'SERVICES',b:'StartTime'},{a:'SERVICES',b:'StartDate'},{a:'SERVICES',b:'SID'},{a:'SERVICES',b:'Price'},{a:'SERVICES',b:'duration'},
+   {a:'SERVICES',b:'c1',total:true},{a:'c1',b:'RESUME',subset:true},{a:'c1',b:'INTERVIEW',subset:true},{a:'c1',b:'MENTORSHIP',subset:true},
+   {a:'Purchase',b:'SERVICES',label:'n',off:-12},{a:'Purchase',b:'CUSTOMER',label:'m',total:true,off:-12},
+   {a:'CUSTOMER',b:'cphone'},{a:'CUSTOMER',b:'cname'},{a:'CUSTOMER',b:'NID'},{a:'CUSTOMER',b:'cemail'},{a:'CUSTOMER',b:'skills'},{a:'CUSTOMER',b:'weakness'},{a:'CUSTOMER',b:'strength'},
+   {a:'Talks_to',b:'CUSTOMER',label:'n',total:true,off:-12},{a:'Talks_to',b:'CAREER_ADVISOR',label:'1',total:true,off:-12},
+   {a:'EMPLOYEE',b:'employee_id'},{a:'EMPLOYEE',b:'ename'},{a:'EMPLOYEE',b:'eemail'},{a:'EMPLOYEE',b:'ephone'},
+   {a:'EMPLOYEE',b:'c2'},{a:'c2',b:'CAREER_ADVISOR',subset:true},{a:'c2',b:'CLIENT_MANAGER',subset:true},
+   {a:'assigned',b:'CUSTOMER',label:'n',off:-12,t:.35},{a:'assigned',b:'CLIENT_MANAGER',label:'k',off:12},{a:'assigned',b:'INDUSTRY_EXPERT',label:'m',total:true,off:-12},
+   {a:'INDUSTRY_EXPERT',b:'INID'},{a:'INDUSTRY_EXPERT',b:'expertise'},{a:'INDUSTRY_EXPERT',b:'iphone'},{a:'INDUSTRY_EXPERT',b:'iemail'}
+  ]}},
+ {group:'Chapter 4 sheet · EER models',title:'EER Q5 · Hospital (open design)',
+  q:'Design an EER diagram for a Hospital Management System tracking doctors, nurses, other staff, wards, patients and appointments. It must have: at least one <b>disjoint-total</b> specialization; at least <b>five strong entities</b> (excluding subclasses); a <b>weak entity</b>; at least one <b>M:N</b> relationship; at least one <b>derived attribute</b>.',
+  steps:[
+   ['Grading rule from the sheet','There is no single answer. You get marks if every condition is visibly met, the scenario is logical, every entity has attributes, and every strong entity has a key.'],
+   ['One design that ticks every box','<b>5 strong entities</b>: STAFF (StaffID), PATIENT (PatientID), WARD (WardNo), DEPARTMENT (DeptID), MEDICINE (MedID). Subclasses don\'t count.<br><b>Disjoint-total</b>: STAFF → {DOCTOR, NURSE, OTHER_STAFF}. "d" because a staff member has one job; double line because every staff member is one of the three.<br><b>Weak entity</b>: BED, partial key BedNo (bed 3 exists in every ward), owned by WARD through the identifying relationship HAS_BED (double diamond, BED total).<br><b>M:N</b>: APPOINTMENT DOCTOR m : n PATIENT (Date, Time) and PRESCRIBED PATIENT m : n MEDICINE (Dose).<br><b>Derived</b>: Age (dashed) from DOB on PATIENT.<br>Also: DOCTOR n : 1 DEPARTMENT (WORKS_IN), NURSE n : 1 WARD (ASSIGNED_TO), PATIENT 1 : 1 BED (OCCUPIES, AdmitDate). Subclasses have their own relationships.'],
+   ['Self-check before you hand it in','Point to each requirement on your drawing: the d circle with a double line, five boxes that are not subclasses, a double box with a double diamond and dashed partial key, one m:n label pair, one dashed ellipse. Then write any assumptions.'],
+  ],
+  spec:{w:960,h:780,nodes:[
+   {id:'STAFF',k:'E',x:520,y:70},{id:'StaffID',k:'A',x:380,y:35,key:true},{id:'SName',k:'A',x:665,y:35,label:'Name'},{id:'SPhone',k:'A',x:690,y:100,label:'Phone'},{id:'Salary',k:'A',x:380,y:110},
+   {id:'c',k:'C',x:520,y:160,label:'d'},
+   {id:'DOCTOR',k:'E',x:330,y:250},{id:'Specialty',k:'A',x:215,y:310},
+   {id:'NURSE',k:'E',x:520,y:250},{id:'Shift',k:'A',x:470,y:325},
+   {id:'OTHER_STAFF',k:'E',x:710,y:250},{id:'Role',k:'A',x:850,y:250},
+   {id:'WORKS_IN',k:'R',x:180,y:170},{id:'DEPARTMENT',k:'E',x:110,y:80},{id:'DeptID',k:'A',x:60,y:20,key:true},{id:'DName',k:'A',x:190,y:20},
+   {id:'APPOINTMENT',k:'R',x:330,y:385},{id:'ADate',k:'A',x:195,y:395,label:'Date'},{id:'ATime',k:'A',x:460,y:390,label:'Time'},
+   {id:'PATIENT',k:'E',x:330,y:500},{id:'PatientID',k:'A',x:190,y:455,key:true},{id:'PName',k:'A',x:185,y:520,label:'Name'},{id:'DOB',k:'A',x:455,y:465},{id:'Age',k:'A',x:465,y:530,derived:true},
+   {id:'ASSIGNED_TO',k:'R',x:620,y:370},
+   {id:'WARD',k:'E',x:760,y:480},{id:'WardNo',k:'A',x:890,y:440,key:true},{id:'WName',k:'A',x:895,y:500,label:'Name'},{id:'Floor',k:'A',x:870,y:560},
+   {id:'HAS_BED',k:'IR',x:660,y:570},{id:'BED',k:'WE',x:560,y:660},{id:'BedNo',k:'A',x:560,y:740,partial:true},{id:'BType',k:'A',x:680,y:730,label:'Type'},
+   {id:'OCCUPIES',k:'R',x:440,y:610},{id:'AdmitDate',k:'A',x:440,y:690},
+   {id:'PRESCRIBED',k:'R',x:250,y:620},{id:'Dose',k:'A',x:95,y:620},
+   {id:'MEDICINE',k:'E',x:250,y:720},{id:'MedID',k:'A',x:110,y:720,key:true},{id:'MName',k:'A',x:370,y:750,label:'Name'}
+  ],edges:[
+   {a:'STAFF',b:'StaffID'},{a:'STAFF',b:'SName'},{a:'STAFF',b:'SPhone'},{a:'STAFF',b:'Salary'},
+   {a:'STAFF',b:'c',total:true},{a:'c',b:'DOCTOR',subset:true},{a:'c',b:'NURSE',subset:true},{a:'c',b:'OTHER_STAFF',subset:true},
+   {a:'DOCTOR',b:'Specialty'},{a:'NURSE',b:'Shift'},{a:'OTHER_STAFF',b:'Role'},
+   {a:'WORKS_IN',b:'DOCTOR',label:'n',total:true,off:12},{a:'WORKS_IN',b:'DEPARTMENT',label:'1',off:12},{a:'DEPARTMENT',b:'DeptID'},{a:'DEPARTMENT',b:'DName'},
+   {a:'APPOINTMENT',b:'DOCTOR',label:'m',off:-12},{a:'APPOINTMENT',b:'PATIENT',label:'n',off:-12},{a:'APPOINTMENT',b:'ADate'},{a:'APPOINTMENT',b:'ATime'},
+   {a:'PATIENT',b:'PatientID'},{a:'PATIENT',b:'PName'},{a:'PATIENT',b:'DOB'},{a:'PATIENT',b:'Age'},
+   {a:'ASSIGNED_TO',b:'NURSE',label:'n',total:true,off:12},{a:'ASSIGNED_TO',b:'WARD',label:'1',off:12},
+   {a:'WARD',b:'WardNo'},{a:'WARD',b:'WName'},{a:'WARD',b:'Floor'},
+   {a:'HAS_BED',b:'WARD',label:'1',total:true,off:-12},{a:'HAS_BED',b:'BED',label:'n',total:true,off:-12},{a:'BED',b:'BedNo'},{a:'BED',b:'BType'},
+   {a:'OCCUPIES',b:'PATIENT',label:'1',off:-12},{a:'OCCUPIES',b:'BED',label:'1',off:-12},{a:'OCCUPIES',b:'AdmitDate'},
+   {a:'PRESCRIBED',b:'PATIENT',label:'m',off:-12},{a:'PRESCRIBED',b:'MEDICINE',label:'n',off:-12},{a:'PRESCRIBED',b:'Dose'},
+   {a:'MEDICINE',b:'MedID'},{a:'MEDICINE',b:'MName'}
+  ]}},
+ {group:'Chapter 4 sheet · EER models',title:'EER Q6 · Hotel (open design)',
+  q:'Design an EER diagram for a Hotel Management System tracking employees, customers, bookings, rooms and services. It must have: at least one <b>overlapping-partial</b> specialization; at least <b>five strong entities</b> (excluding subclasses); a <b>recursive</b> relationship; at least one <b>1:1</b> relationship; at least one <b>multivalued-composite</b> attribute.',
+  steps:[
+   ['One design that ticks every box','Strong entities: <span class="e">EMPLOYEE</span>, <span class="e">CUSTOMER</span>, <span class="e">BOOKING</span>, <span class="e">ROOM</span>, <span class="e">SERVICE</span> (5).<br><b>Overlapping-partial</b>: EMPLOYEE → {RECEPTIONIST, HOUSEKEEPER, CHEF} (o, single line). One person can do two jobs, and managers or guards belong to none.<br><b>Recursive</b>: <span class="r">SUPERVISES</span> EMPLOYEE 1 : n EMPLOYEE (roles supervisor / supervisee).<br><b>1:1</b>: <span class="r">MANAGES</span> EMPLOYEE 1 : 1 SERVICE. Each service (restaurant, spa, laundry) has exactly one manager, and an employee manages at most one service. SERVICE is total, EMPLOYEE partial.<br><b>Multivalued-composite</b>: {Phone(CountryCode, Number)} on CUSTOMER, drawn as a double ellipse with sub-ellipses.'],
+   ['Relationships that make it realistic','CUSTOMER 1 : n BOOKING (MAKES); BOOKING m : n ROOM (RESERVES, CheckIn, CheckOut); BOOKING m : n SERVICE (USES, Quantity); RECEPTIONIST 1 : n BOOKING (HANDLES).'],
+   ['Self-check','The o circle with a <i>single</i> line, five non-subclass boxes, a diamond with both lines to the same box plus role names, one 1/1 label pair, and one double ellipse with children.'],
+  ]},
+ {group:'Other section · Quiz 01 Set A (30 min)',title:'Quiz 01 Set A · University research center',
+  q:'A university research center manages its members, research devices, projects and student identity cards. Each <b>person</b> has a unique PersonID, a Name made of FirstName and LastName, an Address (Street, City, PostalCode), DateOfBirth and multiple PhoneNumbers. Age is not given; it is calculated from DateOfBirth. <b>Every person must be a Student, a Researcher, or both.</b> Student: Major, EnrollmentYear. Researcher: ResearchField, AcademicRank. Each <b>device</b> has a unique DeviceID, Manufacturer and PurchaseDate; DeviceAge is derived from PurchaseDate. <b>A device may be a Sensor or a Laptop, but never both. Some devices belong to neither.</b> Sensor: MeasurementUnit, Accuracy. Laptop: RAMSize, ProcessorModel.<br><b>Relationships:</b> (1) Each student may have at most one student card. Every student card (CardID, IssueDate) must belong to exactly one student. (2) A researcher may lead multiple projects or none. Every project (ProjectID, Title) must be led by exactly one researcher. (3) A person may borrow multiple devices and a device may be borrowed by multiple people; either may exist without participating. Each borrowing has a BorrowDate. (4) A person may mentor multiple other persons or none; a person may have at most one mentor; a person cannot mentor themselves. (5) The center keeps individual <b>SensorReading</b>s: ReadingTime, Value and a ReadingNo assigned by its sensor. ReadingNo starts from 1 for each sensor and is unique only among that sensor\'s readings. A reading cannot exist without its sensor and belongs to exactly one sensor. A sensor may record multiple readings or none.',
+  steps:[
+   ['Attributes on PERSON','PersonID key. Name <b>composite</b> (FirstName, LastName). Address <b>composite</b> (Street, City, PostalCode). PhoneNumbers <b>multivalued</b>. Age <b>derived</b> from DateOfBirth. On DEVICE, DeviceAge is <b>derived</b> from PurchaseDate.'],
+   ['Two specializations','PERSON → {STUDENT, RESEARCHER}: "must be" → <b>total</b> (double line), "or both" → <b>overlapping (o)</b>.<br>DEVICE → {SENSOR, LAPTOP}: "never both" → <b>disjoint (d)</b>, "some belong to neither" → <b>partial</b> (single line).'],
+   ['Relationships on subclasses','<span class="r">HAS_CARD</span> STUDENT 1 : 1 STUDENT_CARD. CARD total ("must belong to exactly one"), STUDENT partial ("may have"). The card has its own key CardID, so it is a <b>strong</b> entity.<br><span class="r">LEADS</span> RESEARCHER 1 : n PROJECT. PROJECT total, RESEARCHER partial.'],
+   ['Relationships on PERSON','<span class="r">BORROWS</span> PERSON m : n DEVICE, partial on both sides, BorrowDate on the diamond (M:N).<br><span class="r">MENTORS</span> is <b>recursive</b> on PERSON with roles mentor (1) and mentee (n), partial on both sides. "Cannot mentor themselves" can\'t be drawn in ER, so write it as a constraint under the diagram.'],
+   ['Weak entity','"ReadingNo is unique only among the readings of that sensor" + "cannot exist without its sensor" → <span class="e">SENSOR_READING</span> is <b>weak</b>, partial key ReadingNo (dashed underline). The owner is the subclass SENSOR, via the identifying relationship <span class="r">RECORDS</span> (double diamond): SENSOR 1 (partial, "may record none") : n SENSOR_READING (total).'],
+  ],
+  spec:{w:1100,h:770,nodes:[
+   {id:'PERSON',k:'E',x:330,y:200},
+   {id:'Name',k:'A',x:170,y:95},{id:'FirstName',k:'A',x:85,y:30},{id:'LastName',k:'A',x:235,y:30},
+   {id:'Address',k:'A',x:470,y:105},{id:'Street',k:'A',x:385,y:30},{id:'City',k:'A',x:485,y:30},{id:'PostalCode',k:'A',x:600,y:40},
+   {id:'PersonID',k:'A',x:150,y:170,key:true},{id:'PhoneNumbers',k:'A',x:545,y:150,multi:true},{id:'DateOfBirth',k:'A',x:520,y:245},{id:'Age',k:'A',x:405,y:268,derived:true},
+   {id:'MENTORS',k:'R',x:145,y:305},
+   {id:'c1',k:'C',x:330,y:305,label:'o'},
+   {id:'STUDENT',k:'E',x:230,y:400},{id:'Major',k:'A',x:95,y:390},{id:'EnrollmentYear',k:'A',x:100,y:450},
+   {id:'RESEARCHER',k:'E',x:450,y:400},{id:'ResearchField',k:'A',x:580,y:445},{id:'AcademicRank',k:'A',x:575,y:505},
+   {id:'HAS_CARD',k:'R',x:230,y:515},{id:'STUDENT_CARD',k:'E',x:230,y:625},{id:'CardID',k:'A',x:150,y:700,key:true},{id:'IssueDate',k:'A',x:300,y:700},
+   {id:'LEADS',k:'R',x:450,y:530},{id:'PROJECT',k:'E',x:450,y:635},{id:'ProjectID',k:'A',x:405,y:722,key:true},{id:'Title',k:'A',x:520,y:710},
+   {id:'BORROWS',k:'R',x:700,y:200},{id:'BorrowDate',k:'A',x:700,y:120},
+   {id:'DEVICE',k:'E',x:900,y:200},{id:'DeviceID',k:'A',x:840,y:115,key:true},{id:'Manufacturer',k:'A',x:1000,y:125},{id:'PurchaseDate',k:'A',x:1030,y:200},{id:'DeviceAge',k:'A',x:1030,y:265,derived:true},
+   {id:'c2',k:'C',x:900,y:300,label:'d'},
+   {id:'SENSOR',k:'E',x:790,y:400},{id:'MeasurementUnit',k:'A',x:650,y:365},{id:'Accuracy',k:'A',x:705,y:460},
+   {id:'LAPTOP',k:'E',x:1010,y:400},{id:'RAMSize',k:'A',x:950,y:480},{id:'ProcessorModel',k:'A',x:1030,y:540},
+   {id:'RECORDS',k:'IR',x:790,y:545},{id:'SENSOR_READING',k:'WE',x:790,y:650},{id:'ReadingNo',k:'A',x:665,y:720,partial:true},{id:'ReadingTime',k:'A',x:800,y:735},{id:'Value',k:'A',x:925,y:720}
+  ],edges:[
+   {a:'PERSON',b:'Name'},{a:'Name',b:'FirstName'},{a:'Name',b:'LastName'},{a:'PERSON',b:'Address'},{a:'Address',b:'Street'},{a:'Address',b:'City'},{a:'Address',b:'PostalCode'},
+   {a:'PERSON',b:'PersonID'},{a:'PERSON',b:'PhoneNumbers'},{a:'PERSON',b:'DateOfBirth'},{a:'PERSON',b:'Age'},
+   {a:'MENTORS',b:'PERSON',ao:[10,-14],bo:[-42,19],label:'1',off:-11,role:'mentor',roff:-30,t:.45},
+   {a:'MENTORS',b:'PERSON',ao:[30,4],bo:[-18,19],label:'n',off:11,role:'mentee',roff:30,t:.45},
+   {a:'PERSON',b:'c1',total:true},{a:'c1',b:'STUDENT',subset:true},{a:'c1',b:'RESEARCHER',subset:true},
+   {a:'STUDENT',b:'Major'},{a:'STUDENT',b:'EnrollmentYear'},{a:'RESEARCHER',b:'ResearchField'},{a:'RESEARCHER',b:'AcademicRank'},
+   {a:'HAS_CARD',b:'STUDENT',label:'1',off:14},{a:'HAS_CARD',b:'STUDENT_CARD',label:'1',total:true,off:14},{a:'STUDENT_CARD',b:'CardID'},{a:'STUDENT_CARD',b:'IssueDate'},
+   {a:'LEADS',b:'RESEARCHER',label:'1',off:14},{a:'LEADS',b:'PROJECT',label:'n',total:true,off:14},{a:'PROJECT',b:'ProjectID'},{a:'PROJECT',b:'Title'},
+   {a:'BORROWS',b:'PERSON',label:'m',off:-12,t:.3},{a:'BORROWS',b:'DEVICE',label:'n',off:-12},{a:'BORROWS',b:'BorrowDate'},
+   {a:'DEVICE',b:'DeviceID'},{a:'DEVICE',b:'Manufacturer'},{a:'DEVICE',b:'PurchaseDate'},{a:'DEVICE',b:'DeviceAge'},
+   {a:'DEVICE',b:'c2'},{a:'c2',b:'SENSOR',subset:true},{a:'c2',b:'LAPTOP',subset:true},
+   {a:'SENSOR',b:'MeasurementUnit'},{a:'SENSOR',b:'Accuracy'},{a:'LAPTOP',b:'RAMSize'},{a:'LAPTOP',b:'ProcessorModel'},
+   {a:'RECORDS',b:'SENSOR',label:'1',off:14},{a:'RECORDS',b:'SENSOR_READING',label:'n',total:true,off:14},
+   {a:'SENSOR_READING',b:'ReadingNo'},{a:'SENSOR_READING',b:'ReadingTime'},{a:'SENSOR_READING',b:'Value'}
+  ]}},
+ {group:'Bonus · not on the sheets but in Lecture 3',title:'Bonus · Vehicle owners (category / union type)',
+  q:'A registration office records who owns each <b>vehicle</b> (VIN, model). An owner can be a <b>person</b> (NID), a <b>bank</b> (BName) or a <b>company</b> (CName). Not every person, bank or company owns a vehicle. An owner can own many vehicles and a vehicle can have several owners. Store the purchase date.',
+  steps:[
+   ['Spot the union','PERSON, BANK and COMPANY are <b>different</b> entity types with different keys. An OWNER is one of them, so OWNER is a <b>category (union type)</b>: a circle with <code>∪</code> and a subset line to OWNER.'],
+   ['Total or partial category','"Not every person/bank/company owns" → <b>partial</b> category (single line circle → OWNER).'],
+   ['Relationship','<span class="r">OWNS</span> OWNER M : N VEHICLE with PurchaseDate on OWNS. An owner inherits attributes only from the superclass it belongs to (selective inheritance).'],
+  ],
+  spec:{w:660,h:560,nodes:[
+   {id:'PERSON',k:'E',x:110,y:75},{id:'BANK',k:'E',x:330,y:75},{id:'COMPANY',k:'E',x:550,y:75},
+   {id:'NID',k:'A',x:110,y:20,key:true},{id:'BName',k:'A',x:330,y:20,key:true},{id:'CName',k:'A',x:550,y:20,key:true},
+   {id:'c',k:'C',x:330,y:175,label:'∪'},{id:'OWNER',k:'E',x:330,y:265},
+   {id:'OWNS',k:'R',x:330,y:370},{id:'PurchaseDate',k:'A',x:510,y:370},{id:'VEHICLE',k:'E',x:330,y:470},
+   {id:'VIN',k:'A',x:240,y:535,key:true},{id:'Model',k:'A',x:420,y:535}
+  ],edges:[
+   {a:'PERSON',b:'NID'},{a:'BANK',b:'BName'},{a:'COMPANY',b:'CName'},
+   {a:'PERSON',b:'c'},{a:'BANK',b:'c'},{a:'COMPANY',b:'c'},{a:'c',b:'OWNER',subset:true},
+   {a:'OWNS',b:'OWNER',label:'m',off:14},{a:'OWNS',b:'VEHICLE',label:'n',off:14},{a:'OWNS',b:'PurchaseDate'},
+   {a:'VEHICLE',b:'VIN'},{a:'VEHICLE',b:'Model'}
+  ]}},
+];
+const pr=document.getElementById('problems');
+let lastGroup='';
+PROBS.forEach((p,pi)=>{
+  if(p.group!==lastGroup){pr.insertAdjacentHTML('beforeend',`<div class="eyebrow" style="margin-top:8px">${p.group}</div>`);lastGroup=p.group}
+  const c=document.createElement('div');c.className='card prob';
+  const total=p.steps.length+(p.spec?1:0);
+  c.innerHTML=`<h3>${p.title}</h3><div class="q">${p.q}</div><div class="reveal" id="rv${pi}"></div><div><button class="btn primary" id="rb${pi}">Reveal step 1 of ${total}</button></div>`;
+  pr.appendChild(c);
+  let k=0;const btn=c.querySelector('#rb'+pi),rv=c.querySelector('#rv'+pi);
+  btn.onclick=()=>{
+    if(k<p.steps.length){const s=p.steps[k];rv.insertAdjacentHTML('beforeend',`<div class="rstep"><h4>Step ${k+1} · ${s[0]}</h4><div>${s[1]}</div></div>`)}
+    else{const d=document.createElement('div');d.className='rstep';d.innerHTML=`<h4>Final diagram</h4>`;const dg=document.createElement('div');dg.className='diagram';const s=el('svg',{});dg.appendChild(s);d.appendChild(dg);rv.appendChild(d);drawER(s,p.spec)}
+    k++;
+    if(k>=total){btn.textContent='All steps shown';btn.disabled=true}else btn.textContent=(k===p.steps.length&&p.spec)?'Reveal final diagram':`Reveal step ${k+1} of ${total}`;
+  };
+});
+
+/* ---------- quiz ---------- */
+const QS=[
+ {id:'q1',q:'Which level of the three-schema architecture describes physical storage structures and access paths?',o:['External','Conceptual','Internal','View'],a:2,e:'The internal schema describes storage: files, indexes, access paths. Conceptual = the whole logical structure; external = user views.'},
+ {id:'q2',q:'Adding a new attribute to the conceptual schema without rewriting existing application programs shows…',o:['Physical data independence','Logical data independence','Data abstraction only','Program–operation independence'],a:1,e:'A conceptual change that leaves external schemas and programs untouched is logical data independence.'},
+ {id:'q3',q:'Which kind of data independence is harder to achieve?',o:['Physical','Logical','Both are equally hard','Neither is achievable'],a:1,e:'Logical is harder, because programs depend heavily on the logical structure of the data.'},
+ {id:'q4',q:'The DBMS stores the database definition (structure, types, constraints) in the…',o:['Catalog','Transaction log','External schema','Buffer'],a:0,e:'The catalog holds metadata. This is why the database approach is called "self-describing".'},
+ {id:'q5',q:'Which is a reason NOT to use a DBMS?',o:['Data is shared by many users','You need backup and recovery','A simple, single-user application that won\'t change','You need to enforce integrity constraints'],a:2,e:'For simple, well-defined, single-user apps the DBMS overhead (cost, generality) may not be worth it. The others are DBMS advantages.'},
+ {id:'q6',q:'A person\'s Age is computed from BirthDate. In ER it is drawn as…',o:['Double ellipse','Dashed ellipse','Ellipse with dashed underline','Double rectangle'],a:1,e:'Derived attribute → dashed ellipse. Double ellipse = multivalued; dashed underline = partial key.'},
+ {id:'q7',q:'"Each employee works for exactly one department." What (min,max) goes next to EMPLOYEE on WORKS_FOR?',o:['(0,N)','(1,N)','(1,1)','(0,1)'],a:2,e:'"Exactly one" → min 1 (total) and max 1. In (min,max), the pair next to EMPLOYEE describes one employee.'},
+ {id:'q8',q:'WORKS_ON between EMPLOYEE and PROJECT is M:N with attribute Hours. Where can Hours go?',o:['In EMPLOYEE','In PROJECT','Either entity','Only on WORKS_ON'],a:3,e:'For an M:N relationship the attribute depends on the pair, so it must stay on the relationship.'},
+ {id:'q9',q:'DEPARTMENT 1 : N EMPLOYEE (WORKS_FOR) has attribute StartDate. It can migrate to…',o:['DEPARTMENT','EMPLOYEE','Either','Neither'],a:1,e:'In 1:N, the attribute can move to the N side. Each employee has only one WORKS_FOR instance.'},
+ {id:'q10',q:'In its identifying relationship, a weak entity type always has…',o:['Partial participation','Total participation','A key attribute','M:N cardinality'],a:1,e:'A weak entity can\'t exist without its owner: total participation (double line).'},
+ {id:'q11',q:'SUPPLY links SUPPLIER, PART and PROJECT in one relationship. Its degree is…',o:['1','2','3','It depends on cardinality'],a:2,e:'Three entity types take part, so it is ternary (degree 3).'},
+ {id:'q12',q:'An entity type participates in a relationship with itself (EMPLOYEE supervises EMPLOYEE). What must you add?',o:['A partial key','Role names','A derived attribute','A category'],a:1,e:'In a recursive relationship role names (supervisor, supervisee) tell the two lines apart.'},
+ {id:'q13',q:'A circle with "o" under the superclass means…',o:['Every entity must be in a subclass','An entity may belong to more than one subclass','An entity belongs to exactly one subclass','The subclass is a category'],a:1,e:'o = overlapping. Whether membership is required is shown by the double/single line, not the letter.'},
+ {id:'q14',q:'A double line from the superclass to the specialization circle means…',o:['Disjoint','Overlapping','Total specialization','Shared subclass'],a:2,e:'Double line = total: every superclass entity must be in at least one subclass.'},
+ {id:'q15',q:'Defining VEHICLE from existing CAR and TRUCK by pulling out their common attributes is…',o:['Specialization','Generalization','Aggregation','Categorization'],a:1,e:'Bottom-up merging of common features into a superclass is generalization.'},
+ {id:'q16',q:'An entity in a category (union type) must belong to…',o:['All of its superclasses','At least one of its superclasses','Exactly two superclasses','None of them'],a:1,e:'Category = union, so at least one. A shared subclass (intersection) requires all.'},
+ {id:'q17',q:'STUDENT_ASSISTANT is a subclass of both EMPLOYEE and STUDENT and inherits from both. This is a…',o:['Category','Shared subclass in a lattice','Weak entity','Predicate-defined subclass'],a:1,e:'A subclass with several superclasses is a shared subclass (multiple inheritance). The structure is a lattice.'},
+ {id:'q19',q:'"Room number is not unique unless combined with the building number." How is ROOMS modeled?',o:['Strong entity with key RoomNo','Weak entity with partial key RoomNo, owned by BUILDINGS','Multivalued attribute of BUILDINGS','Subclass of BUILDINGS'],a:1,e:'Unique only together with the owner\'s key → weak entity, dashed-underlined partial key, identifying relationship (sheet ER Q4).'},
+ {id:'q20',q:'"A game is played between two teams (host_team and guest_team)." Best model?',o:['A GAME weak entity with no relationships','A recursive relationship on TEAMS with roles Host and Guest','A multivalued attribute Opponents','A specialization of TEAMS'],a:1,e:'Two teams of the same entity type in different roles → recursive relationship with role names. Date and Score go on the relationship (sheet ER Q1).'},
+ {id:'q21',q:'For each vet visit "the date, time, all medicines and reason are recorded". Where does medicines go?',o:['Multivalued attribute on the visits relationship','Single-valued attribute of PET','Key of VET','Derived attribute of PET'],a:0,e:'It is recorded per visit and there can be many, so it is a multivalued attribute on the relationship (sheet ER Q3).'},
+ {id:'q22',q:'"A person need not belong to any of these groups, and may belong to two or more." The specialization is…',o:['Disjoint, total','Disjoint, partial','Overlapping, total','Overlapping, partial'],a:3,e:'"Need not belong to any" → partial (single line). "Two or more" → overlapping (o). Sheet EER Q1.'},
+ {id:'q23',q:'A borrower borrows a particular book from a particular library, with borrow and due dates. Your sheet models Borrows as…',o:['Binary BORROWER–BOOKS only','Ternary among BORROWER, BOOKS and LIBRARY','A weak entity','An attribute of LIBRARY'],a:1,e:'All three participate in one event, so the answer uses a ternary relationship with labels n, k, m (sheet EER Q3).'},
+ {id:'q24',q:'"Every branch library is a branch of exactly one main library." Has connects…',o:['LIBRARY to itself (recursive)','MAIN_LIBRARY 1 : n BRANCH_LIBRARY, BRANCH total','LIBRARY to BOOKS','MAIN_LIBRARY n : m BRANCH_LIBRARY'],a:1,e:'Relationships can join two subclasses. "Exactly one main" → 1 on the main side, and BRANCH is total (sheet EER Q3).'},
+ {id:'q25',q:'In the open-design questions (hospital/hotel), which is the grading rule?',o:['Match the model answer exactly','Meet every listed condition, keep it logical, give every entity attributes and every strong entity a key','Use the fewest entities possible','No assumptions allowed'],a:1,e:'The sheet says there is no fixed solution; the conditions, logic, attributes and keys are what is checked.'},
+ {id:'q18',q:'The database schema is also called the… and the database state is also called the…',o:['extension; intension','intension; extension','instance; schema','view; catalog'],a:1,e:'Schema = intension (rarely changes). State = extension or instance (changes all the time).'},
+];
+let mode='quiz',pool=[],qi=0,score=0,answered=0;
+let wrong=new Set(store.get('er_wrong',[]));
+function startQuiz(onlyWrong){
+  pool=onlyWrong?QS.filter(q=>wrong.has(q.id)):QS.slice();
+  pool.sort(()=>Math.random()-.5);qi=0;score=0;answered=0;renderQ();
+}
+function renderQ(){
+  const A=document.getElementById('quizArea');
+  if(!pool.length){A.innerHTML=`<p>No mistakes saved. Nice. <button class="btn" id="qr">Start full test</button></p>`;A.querySelector('#qr').onclick=()=>startQuiz(false);return}
+  if(qi>=pool.length){
+    A.innerHTML=`<h3>Done: ${score} / ${pool.length}</h3><p>${wrong.size?`${wrong.size} question${wrong.size>1?'s are':' is'} on your mistakes list.`:'Your mistakes list is empty.'}</p>
+    <div class="fcnav" style="justify-content:flex-start"><button class="btn primary" id="qa">Start again</button>${wrong.size?'<button class="btn" id="qw">Retry my mistakes</button>':''}</div>`;
+    A.querySelector('#qa').onclick=()=>startQuiz(false);const w=A.querySelector('#qw');if(w)w.onclick=()=>startQuiz(true);return}
+  const q=pool[qi];
+  A.innerHTML=`<div class="qhead"><span class="eyebrow">Question ${qi+1} of ${pool.length}</span><span class="score">Score ${score}/${answered}</span></div>
+   <div class="progress"><i style="width:${qi/pool.length*100}%"></i></div>
+   <h3 style="font-family:var(--body);font-weight:600;font-size:17px">${q.q}</h3>
+   <div class="opts">${q.o.map((o,i)=>`<button class="opt" data-i="${i}">${String.fromCharCode(65+i)}. ${o}</button>`).join('')}</div>
+   <div id="fb"></div>
+   <div class="fcnav" style="justify-content:space-between"><button class="btn" id="qw2" ${wrong.size?'':'hidden'}>Retry my mistakes (${wrong.size})</button><button class="btn primary" id="qn" hidden>Next</button></div>`;
+  A.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i,ok=i===q.a;answered++;
+    A.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(+x.dataset.i===q.a)x.classList.add('right')});
+    if(!ok){b.classList.add('wrong');wrong.add(q.id)}else{score++;wrong.delete(q.id)}
+    store.set('er_wrong',[...wrong]);
+    A.querySelector('#fb').innerHTML=`<div class="expl"><b class="${ok?'ok':'no'}">${ok?'Correct.':'Not quite.'}</b> ${q.e}</div>`;
+    A.querySelector('.score').textContent=`Score ${score}/${answered}`;
+    const n=A.querySelector('#qn');n.hidden=false;n.focus();n.onclick=()=>{qi++;renderQ()};
+  });
+  const w2=A.querySelector('#qw2');if(w2)w2.onclick=()=>startQuiz(true);
+}
+/* flashcards */
+let fi=0,fdeck=DEFS.slice();
+function renderFC(){
+  const F=document.getElementById('flashArea');const d=fdeck[fi];
+  F.innerHTML=`<p class="caption" style="text-align:center">Card ${fi+1} of ${fdeck.length}. Tap the card to flip.</p>
+  <div class="fc" id="fc" tabindex="0" role="button" aria-label="Flip card"><div class="fc-in"><div class="fc-f"><div><span class="def"><span class="grp ${d[0]}">${d[0].toUpperCase()}</span></span><b>${d[1]}</b></div></div><div class="fc-b"><div><p>${d[2]}</p><p class="caption" style="margin-top:8px">${d[3]}</p></div></div></div></div>
+  <div class="fcnav"><button class="btn" id="fp">← Prev</button><button class="btn" id="fs">Shuffle</button><button class="btn primary" id="fn">Next →</button></div>`;
+  const fc=F.querySelector('#fc');fc.onclick=()=>fc.classList.toggle('flip');fc.onkeydown=e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();fc.classList.toggle('flip')}};
+  F.querySelector('#fp').onclick=()=>{fi=(fi-1+fdeck.length)%fdeck.length;renderFC()};
+  F.querySelector('#fn').onclick=()=>{fi=(fi+1)%fdeck.length;renderFC()};
+  F.querySelector('#fs').onclick=()=>{fdeck.sort(()=>Math.random()-.5);fi=0;renderFC()};
+}
+seg('modeSeg',[['quiz','Quiz'],['flash','Flashcards']],()=>mode,v=>{mode=v;document.getElementById('quizArea').hidden=v!=='quiz';document.getElementById('flashArea').hidden=v!=='flash';if(v==='flash')renderFC()});
+startQuiz(false);
+
+/* ---------- tabs, cram, theme ---------- */
+const panels=[...document.querySelectorAll('section.panel')];
+const tabsEl=document.getElementById('tabs');
+panels.forEach((p,i)=>{const b=document.createElement('button');b.className='tab'+(p.classList.contains('nocram')?' nocram':'');b.setAttribute('role','tab');b.dataset.id=p.id;b.innerHTML=`<span class="n">${i+1}</span>${p.dataset.title}`;b.onclick=()=>show(p.id);tabsEl.appendChild(b)});
+function show(id){panels.forEach(p=>p.hidden=p.id!==id);[...tabsEl.children].forEach(t=>t.setAttribute('aria-selected',String(t.dataset.id===id)));store.set('er_tab',id);window.scrollTo({top:0})}
+show(store.get('er_tab','p-big'));
+const cramBtn=document.getElementById('cramBtn');
+cramBtn.onclick=()=>{const on=!document.body.classList.contains('cram');document.body.classList.toggle('cram',on);cramBtn.setAttribute('aria-pressed',String(on));
+  const cur=panels.find(p=>!p.hidden);if(on&&cur&&cur.classList.contains('nocram'))show('p-defs')};
+document.getElementById('themeBtn').onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.dataset.theme=dark?'light':'dark'};
+</script>
+
+</body></html>

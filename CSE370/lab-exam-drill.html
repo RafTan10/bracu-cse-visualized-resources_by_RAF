@@ -1,0 +1,554 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>CSE370 Lab Exam Drill</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: exam-copy page — a narrow ruled column, blue-ink answers, red-margin traps. Sticky bar holds tabs, timer and score. */
+:root{
+  --paper:#f7f8fb; --sheet:#ffffff; --ink:#1b2233; --muted:#5d6678; --rule:#dfe3ec;
+  --blue:#2346b8; --blue-soft:#e8edfb; --red:#c0392b; --red-soft:#fbeceb; --green:#1d7a4f; --green-soft:#e5f4ec;
+  --code-bg:#f1f3f8;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#11141c; --sheet:#181c26; --ink:#e6e9f2; --muted:#9aa3b6; --rule:#2a3040;
+  --blue:#8ea8ff; --blue-soft:#1f2a4a; --red:#ff8a7a; --red-soft:#3a2023; --green:#6fd6a2; --green-soft:#17322a;
+  --code-bg:#121620; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#11141c; --sheet:#181c26; --ink:#e6e9f2; --muted:#9aa3b6; --rule:#2a3040;
+  --blue:#8ea8ff; --blue-soft:#1f2a4a; --red:#ff8a7a; --red-soft:#3a2023; --green:#6fd6a2; --green-soft:#17322a;
+  --code-bg:#121620; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--sheet)}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{padding-block:28px 12px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,5vw,40px);line-height:1.05;margin:0 0 6px;text-wrap:balance;letter-spacing:-.01em}
+.lede{color:var(--muted);margin:0;max-width:62ch}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--sheet);border-bottom:1px solid var(--rule)}
+.bar .wrap{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-block:10px}
+.tabs{display:flex;gap:4px;background:var(--code-bg);padding:3px;border-radius:9px}
+.tab{border:0;background:transparent;color:var(--muted);font:600 14px var(--f-body);padding:7px 12px;border-radius:7px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--sheet);color:var(--ink);box-shadow:0 1px 2px rgb(0 0 0 / .12)}
+.spacer{flex:1}
+.pill{font:600 13px var(--f-mono);font-variant-numeric:tabular-nums;padding:6px 10px;border-radius:999px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);white-space:nowrap}
+button.pill{cursor:pointer}
+.pill.ok{color:var(--green);border-color:var(--green)}
+.pill.warn{color:var(--red);border-color:var(--red)}
+button:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+main{padding-block:20px 60px}
+h2{font-family:var(--f-display);font-weight:800;font-size:24px;margin:34px 0 4px;letter-spacing:-.01em}
+h2:first-child{margin-top:4px}
+h3{font-family:var(--f-display);font-weight:600;font-size:18px;margin:22px 0 8px}
+.sub{color:var(--muted);margin:0 0 14px}
+code,.mono{font-family:var(--f-mono);font-size:.88em}
+p code,li code,td code{background:var(--code-bg);padding:1px 5px;border-radius:4px}
+pre{font-family:var(--f-mono);font-size:13px;line-height:1.55;background:var(--code-bg);padding:12px 14px;border-radius:8px;overflow-x:auto;margin:8px 0;white-space:pre}
+.kw{color:var(--blue);font-weight:600}
+
+/* cheat sheet */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:14px}
+.box{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;min-width:0}
+.box h3{margin-top:0}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.trap{background:var(--red-soft);border-left:3px solid var(--red);padding:10px 14px;border-radius:0 8px 8px 0;margin:8px 0}
+.trap b{color:var(--red)}
+ul.tight{margin:6px 0;padding-left:18px}
+ul.tight li{margin:3px 0}
+.order{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0;font:600 13px var(--f-mono)}
+.order span{background:var(--blue-soft);color:var(--blue);padding:4px 9px;border-radius:6px}
+.order i{color:var(--muted);font-style:normal}
+
+/* data */
+details.data{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:10px 14px;margin:10px 0 18px}
+details.data summary{cursor:pointer;font-weight:600}
+.datatbl{font-family:var(--f-mono);font-size:12px;white-space:nowrap}
+.datatbl td,.datatbl th{padding:4px 7px;font-variant-numeric:tabular-nums}
+.null{color:var(--muted);font-style:italic}
+
+/* questions */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px}
+.q{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;margin:12px 0;min-width:0}
+.q.got{border-color:var(--green)}
+.q.miss{border-color:var(--red)}
+.qhead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.qnum{font:800 15px var(--f-display);color:var(--blue);min-width:2.4em}
+.qtext{flex:1;min-width:0;font-weight:500}
+.chip{font:600 11px var(--f-body);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border:1px solid var(--rule);border-radius:999px;padding:2px 8px}
+.chip.core{color:var(--blue);border-color:var(--blue)}
+textarea{width:100%;min-height:70px;margin-top:10px;font:13px/1.5 var(--f-mono);background:var(--code-bg);color:var(--ink);border:1px dashed var(--rule);border-radius:8px;padding:10px;resize:vertical}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btn{font:600 13px var(--f-body);border-radius:7px;padding:7px 12px;cursor:pointer;border:1px solid var(--rule);background:var(--sheet);color:var(--ink)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:var(--sheet)}
+.btn.good{color:var(--green);border-color:var(--green)}
+.btn.good[aria-pressed="true"]{background:var(--green-soft)}
+.btn.bad{color:var(--red);border-color:var(--red)}
+.btn.bad[aria-pressed="true"]{background:var(--red-soft)}
+.ans{margin-top:12px;border-top:1px dashed var(--rule);padding-top:10px}
+.ans .lbl{font:600 11px var(--f-body);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:8px 0 2px}
+.ans pre{border-left:3px solid var(--blue)}
+.out{overflow-x:auto}
+.out table{width:auto;font-family:var(--f-mono);font-size:12px}
+.out td,.out th{padding:3px 10px;font-variant-numeric:tabular-nums;text-transform:none;letter-spacing:0}
+.note{font-size:14px;margin:6px 0}
+.note.warnnote{color:var(--red)}
+.state{font-size:13px;color:var(--muted);margin:8px 0 0}
+.empty{color:var(--muted);font-style:italic;font-family:var(--f-mono);font-size:12px}
+@media (prefers-reduced-motion: no-preference){ .ans{animation:fade .18s ease-out} @keyframes fade{from{opacity:.4;transform:translateY(-2px)}to{opacity:1;transform:none}} }
+</style>
+
+<header class="top wrap">
+  <h1>CSE370 Lab Exam Drill</h1>
+  <p class="lede">Lab 1 and Lab 2 only, with no basics. Read the cheat sheet in about 10 minutes, then work through the practice set on paper. Every answer and output below was run on MariaDB, the database XAMPP uses.</p>
+</header>
+
+<div class="bar"><div class="wrap">
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-sheet" aria-selected="true" data-view="sheet">Cheat sheet</button>
+    <button class="tab" role="tab" id="tab-practice" aria-selected="false" data-view="practice">Practice</button>
+    <button class="tab" role="tab" id="tab-bugs" aria-selected="false" data-view="bugs">Spot the bug</button>
+  </div>
+  <span class="spacer"></span>
+  <button class="pill" id="timer" title="Start or pause a 75-minute timer">⏱ 75:00 · start</button>
+  <span class="pill" id="score">0 / 0 marked</span>
+</div></div>
+
+<main class="wrap">
+
+<!-- ================= CHEAT SHEET ================= -->
+<section id="view-sheet">
+  <h2>Order of execution</h2>
+  <p class="sub">This order explains most of the rules below.</p>
+  <div class="order"><span>FROM</span><i>→</i><span>WHERE</span><i>→</i><span>GROUP BY</span><i>→</i><span>HAVING</span><i>→</i><span>SELECT</span><i>→</i><span>ORDER BY</span><i>→</i><span>LIMIT</span></div>
+  <ul class="tight">
+    <li>WHERE runs before grouping, so <b>it can't use aggregates</b>. Put <code>AVG(x) &gt; 5</code> in HAVING.</li>
+    <li>A SELECT alias works in ORDER BY (and HAVING in MySQL), but <b>not in WHERE</b>.</li>
+    <li>Every SELECT column that isn't aggregated must be in GROUP BY.</li>
+  </ul>
+
+  <h2>Lab 1: easy marks to lose</h2>
+  <div class="grid2">
+    <div class="box">
+      <h3>ALTER TABLE: five forms</h3>
+      <div class="tbl"><table>
+        <tr><th>Goal</th><th>Syntax</th></tr>
+        <tr><td>New column</td><td><code>ADD col TYPE</code></td></tr>
+        <tr><td>Change type only</td><td><code>MODIFY col NEWTYPE</code></td></tr>
+        <tr><td>Rename (+type)</td><td><code>CHANGE old new TYPE</code></td></tr>
+        <tr><td>Remove column</td><td><code>DROP COLUMN col</code></td></tr>
+        <tr><td>Rename table</td><td><code>RENAME TO newname</code></td></tr>
+      </table></div>
+      <p class="note">CHANGE <b>always</b> needs the type, even when the type stays the same.</p>
+    </div>
+    <div class="box">
+      <h3>Write it right on paper</h3>
+      <ul class="tight">
+        <li>Text and dates go in single quotes: <code>'Dhaka'</code>, <code>'2020-01-01'</code></li>
+        <li><code>LIKE '%x'</code> = ends with x · <code>'x%'</code> = starts with · <code>'_a%'</code> = 2nd letter a</li>
+        <li><code>BETWEEN a AND b</code> includes both ends, and a must be ≤ b</li>
+        <li><code>IS NULL</code> / <code>IS NOT NULL</code>, never <code>= NULL</code></li>
+        <li><code>UPDATE t SET c = expr WHERE …;</code> with no WHERE changes every row</li>
+        <li><code>DELETE FROM t WHERE …</code> removes rows · <code>DROP TABLE t</code> removes the table</li>
+        <li>Mixing AND/OR? Use brackets: <code>a AND (b OR c)</code></li>
+        <li><code>DECIMAL(5,2)</code> = 5 digits in total, 2 after the point (max 999.99)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Lab 2: aggregates</h2>
+  <div class="grid2">
+    <div class="box">
+      <h3>NULL behaviour</h3>
+      <ul class="tight">
+        <li><code>COUNT(*)</code> counts rows. <code>COUNT(col)</code> <b>skips NULLs</b>.</li>
+        <li><code>AVG / SUM / MIN / MAX</code> ignore NULLs.</li>
+        <li><code>MAX(date)</code> gives the latest date, <code>MIN(date)</code> the earliest.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>WHERE + GROUP BY + HAVING together</h3>
+<pre><span class="kw">SELECT</span> role, AVG(runs) <span class="kw">FROM</span> players
+<span class="kw">WHERE</span>  debut_date &gt;= '2020-01-01'  <i>-- rows</i>
+<span class="kw">GROUP BY</span> role
+<span class="kw">HAVING</span> AVG(runs) &gt; 200;          <i>-- groups</i></pre>
+    </div>
+  </div>
+
+  <h2>Lab 2: pick the pattern from the question's wording</h2>
+  <div class="box tbl"><table>
+    <tr><th>Question says…</th><th>Write</th></tr>
+    <tr><td>"the highest / lowest" (ties too)</td><td><code>WHERE x = (SELECT MAX(x) FROM t)</code></td></tr>
+    <tr><td>"above average"</td><td><code>WHERE x &gt; (SELECT AVG(x) FROM t)</code></td></tr>
+    <tr><td>"more than <b>every / all</b> of group B"</td><td><code>x &gt; ALL (SELECT x … WHERE grp='B')</code></td></tr>
+    <tr><td>"more than <b>at least one</b> / any of B"</td><td><code>x &gt; ANY (SELECT x … WHERE grp='B')</code></td></tr>
+    <tr><td>"the best <b>in each</b> group"</td><td>correlated: <code>x = (SELECT MAX(x) FROM t t2 WHERE t2.g = t1.g)</code></td></tr>
+    <tr><td>"groups with at least one row where…"</td><td><code>WHERE EXISTS (SELECT * … WHERE t2.g = t1.g AND …)</code></td></tr>
+    <tr><td>"max <b>without</b> MAX / using EXISTS"</td><td><code>NOT EXISTS (… t2.id &lt;&gt; t1.id AND t2.x &gt; t1.x)</code></td></tr>
+    <tr><td>"the <b>unique</b> max"</td><td>same as above, but with <code>t2.x &gt;= t1.x</code></td></tr>
+    <tr><td>"the group with the most rows"</td><td><code>HAVING COUNT(*) &gt;= ALL (SELECT COUNT(*) … GROUP BY g)</code></td></tr>
+    <tr><td>"groups whose average beats the overall average"</td><td><code>HAVING AVG(x) &gt; (SELECT AVG(x) FROM t)</code></td></tr>
+    <tr><td>"groups that have <b>no</b> X"</td><td><code>g NOT IN (SELECT g FROM t WHERE X)</code></td></tr>
+    <tr><td>subquery after FROM</td><td><code>FROM (SELECT …) <b>AS alias</b></code> (the alias is required)</td></tr>
+    <tr><td>show one fixed value on every row</td><td><code>SELECT name, (SELECT MAX(x) FROM t) AS top</code></td></tr>
+  </table></div>
+
+  <div class="trap"><b>Trap 1:</b> <code>&gt; ALL (subquery)</code> where the subquery returns a NULL gives an <b>empty result</b>. Add <code>AND col IS NOT NULL</code> inside the subquery.</div>
+  <div class="trap"><b>Trap 2:</b> <code>= (subquery)</code> fails if the subquery returns more than one row. Use <code>IN</code> or <code>= ANY</code>.</div>
+  <div class="trap"><b>Trap 3:</b> <code>ORDER BY … LIMIT 1</code> for "the highest" drops ties. Use <code>= (SELECT MAX…)</code>.</div>
+  <div class="trap"><b>Trap 4:</b> <code>&gt; ANY</code> = "more than the smallest". <code>&gt; ALL</code> = "more than the biggest".</div>
+</section>
+
+<!-- ================= PRACTICE ================= -->
+<section id="view-practice" hidden>
+  <h2>Practice set: Cricket League</h2>
+  <p class="sub">Write each query on paper first, or in the box. Then reveal the answer and mark yourself honestly. Run Part A in order, because some steps change the table. Part B uses the table as it stands after Part A.</p>
+
+  <details class="data" open>
+    <summary>Table <code>players</code> (12 rows, before Part A)</summary>
+    <div class="tbl"><table class="datatbl" id="datatbl"></table></div>
+  </details>
+
+  <div class="filters">
+    <button class="btn" id="f-core" aria-pressed="false">Short on time: core questions only (★)</button>
+    <button class="btn" id="f-reset">Clear my marks</button>
+  </div>
+
+  <h2>Part A · Lab 1 (single table, DDL and DML)</h2>
+  <div id="qa"></div>
+  <h2>Part B · Lab 2 (aggregates and subqueries)</h2>
+  <div id="qb"></div>
+</section>
+
+<!-- ================= BUGS ================= -->
+<section id="view-bugs" hidden>
+  <h2>Spot the bug</h2>
+  <p class="sub">10 quick ones, about 10 minutes. Some are correct as written. Decide before you reveal.</p>
+  <div id="qc"></div>
+</section>
+
+</main>
+
+<script>
+const DATA = [
+ [1,'Arif Hasan','arif.h@bpl.com','Dhaka','Batter',24,812,640,null,'2019-03-12'],
+ [2,'Nayeem Rahman','nayeem.r@gmail.com','Dhaka','AllRounder',30,655,590,28,'2018-07-01'],
+ [3,'Tanvir Chowdhury','tanvir.c@bpl.com','Sylhet','Batter',18,540,470,null,'2021-01-20'],
+ [4,'Nabil Karim','nabil.k@gmail.com','Sylhet','Bowler',22,95,120,34,'2020-02-14'],
+ [5,'Rafi Ahmed','rafi.a@bpl.com','Chattogram','AllRounder',15,410,300,15,'2022-05-09'],
+ [6,'Imran Sarkar','imran.s@gmail.com','Chattogram','Bowler',27,210,190,41,'2019-11-30'],
+ [7,'Shuvo Das','shuvo.d@bpl.com','Dhaka','Bowler',12,60,75,19,'2023-03-03'],
+ [8,'Fahim Alam','fahim.a@bpl.com','Rajshahi','Batter',35,812,700,null,'2017-08-15'],
+ [9,'Rakib Paul','rakib.p@gmail.com','Sylhet','AllRounder',9,260,230,7,'2023-10-10'],
+ [10,'Yasir Khan','yasir.k@bpl.com','Rajshahi','Bowler',20,130,160,25,'2021-06-18'],
+ [11,'Sajid Roy','sajid.r@gmail.com','Chattogram','Batter',0,0,0,null,'2024-12-01'],
+ [12,'Mahin Ullah','mahin.u@bpl.com','Dhaka','AllRounder',26,530,480,22,'2020-09-05']
+];
+const COLS=['player_id','player_name','email','team','role','matches','runs','balls_faced','wickets','debut_date'];
+
+// q: id, core, tag, text, ans, out:[cols, rows], notes:[...], warn:[...]
+const QA = [
+ {id:'A1',core:1,tag:'CREATE',text:'Create the table <code>players</code> with suitable data types for all 10 columns.',
+  ans:`CREATE TABLE players (
+  player_id   INT PRIMARY KEY,
+  player_name VARCHAR(30),
+  email       VARCHAR(40),
+  team        VARCHAR(15),
+  role        VARCHAR(12),
+  matches     INT,
+  runs        INT,
+  balls_faced INT,
+  wickets     INT,
+  debut_date  DATE
+);`, warn:['Commas between columns, none after the last one. DATE, not VARCHAR, for dates.']},
+ {id:'A2',core:0,tag:'INSERT',text:'Insert the first three rows using a single INSERT statement.',
+  ans:`INSERT INTO players VALUES
+(1,'Arif Hasan','arif.h@bpl.com','Dhaka','Batter',24,812,640,NULL,'2019-03-12'),
+(2,'Nayeem Rahman','nayeem.r@gmail.com','Dhaka','AllRounder',30,655,590,28,'2018-07-01'),
+(3,'Tanvir Chowdhury','tanvir.c@bpl.com','Sylhet','Batter',18,540,470,NULL,'2021-01-20');`,
+  warn:['Write NULL with no quotes. \'NULL\' in quotes is a string.','Dates in quotes, as YYYY-MM-DD.']},
+ {id:'A3',core:1,tag:'UPPER · IN · ORDER BY',text:'Show the name in UPPERCASE (column heading <code>name</code>) and the team of every Bowler and AllRounder, highest runs first.',
+  ans:`SELECT UPPER(player_name) AS name, team
+FROM players
+WHERE role IN ('Bowler','AllRounder')
+ORDER BY runs DESC;`,
+  out:[['name','team'],[['NAYEEM RAHMAN','Dhaka'],['MAHIN ULLAH','Dhaka'],['RAFI AHMED','Chattogram'],['RAKIB PAUL','Sylhet'],['IMRAN SARKAR','Chattogram'],['YASIR KHAN','Rajshahi'],['NABIL KARIM','Sylhet'],['SHUVO DAS','Dhaka']]],
+  notes:['You can ORDER BY a column you don\'t SELECT.']},
+ {id:'A4',core:1,tag:'Expression · BETWEEN',text:'Show player_name and runs per match (as <code>avg_runs</code>) for players who played 10 to 25 matches.',
+  ans:`SELECT player_name, runs / matches AS avg_runs
+FROM players
+WHERE matches BETWEEN 10 AND 25;`,
+  out:[['player_name','avg_runs'],[['Arif Hasan','33.8333'],['Tanvir Chowdhury','30.0000'],['Nabil Karim','4.3182'],['Rafi Ahmed','27.3333'],['Shuvo Das','5.0000'],['Yasir Khan','6.5000']]],
+  notes:['BETWEEN includes both ends: 10 and 25 count.']},
+ {id:'A5',core:1,tag:'LIKE',text:'Find the names of players who use Gmail and whose name starts with N.',
+  ans:`SELECT player_name
+FROM players
+WHERE email LIKE '%@gmail.com' AND player_name LIKE 'N%';`,
+  out:[['player_name'],[['Nayeem Rahman'],['Nabil Karim']]]},
+ {id:'A6',core:0,tag:'DISTINCT',text:'List every team once.',
+  ans:`SELECT DISTINCT team FROM players;`, out:[['team'],[['Dhaka'],['Sylhet'],['Chattogram'],['Rajshahi']]]},
+ {id:'A7',core:1,tag:'DELETE',text:'Remove the players who have not played any match.',
+  ans:`DELETE FROM players WHERE matches = 0;`, notes:['Removes Sajid Roy. From here on, the table has 11 rows.'],
+  warn:['DROP would delete the whole table. TRUNCATE would delete every row.']},
+ {id:'A8',core:1,tag:'ALTER CHANGE',text:'Rename the column <code>balls_faced</code> to <code>balls</code>. Keep it INT.',
+  ans:`ALTER TABLE players CHANGE balls_faced balls INT;`, warn:['Leaving out INT is a syntax error. CHANGE always needs the type.']},
+ {id:'A9',core:1,tag:'ALTER MODIFY',text:'Let <code>player_name</code> hold up to 50 characters.',
+  ans:`ALTER TABLE players MODIFY player_name VARCHAR(50);`},
+ {id:'A10',core:0,tag:'ALTER ADD',text:'Add a column <code>strike_rate</code> that stores values like 136.67.',
+  ans:`ALTER TABLE players ADD strike_rate DECIMAL(5,2);`, notes:['DECIMAL(5,2) holds values up to 999.99. DECIMAL(4,2) would overflow above 99.99.']},
+ {id:'A11',core:1,tag:'UPDATE',text:'Fill in strike_rate as runs × 100 ÷ balls for every player.',
+  ans:`UPDATE players SET strike_rate = runs * 100 / balls;`,
+  out:[['player_id','player_name','strike_rate'],[[1,'Arif Hasan','126.88'],[2,'Nayeem Rahman','111.02'],[3,'Tanvir Chowdhury','114.89'],[4,'Nabil Karim','79.17'],[5,'Rafi Ahmed','136.67'],[6,'Imran Sarkar','110.53'],[7,'Shuvo Das','80.00'],[8,'Fahim Alam','116.00'],[9,'Rakib Paul','113.04'],[10,'Yasir Khan','81.25'],[12,'Mahin Ullah','110.42']]],
+  notes:['Use the new name, balls. balls_faced no longer exists after A8. Deleting Sajid in A7 also avoids dividing by 0.']},
+ {id:'A12',core:1,tag:'AND / OR',text:'Show the name and runs of players <b>not</b> from Dhaka who either scored more than 500 runs or took at least 30 wickets.',
+  ans:`SELECT player_name, runs
+FROM players
+WHERE team <> 'Dhaka' AND (runs > 500 OR wickets >= 30);`,
+  out:[['player_name','runs'],[['Tanvir Chowdhury',540],['Nabil Karim',95],['Imran Sarkar',210],['Fahim Alam',812]]],
+  warn:['Without the brackets, AND runs first, so Nayeem (Dhaka, 655 runs) would wrongly appear.']}
+];
+
+const QB = [
+ {id:'B1',core:0,tag:'Aggregates',text:'In one query, show the number of players, their average runs and the highest runs.',
+  ans:`SELECT COUNT(*) AS total, AVG(runs) AS avg_runs, MAX(runs) AS top
+FROM players;`, out:[['total','avg_runs','top'],[[11,'410.3636',812]]]},
+ {id:'B2',core:1,tag:'COUNT(*) vs COUNT(col)',text:'For each team, show how many players it has and how many have a wickets record (not NULL).',
+  ans:`SELECT team, COUNT(*) AS players, COUNT(wickets) AS wicket_takers
+FROM players
+GROUP BY team;`,
+  out:[['team','players','wicket_takers'],[['Chattogram',2,2],['Dhaka',4,3],['Rajshahi',2,1],['Sylhet',3,2]]],
+  notes:['COUNT(wickets) skips Arif, Fahim and Tanvir because their wickets are NULL.']},
+ {id:'B3',core:1,tag:'GROUP BY · HAVING',text:'Show the total runs of every team that has at least 3 players.',
+  ans:`SELECT team, SUM(runs)
+FROM players
+GROUP BY team
+HAVING COUNT(*) >= 3;`, out:[['team','SUM(runs)'],[['Dhaka',2057],['Sylhet',895]]]},
+ {id:'B4',core:1,tag:'WHERE + HAVING',text:'Using only players who debuted on or after 1 Jan 2020, find the average runs per role. Show only roles where that average is above 200.',
+  ans:`SELECT role, AVG(runs)
+FROM players
+WHERE debut_date >= '2020-01-01'
+GROUP BY role
+HAVING AVG(runs) > 200;`, out:[['role','AVG(runs)'],[['AllRounder','400.0000'],['Batter','540.0000']]],
+  notes:['The date condition filters rows, so it goes in WHERE. The average condition filters groups, so it goes in HAVING.']},
+ {id:'B5',core:1,tag:'Subquery · MAX',text:'Find the name(s) of the top run-scorer.',
+  ans:`SELECT player_name
+FROM players
+WHERE runs = (SELECT MAX(runs) FROM players);`, out:[['player_name'],[['Arif Hasan'],['Fahim Alam']]],
+  warn:['There is a tie at 812. ORDER BY runs DESC LIMIT 1 would miss one of them.']},
+ {id:'B6',core:0,tag:'Subquery · AVG',text:'Show the name and runs of players who scored above the league average.',
+  ans:`SELECT player_name, runs
+FROM players
+WHERE runs > (SELECT AVG(runs) FROM players);`,
+  out:[['player_name','runs'],[['Arif Hasan',812],['Nayeem Rahman',655],['Tanvir Chowdhury',540],['Fahim Alam',812],['Mahin Ullah',530]]],
+  notes:['The league average is 410.36.']},
+ {id:'B7',core:1,tag:'ALL',text:'Find the Dhaka players who scored more runs than <b>every</b> Sylhet player.',
+  ans:`SELECT player_name
+FROM players
+WHERE team = 'Dhaka'
+  AND runs > ALL (SELECT runs FROM players WHERE team = 'Sylhet');`,
+  out:[['player_name'],[['Arif Hasan'],['Nayeem Rahman']]], notes:['Sylhet runs are 540, 95 and 260, so the player must beat 540. Mahin (530) fails.']},
+ {id:'B8',core:1,tag:'ANY',text:'Find the Dhaka players who scored more runs than <b>at least one</b> Sylhet player.',
+  ans:`SELECT player_name
+FROM players
+WHERE team = 'Dhaka'
+  AND runs > ANY (SELECT runs FROM players WHERE team = 'Sylhet');`,
+  out:[['player_name'],[['Arif Hasan'],['Nayeem Rahman'],['Mahin Ullah']]], notes:['The player only needs to beat 95, the smallest. Shuvo (60) fails.']},
+ {id:'B9',core:1,tag:'Correlated',text:'Show the top run-scorer of each team (team, player_name, runs).',
+  ans:`SELECT team, player_name, runs
+FROM players p1
+WHERE runs = (SELECT MAX(runs) FROM players p2
+              WHERE p2.team = p1.team);`,
+  out:[['team','player_name','runs'],[['Dhaka','Arif Hasan',812],['Sylhet','Tanvir Chowdhury',540],['Chattogram','Rafi Ahmed',410],['Rajshahi','Fahim Alam',812]]],
+  warn:['SELECT team, player_name, MAX(runs) … GROUP BY team is wrong. player_name isn\'t grouped, so you get a random name or an error.']},
+ {id:'B10',core:1,tag:'EXISTS',text:'Using EXISTS, find the teams that have at least one Bowler with 30 or more wickets.',
+  ans:`SELECT DISTINCT team
+FROM players p1
+WHERE EXISTS (SELECT * FROM players p2
+              WHERE p2.team = p1.team
+                AND p2.role = 'Bowler' AND p2.wickets >= 30);`,
+  out:[['team'],[['Sylhet'],['Chattogram']]], notes:['Without DISTINCT, each team appears once for every player in it.']},
+ {id:'B11',core:1,tag:'NOT EXISTS',text:'Find the player with the most matches without using MAX. Use NOT EXISTS.',
+  ans:`SELECT player_name
+FROM players p1
+WHERE NOT EXISTS (SELECT * FROM players p2
+                  WHERE p2.player_id <> p1.player_id
+                    AND p2.matches > p1.matches);`,
+  out:[['player_name'],[['Fahim Alam']]], notes:['Read it as "no other player has played more". Change > to >= to require that nobody else ties.']},
+ {id:'B12',core:1,tag:'HAVING >= ALL',text:'Find the team with the most players.',
+  ans:`SELECT team
+FROM players
+GROUP BY team
+HAVING COUNT(*) >= ALL (SELECT COUNT(*) FROM players GROUP BY team);`, out:[['team'],[['Dhaka']]],
+  notes:['This is the Bonus Task pattern from the Lab 2 slides.']},
+ {id:'B13',core:0,tag:'HAVING + subquery',text:'Show the teams whose average runs are above the league average, with that average.',
+  ans:`SELECT team, AVG(runs)
+FROM players
+GROUP BY team
+HAVING AVG(runs) > (SELECT AVG(runs) FROM players);`, out:[['team','AVG(runs)'],[['Dhaka','514.2500'],['Rajshahi','471.0000']]]},
+ {id:'B14',core:0,tag:'Subquery in FROM',text:'Find the average runs of AllRounders, using a subquery in FROM.',
+  ans:`SELECT AVG(runs)
+FROM (SELECT runs FROM players WHERE role = 'AllRounder') AS ar;`, out:[['AVG(runs)'],[['463.7500']]],
+  warn:['Leaving out "AS ar" causes an error. Every derived table must have an alias.']},
+ {id:'B15',core:1,tag:'NULL trap',text:'Find the AllRounders who took more wickets than every Rajshahi player with a wickets record.',
+  ans:`SELECT player_name, wickets
+FROM players
+WHERE role = 'AllRounder'
+  AND wickets > ALL (SELECT wickets FROM players
+                     WHERE team = 'Rajshahi'
+                       AND wickets IS NOT NULL);`,
+  out:[['player_name','wickets'],[['Nayeem Rahman',28]]],
+  warn:['Without IS NOT NULL the result is empty: Fahim\'s NULL makes every > ALL comparison unknown.']},
+ {id:'B16',core:0,tag:'NOT IN',text:'Find the players from teams where <b>nobody</b> scored more than 600 runs.',
+  ans:`SELECT player_name
+FROM players
+WHERE team NOT IN (SELECT team FROM players WHERE runs > 600);`,
+  out:[['player_name'],[['Tanvir Chowdhury'],['Nabil Karim'],['Rafi Ahmed'],['Imran Sarkar'],['Rakib Paul']]],
+  notes:['The subquery finds the "bad" teams (Dhaka, Rajshahi), and NOT IN excludes them. WHERE runs <= 600 would be wrong: it removes players, not teams.']},
+ {id:'B17',core:0,tag:'Subquery in SELECT',text:'For each Batter, show the name and how many runs short of the league\'s top score they are (as <code>gap</code>).',
+  ans:`SELECT player_name, (SELECT MAX(runs) FROM players) - runs AS gap
+FROM players
+WHERE role = 'Batter';`, out:[['player_name','gap'],[['Arif Hasan',0],['Tanvir Chowdhury',272],['Fahim Alam',0]]]}
+];
+
+const QC = [
+ {id:'C1',tag:'Bug',text:'Teams with average runs above 400:',code:`SELECT team, AVG(runs) FROM players
+WHERE AVG(runs) > 400 GROUP BY team;`,
+  ans:`SELECT team, AVG(runs) FROM players
+GROUP BY team HAVING AVG(runs) > 400;`, notes:['Aggregates can\'t go in WHERE. Use HAVING.']},
+ {id:'C2',tag:'Bug',text:'Players whose runs match any Dhaka player\'s runs:',code:`SELECT player_name FROM players
+WHERE runs = (SELECT runs FROM players WHERE team='Dhaka');`,
+  ans:`SELECT player_name FROM players
+WHERE runs IN (SELECT runs FROM players WHERE team='Dhaka');`, notes:['The subquery returns 4 rows, so = fails with "Subquery returns more than 1 row". Use IN or = ANY.']},
+ {id:'C3',tag:'Bug',text:'Players with no wickets record:',code:`SELECT * FROM players WHERE wickets = NULL;`,
+  ans:`SELECT * FROM players WHERE wickets IS NULL;`, notes:['= NULL is never true, so this always returns an empty set.']},
+ {id:'C4',tag:'Bug',text:'Average runs of Dhaka players via a derived table:',code:`SELECT AVG(runs)
+FROM (SELECT runs FROM players WHERE team='Dhaka');`,
+  ans:`SELECT AVG(runs)
+FROM (SELECT runs FROM players WHERE team='Dhaka') AS d;`, notes:['A derived table must have an alias.']},
+ {id:'C5',tag:'Bug',text:'Top scorer of each team:',code:`SELECT team, player_name, MAX(runs)
+FROM players GROUP BY team;`,
+  ans:`SELECT team, player_name, runs FROM players p1
+WHERE runs = (SELECT MAX(runs) FROM players p2 WHERE p2.team = p1.team);`, notes:['player_name isn\'t grouped. Newer MySQL gives an error; older versions return any name from the group, not necessarily the top scorer\'s.']},
+ {id:'C6',tag:'Bug',text:'Rename balls_faced to balls:',code:`ALTER TABLE players CHANGE balls_faced balls;`,
+  ans:`ALTER TABLE players CHANGE balls_faced balls INT;`, notes:['CHANGE needs the data type.']},
+ {id:'C7',tag:'Bug',text:'Give Dhaka players 10 bonus runs:',code:`UPDATE players SET runs = runs + 10;`,
+  ans:`UPDATE players SET runs = runs + 10 WHERE team = 'Dhaka';`, notes:['With no WHERE, every row is updated.']},
+ {id:'C8',tag:'Bug',text:'Dhaka players:',code:`SELECT player_name FROM players WHERE team = Dhaka;`,
+  ans:`SELECT player_name FROM players WHERE team = 'Dhaka';`, notes:['Without quotes, Dhaka is read as a column name, which gives "Unknown column".']},
+ {id:'C9',tag:'Bug or fine?',text:'Player(s) with the most matches:',code:`SELECT player_name FROM players p1
+WHERE NOT EXISTS (SELECT * FROM players p2
+                  WHERE p2.matches > p1.matches);`,
+  ans:`-- Correct as written.`, notes:['With strict >, a row can never be greater than itself, so the id check isn\'t needed. It is needed with >= (the "unique max" version).']},
+ {id:'C10',tag:'Bug',text:'Players who debuted in 2020 or 2021:',code:`SELECT player_name FROM players
+WHERE debut_date BETWEEN '2021-12-31' AND '2020-01-01';`,
+  ans:`SELECT player_name FROM players
+WHERE debut_date BETWEEN '2020-01-01' AND '2021-12-31';`, notes:['BETWEEN needs the smaller value first. Reversed bounds silently return an empty set.']}
+];
+
+/* ---------- storage ---------- */
+const KEY='cse370drill.v1';
+let st={marks:{},drafts:{},core:false};
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s) st=Object.assign(st,s);}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}}
+
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- data table ---------- */
+(function(){
+  const t=document.getElementById('datatbl');
+  let h='<tr>'+COLS.map(c=>`<th>${c}</th>`).join('')+'</tr>';
+  DATA.forEach(r=>{h+='<tr>'+r.map(v=>v===null?'<td class="null">NULL</td>':`<td>${esc(v)}</td>`).join('')+'</tr>'});
+  t.innerHTML=h;
+})();
+
+function outTable(out){
+  if(!out) return '';
+  const [cols,rows]=out;
+  if(!rows.length) return '<div class="empty">Empty set</div>';
+  return `<div class="out"><table><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr>${rows.map(r=>'<tr>'+r.map(v=>`<td>${esc(v)}</td>`).join('')+'</tr>').join('')}</table></div>`;
+}
+
+function card(q,isBug){
+  const el=document.createElement('article');
+  el.className='q'; el.id='q-'+q.id; if(q.core) el.dataset.core='1';
+  const m=st.marks[q.id]; if(m) el.classList.add(m);
+  el.innerHTML=`
+   <div class="qhead"><span class="qnum">${q.id}</span><span class="qtext">${q.text}</span>
+     <span class="chip ${q.core?'core':''}">${q.core?'★ ':''}${esc(q.tag)}</span></div>
+   ${isBug?`<pre>${esc(q.code)}</pre>`:`<textarea id="d-${q.id}" placeholder="Write your query (or write it on paper)…" spellcheck="false">${esc(st.drafts[q.id]||'')}</textarea>`}
+   <div class="actions">
+     <button class="btn primary" data-act="show">Show answer</button>
+     <button class="btn good" data-act="got" aria-pressed="${m==='got'}">✓ Got it</button>
+     <button class="btn bad" data-act="miss" aria-pressed="${m==='miss'}">✗ Missed</button>
+   </div>
+   <div class="ans" hidden>
+     <div class="lbl">${isBug?'Fixed':'Answer'}</div><pre>${esc(q.ans)}</pre>
+     ${q.out?`<div class="lbl">Output</div>${outTable(q.out)}`:''}
+     ${(q.notes||[]).map(n=>`<p class="note">${n}</p>`).join('')}
+     ${(q.warn||[]).map(n=>`<p class="note warnnote">⚠ ${n}</p>`).join('')}
+   </div>`;
+  const ta=el.querySelector('textarea');
+  if(ta) ta.addEventListener('input',()=>{st.drafts[q.id]=ta.value;save();});
+  el.querySelector('.actions').addEventListener('click',e=>{
+    const a=e.target.closest('button')?.dataset.act; if(!a) return;
+    if(a==='show'){const box=el.querySelector('.ans'); box.hidden=!box.hidden; e.target.textContent=box.hidden?'Show answer':'Hide answer'; return;}
+    st.marks[q.id]= st.marks[q.id]===a ? undefined : a;
+    if(!st.marks[q.id]) delete st.marks[q.id];
+    el.classList.remove('got','miss'); if(st.marks[q.id]) el.classList.add(st.marks[q.id]);
+    el.querySelector('[data-act=got]').setAttribute('aria-pressed',st.marks[q.id]==='got');
+    el.querySelector('[data-act=miss]').setAttribute('aria-pressed',st.marks[q.id]==='miss');
+    save(); score();
+  });
+  return el;
+}
+const qa=document.getElementById('qa'),qb=document.getElementById('qb'),qc=document.getElementById('qc');
+QA.forEach(q=>qa.appendChild(card(q)));
+QB.forEach(q=>qb.appendChild(card(q)));
+QC.forEach(q=>qc.appendChild(card(q,true)));
+
+function score(){
+  const ms=Object.values(st.marks); const got=ms.filter(x=>x==='got').length;
+  const total=QA.length+QB.length+QC.length;
+  const p=document.getElementById('score');
+  p.textContent=`✓ ${got} · ✗ ${ms.length-got} · ${total-ms.length} left`;
+  p.className='pill'+(ms.length&&got/ms.length>=.8?' ok':ms.length&&got/ms.length<.5?' warn':'');
+}
+score();
+
+/* core filter */
+const fc=document.getElementById('f-core');
+function applyCore(){fc.setAttribute('aria-pressed',st.core);fc.textContent=st.core?'Showing core questions only (★). Show all':'Short on time: core questions only (★)';
+  document.querySelectorAll('#qa .q, #qb .q').forEach(el=>{el.hidden=st.core&&!el.dataset.core;});}
+fc.onclick=()=>{st.core=!st.core;save();applyCore();}; applyCore();
+const fr=document.getElementById('f-reset');
+fr.onclick=()=>{
+  if(fr.dataset.armed){st.marks={};save();document.querySelectorAll('.q').forEach(el=>{el.classList.remove('got','miss');el.querySelectorAll('[aria-pressed]').forEach(b=>b.setAttribute('aria-pressed','false'));});score();fr.textContent='Marks cleared';delete fr.dataset.armed;setTimeout(()=>fr.textContent='Clear my marks',1500);}
+  else{fr.dataset.armed=1;fr.textContent='Click again to clear';setTimeout(()=>{if(fr.dataset.armed){delete fr.dataset.armed;fr.textContent='Clear my marks';}},3000);}
+};
+
+/* tabs */
+const tabs=[...document.querySelectorAll('.tab')];
+function show(v){tabs.forEach(t=>t.setAttribute('aria-selected',t.dataset.view===v));
+  ['sheet','practice','bugs'].forEach(x=>document.getElementById('view-'+x).hidden=x!==v);
+  try{history.replaceState(null,'','#'+v);}catch(e){}}
+tabs.forEach(t=>t.onclick=()=>{show(t.dataset.view);window.scrollTo({top:0});});
+const h=(location.hash||'').slice(1); show(['sheet','practice','bugs'].includes(h)?h:'sheet');
+addEventListener('hashchange',()=>{const v=location.hash.slice(1);if(['sheet','practice','bugs'].includes(v))show(v);});
+
+/* timer */
+let left=75*60,run=false,iv=null; const tm=document.getElementById('timer');
+const fmt=s=>`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+function paint(){tm.textContent=`⏱ ${fmt(left)}${run?'':' · '+(left===75*60?'start':left===0?'done':'paused')}`;tm.className='pill'+(left<=10*60&&left>0?' warn':'')+(left===0?' ok':'');}
+tm.onclick=()=>{ if(left===0){left=75*60;} run=!run;
+  if(run){iv=setInterval(()=>{left=Math.max(0,left-1);if(!left){run=false;clearInterval(iv);}paint();},1000);} else clearInterval(iv); paint(); };
+paint();
+</script>
+
+</body></html>

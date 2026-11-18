@@ -11,11 +11,14 @@ Most course notes are walls of text. These are built around one idea: if you can
 | Course | What's there | Open |
 |---|---|---|
 | **CSE340** · Computer Architecture | 6 interactive pages and 3 printable exam-note PDFs covering Chapters 1–3 (RISC-V, IEEE 754), every Practice Sheet 1–3 question solved, midterm guides and self-tests | [`CSE340/`](CSE340/) |
+| **CSE370** · Database Systems | 3 interactive pages with 9 simulators (ER/EER, constraints, schema mapping, storage, normalization), a SQL lab-exam mock paper with timer, 2 printable exam-note PDFs, and a short demo video for every interactive part | [`CSE370/`](CSE370/) |
 | **CSE422** · Artificial Intelligence | Mid-term material: a 40-page printable notes PDF, an 8-tab practice lab (A\*, heuristics, hill climbing, simulated annealing, GA, alpha–beta, quiz) and 24 Python lab drills marked by real Python, with short demo videos of every interactive part | [`CSE422/`](CSE422/) |
 
 More courses will be added folder by folder.
 
 ![CSE340 study pages](CSE340/media/index.png)
+
+![CSE370: change a relationship's cardinality and watch the diagram update](CSE370/media/er-cardinality-sim.gif)
 
 ![CSE422: step through A* one pop at a time](CSE422/media/theory-search-stepper.gif)
 
