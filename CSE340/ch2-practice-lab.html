@@ -1,0 +1,879 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>CSE340 Chapter 2 Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Sans:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: lab bench. Sticky tab bar; one reading column; each simulation is an instrument panel with inputs left, readout right. */
+:root{
+  --bg:#f4f5f2; --surface:#ffffff; --sunk:#eceee9; --ink:#17201c; --muted:#5b6660; --line:#d6dad3;
+  --copper:#b4532a; --copper-soft:#f8e9e0; --green:#22684a; --green-soft:#e1f0e8; --bad:#b0362a; --bad-soft:#fae6e2;
+  --f-disp:"Archivo","Arial Narrow",Arial,sans-serif; --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111613; --surface:#18201c; --sunk:#1f2823; --ink:#e3e9e5; --muted:#9aa7a0; --line:#2e3a34;
+  --copper:#e48455; --copper-soft:#3a2418; --green:#5cc796; --green-soft:#16352a; --bad:#f07a6b; --bad-soft:#3d1d19; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111613; --surface:#18201c; --sunk:#1f2823; --ink:#e3e9e5; --muted:#9aa7a0; --line:#2e3a34;
+  --copper:#e48455; --copper-soft:#3a2418; --green:#5cc796; --green-soft:#16352a; --bad:#f07a6b; --bad-soft:#3d1d19; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.topin{max-width:1060px;margin:0 auto;display:flex;align-items:center;gap:12px;padding-block:8px;flex-wrap:wrap}
+.brand{font-family:var(--f-disp);font-weight:800;font-stretch:85%;font-size:18px;white-space:nowrap}
+.brand span{color:var(--copper)}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;flex:1 1 300px;min-width:0;scrollbar-width:none}
+nav.tabs a{font-size:14px;text-decoration:none;color:var(--muted);padding:6px 10px;border-radius:6px;white-space:nowrap}
+nav.tabs a:hover,nav.tabs a:focus-visible{color:var(--ink);background:var(--sunk);outline:none}
+nav.tabs a.on{color:var(--copper);background:var(--copper-soft)}
+.tools{display:flex;gap:6px}
+button,.btn{font:inherit;font-size:14px;padding:7px 12px;border-radius:7px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--copper);color:var(--copper)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--copper);outline-offset:2px}
+button.pri{background:var(--copper);border-color:var(--copper);color:var(--surface)}
+button.pri:hover{filter:brightness(1.08);color:var(--surface)}
+button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+main{max-width:1060px;margin:0 auto;padding-block:28px 80px;display:flex;flex-direction:column;gap:64px}
+section{scroll-margin-top:80px}
+h1,h2,h3,h4{font-family:var(--f-disp);margin:0;text-wrap:balance}
+h1{font-size:clamp(32px,6vw,54px);font-weight:800;font-stretch:78%;line-height:1}
+h2{font-size:28px;font-weight:800;font-stretch:85%;display:flex;gap:10px;align-items:baseline;margin-bottom:6px}
+h2 .no{font-family:var(--f-mono);font-size:13px;color:var(--copper);font-weight:600}
+h3{font-size:19px;font-weight:700;font-stretch:90%;margin:24px 0 8px}
+p{margin:0 0 10px;max-width:68ch}
+.sub{color:var(--muted);max-width:66ch;margin-bottom:18px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--copper);margin-bottom:10px}
+code,.m{font-family:var(--f-mono);font-size:.88em}
+.formula{font-family:var(--f-mono);font-size:14px;background:var(--sunk);border-radius:8px;padding:12px 14px;white-space:pre;overflow-x:auto;line-height:1.7}
+.formula b{color:var(--copper);font-weight:600}
+.notice{background:var(--copper-soft);border-radius:8px;padding:10px 14px;font-size:14.5px;max-width:72ch}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.card h4{font-size:16px;margin-bottom:4px}
+.card p{font-size:14.5px;color:var(--muted);margin:0}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+svg{display:block;max-width:100%;height:auto}
+svg text{fill:var(--ink);font-family:var(--f-body)}
+
+/* instrument panels */
+.lab{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.labhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.labhead h3{margin:0}
+.labhead .tag{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.labbody{display:grid;grid-template-columns:minmax(0,330px) minmax(0,1fr);gap:0}
+.controls{padding:14px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:14px;background:var(--sunk)}
+.readout{padding:14px 16px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.ctl label{display:flex;justify-content:space-between;font-size:14px;gap:8px}
+.ctl label output{font-family:var(--f-mono);font-weight:600;color:var(--copper)}
+input[type=range]{width:100%;accent-color:var(--copper)}
+input[type=number],input[type=text],select{font:inherit;font-family:var(--f-mono);font-size:15px;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:100%;min-width:0}
+.notice-line{max-width:none;font-size:14px;color:var(--muted);border-top:1px dashed var(--line);padding:10px 16px;margin:0}
+.notice-line b{color:var(--ink)}
+.big{font-family:var(--f-disp);font-weight:800;font-stretch:85%;font-size:34px;line-height:1.1}
+.big small{font-size:16px;color:var(--muted);font-weight:600}
+.pill{display:inline-block;font-family:var(--f-mono);font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px}
+.pill.ok{background:var(--green-soft);color:var(--green)}
+.pill.no{background:var(--bad-soft);color:var(--bad)}
+.pill.hot{background:var(--copper);color:var(--surface)}
+.pill.mid{background:var(--copper-soft);color:var(--copper)}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bar{display:grid;grid-template-columns:80px minmax(0,1fr) 90px;gap:8px;align-items:center;font-size:14px}
+.bar .tr{height:14px;background:var(--sunk);border-radius:4px;overflow:hidden}
+.bar .fl{height:100%;background:var(--copper);border-radius:4px;transition:width .25s}
+.bar .fl.g{background:var(--green)}
+.bar span:last-child{font-family:var(--f-mono);text-align:right}
+.mixrow{display:grid;grid-template-columns:54px minmax(0,1fr) 70px;gap:8px;align-items:center;font-size:14px}
+
+/* definitions */
+.defs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.def{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.def b{font-family:var(--f-disp);font-stretch:90%;font-size:16px;display:block}
+.def span{font-size:14px;color:var(--muted)}
+.def i{display:block;font-style:normal;font-family:var(--f-mono);font-size:12.5px;color:var(--copper);margin-top:4px}
+
+/* details */
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin:8px 0}
+summary{cursor:pointer;padding:11px 14px;font-weight:600;list-style:none;display:flex;gap:10px;align-items:baseline}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"+";font-family:var(--f-mono);color:var(--copper)}
+details[open] summary::before{content:"−"}
+summary .q{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-weight:400}
+.dbody{padding:0 16px 14px;border-top:1px dashed var(--line)}
+.dbody p{margin-top:10px}
+.dbody .formula{margin-top:10px}
+
+/* practice */
+.prac{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.prac .ptop{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.prac select{width:auto}
+.ptext{font-size:16px;max-width:72ch;margin-bottom:12px}
+.fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:12px}
+.field label{display:block;font-size:14px;margin-bottom:4px}
+.field .fb{font-size:13px;margin-top:4px;min-height:1.2em;font-family:var(--f-mono)}
+.field.ok input{border-color:var(--green);background:var(--green-soft)}
+.field.no input{border-color:var(--bad);background:var(--bad-soft)}
+.fb.ok{color:var(--green)} .fb.no{color:var(--bad)}
+.steps{margin-top:12px}
+.score{font-family:var(--f-mono);font-size:14px;color:var(--muted);margin-left:auto}
+
+/* quiz */
+.quiz{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.qq{font-size:17px;font-weight:600;margin-bottom:12px;max-width:70ch}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opts button{text-align:left;padding:10px 12px;font-size:15px}
+.opts button.right{background:var(--green-soft);border-color:var(--green);color:var(--ink)}
+.opts button.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--ink)}
+.expl{margin-top:12px;font-size:15px;background:var(--sunk);padding:10px 12px;border-radius:8px}
+.qnav{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.flip{perspective:900px;max-width:520px}
+.fc{position:relative;height:200px;cursor:pointer;transform-style:preserve-3d;transition:transform .45s}
+.fc.flipped{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:18px;text-align:center}
+.face.front{background:var(--surface);font-family:var(--f-disp);font-weight:800;font-stretch:85%;font-size:28px}
+.face.back{background:var(--copper-soft);transform:rotateY(180deg);font-size:16px}
+
+/* cram mode */
+body.cram main>section:not(.cramkeep){display:none}
+.cramnote{display:none}
+body.cram .cramnote{display:block}
+
+@media (max-width:760px){.brand{order:1;flex:1}.tools{order:2}nav.tabs{order:3;flex-basis:100%}.mapwrap svg{min-width:620px}.labbody{grid-template-columns:minmax(0,1fr)}.controls{border-right:0;border-bottom:1px solid var(--line)}.g2,.g3{grid-template-columns:minmax(0,1fr)}.bar{grid-template-columns:62px minmax(0,1fr) 78px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+<style>
+/* Chapter 2 additions: bit-field strips, register file, code listing */
+.fieldstrip{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;min-width:560px}
+.fld{border-right:1px solid var(--line);padding:6px 4px;text-align:center;min-width:0}
+.fld:last-child{border-right:0}
+.fld .nm{font-size:11px;color:var(--muted);white-space:nowrap}
+.fld .bits{font-family:var(--f-mono);font-size:13px;font-weight:600;letter-spacing:.04em;word-break:break-all}
+.fld .dec{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.fld.imm{background:var(--copper-soft)}
+.fld.reg{background:var(--green-soft)}
+.fld.op{background:var(--sunk)}
+.scroll{overflow-x:auto}
+.hexout{font-family:var(--f-mono);font-size:24px;font-weight:600;color:var(--copper)}
+.err{color:var(--bad);font-size:14px;font-family:var(--f-mono)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{font-family:var(--f-mono);font-size:12.5px;padding:4px 8px}
+.bitrow{display:flex;gap:3px;flex-wrap:wrap}
+.bitrow button{width:30px;height:34px;padding:0;font-family:var(--f-mono);font-size:15px;font-weight:600}
+.bitrow button.one{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.bitrow button.sign{outline:2px solid var(--copper);outline-offset:1px}
+.kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 14px;font-size:15px}
+.kv span:nth-child(odd){color:var(--muted)}
+.kv span:nth-child(even){font-family:var(--f-mono);word-break:break-all}
+.sim{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:0}
+.code{font-family:var(--f-mono);font-size:13.5px;line-height:1.5;padding:10px 0;border-right:1px solid var(--line);overflow-x:auto;max-height:520px;overflow-y:auto}
+.code div{padding:1px 12px;white-space:pre;display:flex;gap:10px}
+.code div .ad{color:var(--muted);min-width:34px;text-align:right}
+.code div.cur{background:var(--copper-soft);box-shadow:inset 3px 0 0 var(--copper)}
+.code div.lbl{color:var(--green);font-weight:600}
+.state{padding:10px 14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.regs{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:4px}
+.rg{font-family:var(--f-mono);font-size:12.5px;padding:3px 6px;border-radius:5px;background:var(--sunk);display:flex;justify-content:space-between;gap:6px}
+.rg.chg{background:var(--copper);color:var(--surface)}
+.mem{font-family:var(--f-mono);font-size:12.5px;display:flex;flex-direction:column;gap:2px}
+.mem div{display:flex;justify-content:space-between;gap:8px;padding:2px 6px;border-radius:4px;background:var(--sunk)}
+.mem div.sp{box-shadow:inset 3px 0 0 var(--green)}
+.mem div.chg{background:var(--copper);color:var(--surface)}
+.simbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line)}
+.simbar select{width:auto}
+.status{font-family:var(--f-mono);font-size:13px;color:var(--muted);margin-left:auto}
+.arr{display:flex;gap:3px;flex-wrap:wrap}
+.arr div{border:1px solid var(--line);border-radius:5px;padding:4px 6px;font-family:var(--f-mono);font-size:12px;text-align:center;min-width:58px}
+.arr div.hit{background:var(--copper);color:var(--surface);border-color:var(--copper)}
+@media (max-width:760px){.sim{grid-template-columns:minmax(0,1fr)}.code{border-right:0;border-bottom:1px solid var(--line);max-height:320px}}
+</style>
+
+<header class="top gut">
+  <div class="topin">
+    <div class="brand">CSE340 <span>Ch&nbsp;2</span> Lab</div>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#map">Big picture</a>
+      <a href="#concepts">Concepts</a>
+      <a href="#defs">Definitions</a>
+      <a href="#sims">Simulations</a>
+      <a href="#traps">Traps</a>
+      <a href="#hooks">Memory hooks</a>
+      <a href="#pq">Sheet analysis</a>
+      <a href="#practice">Practice</a>
+      <a href="#test">Self-test</a>
+    </nav>
+    <div class="tools">
+      <button type="button" id="cramBtn" aria-pressed="false">Cram mode</button>
+      <button type="button" id="themeBtn" aria-label="Switch colour theme">Theme</button>
+    </div>
+  </div>
+</header>
+
+<main class="gut">
+<section id="map">
+  <div class="eyebrow">CSE340 · Chapter 2 · Instructions: Language of the Computer</div>
+  <h1>Chapter 2 practice lab</h1>
+  <p class="sub" style="margin-top:12px">Encode and decode real RISC-V instructions, flip bits in two's complement, and step through loops and recursive calls while you watch registers and the stack change. Built from the Chapter 2 slides, the PBK handout, Practice Sheet 2 and its solution, the Loop Examples worksheet and the textbook (RV64).</p>
+  <p class="cramnote notice">Cram mode is on: only Quick definitions and the Self-test are showing.</p>
+  <div class="mapwrap" style="overflow-x:auto">
+  <svg viewBox="0 0 760 230" role="img" aria-label="Chapter 2 concept map">
+    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>
+    <g style="font-size:13px">
+      <rect x="10" y="20" width="130" height="40" rx="7" fill="var(--surface)" stroke="var(--line)"/><text x="75" y="45" text-anchor="middle">C code</text>
+      <rect x="215" y="20" width="150" height="40" rx="7" fill="var(--copper-soft)" stroke="var(--copper)"/><text x="290" y="45" text-anchor="middle" style="font-weight:700">RISC-V assembly</text>
+      <rect x="445" y="20" width="150" height="40" rx="7" fill="var(--ink)"/><text x="520" y="45" text-anchor="middle" style="fill:var(--bg);font-weight:700">32-bit machine code</text>
+      <rect x="640" y="20" width="110" height="40" rx="7" fill="var(--surface)" stroke="var(--line)"/><text x="695" y="45" text-anchor="middle">runs on CPU</text>
+    </g>
+    <g stroke="var(--muted)" stroke-width="1.4" fill="none" marker-end="url(#ar)"><path d="M140,40 L212,40"/><path d="M365,40 L442,40"/><path d="M595,40 L637,40"/>
+      <path d="M290,60 L110,120"/><path d="M290,60 L250,120"/><path d="M290,60 L390,120"/><path d="M520,60 L530,120"/><path d="M520,60 L670,120"/></g>
+    <g style="font-size:11px;fill:var(--muted)"><text x="176" y="34" text-anchor="middle">compiler</text><text x="404" y="34" text-anchor="middle">assembler</text></g>
+    <g style="font-size:12px">
+      <rect x="40" y="120" width="140" height="56" rx="6" fill="var(--surface)" stroke="var(--line)"/><text x="110" y="142" text-anchor="middle" style="font-weight:700">Operands</text><text x="110" y="160" text-anchor="middle" style="fill:var(--muted)">32 regs · ld/sd · imm</text>
+      <rect x="190" y="120" width="120" height="56" rx="6" fill="var(--surface)" stroke="var(--line)"/><text x="250" y="142" text-anchor="middle" style="font-weight:700">Control flow</text><text x="250" y="160" text-anchor="middle" style="fill:var(--muted)">beq · bne · loops</text>
+      <rect x="320" y="120" width="140" height="56" rx="6" fill="var(--surface)" stroke="var(--line)"/><text x="390" y="142" text-anchor="middle" style="font-weight:700">Procedures</text><text x="390" y="160" text-anchor="middle" style="fill:var(--muted)">jal · jalr · stack</text>
+      <rect x="470" y="120" width="120" height="56" rx="6" fill="var(--surface)" stroke="var(--line)"/><text x="530" y="142" text-anchor="middle" style="font-weight:700">Formats</text><text x="530" y="160" text-anchor="middle" style="fill:var(--muted)">R I S SB U UJ</text>
+      <rect x="600" y="120" width="150" height="56" rx="6" fill="var(--surface)" stroke="var(--line)"/><text x="675" y="142" text-anchor="middle" style="font-weight:700">Numbers</text><text x="675" y="160" text-anchor="middle" style="fill:var(--muted)">two's complement</text>
+    </g>
+    <text x="380" y="210" text-anchor="middle" style="font-size:12px;fill:var(--muted)">Exam skills: translate C ↔ RISC-V · encode/decode · write loops and procedures</text>
+  </svg>
+  </div>
+</section>
+
+<section id="concepts">
+  <h2><span class="no">01</span>Core concepts, illustrated</h2>
+  <p class="sub">Six ideas that carry most of the chapter's marks.</p>
+  <div class="grid g2">
+    <div class="card"><h4>Registers, not variables</h4><p>32 registers x0–x31, 64 bits each. x0 is always 0. Arithmetic works only on registers and small immediates: add, sub, addi.</p></div>
+    <div class="card"><h4>Memory needs ld / sd</h4><p>Address = base register + constant offset. A[i] of doublewords is at base + 8i. Variable index → slli by 3, add base, ld 0(reg).</p></div>
+    <div class="card"><h4>Every instruction is 32 bits</h4><p>Six formats (R, I, S, SB, U, UJ) keep opcode, rd, rs1, rs2 in fixed places. Immediates are split in S, SB and UJ.</p></div>
+    <div class="card"><h4>Branch on the opposite condition</h4><p><code>if (i == j)</code> compiles to <code>bne … Else</code>. Branch offsets are bytes: target − branch address.</p></div>
+    <div class="card"><h4>Procedures use the stack</h4><p>Args in x10–x17, result in x10, call with jal x1, return with jalr x0, 0(x1). Save x1 and any s-register you change.</p></div>
+    <div class="card"><h4>Two's complement</h4><p>Top bit weighs −2ⁿ⁻¹. Negate = invert + 1. Widen by copying the sign bit (sign extension).</p></div>
+  </div>
+</section>
+
+<section id="defs" class="cramkeep">
+  <h2><span class="no">02</span>Quick definitions</h2>
+  <p class="sub">The night-before section. One line each.</p>
+  <div class="defs" id="defGrid"></div>
+</section>
+
+<section id="sims">
+  <h2><span class="no">03</span>Simulations</h2>
+  <p class="sub">Type, click and step. Each panel ends with what to notice.</p>
+
+  <div class="lab">
+    <div class="labhead"><h3>Instruction encoder / decoder</h3><span class="tag">assembly ⇄ 32-bit machine code</span></div>
+    <div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+      <div class="grid g2">
+        <div><label for="encIn" style="font-size:14px">Assembly (x-names or ABI names)</label><input type="text" id="encIn" value="add x9, x20, x21" autocomplete="off" spellcheck="false"></div>
+        <div><label for="decIn" style="font-size:14px">Machine code (hex)</label><input type="text" id="decIn" value="" autocomplete="off" spellcheck="false" placeholder="e.g. 0x40A48433"></div>
+      </div>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:14px">
+        <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="encCourse" checked> Branch opcode 1100111 (103), as given in Practice Sheet 2</label>
+        <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="encX"> Show opcode / funct3 / funct7 as X (when the question doesn't give them)</label>
+      </div>
+      <div class="chips" id="encChips"></div>
+      <div id="encErr" class="err"></div>
+      <div class="scroll"><div class="fieldstrip" id="encStrip"></div></div>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:baseline"><div class="hexout" id="encHex"></div><div class="m" id="encBin" style="font-size:13px;color:var(--muted)"></div></div>
+      <div id="encNote" style="font-size:14.5px;color:var(--muted);max-width:72ch"></div>
+    </div>
+    <p class="notice-line"><b>What to notice:</b> rd, rs1 and rs2 never move between formats. In sd the stored register sits in rs2 and the immediate is cut in two. Branch offsets are bytes and always even. With the first box ticked, branches use 1100111 like your practice sheet; unticked, they use the official RISC-V value 1100011. In the course setting, 1100111 is read back as a branch, so jalr can't be decoded there.</p>
+  </div>
+
+  <div class="lab" style="margin-top:20px">
+    <div class="labhead"><h3>Two's complement explorer</h3><span class="tag">value = −bₙ₋₁·2ⁿ⁻¹ + …</span></div>
+    <div class="labbody">
+      <div class="controls">
+        <div class="ctl"><label for="tcW">Width</label><select id="tcW"><option value="8" selected>8 bits</option><option value="16">16 bits</option><option value="32">32 bits</option></select></div>
+        <div class="ctl"><label for="tcV">Type a decimal value</label><input type="number" id="tcV" value="-10" step="1"></div>
+        <button type="button" id="tcNeg">Negate (invert + 1)</button>
+        <p style="font-size:13.5px;color:var(--muted);margin:0">Or click the bits on the right to flip them.</p>
+      </div>
+      <div class="readout">
+        <div class="bitrow" id="tcBits" aria-label="Bits, most significant first"></div>
+        <div class="kv" id="tcKV"></div>
+        <div id="tcSteps" class="formula" style="white-space:pre-wrap"></div>
+      </div>
+    </div>
+    <p class="notice-line"><b>What to notice:</b> the outlined sign bit flips a value from the top of the range to the bottom. 0111…1 is the largest positive; 1000…0 is the most negative and has no positive partner.</p>
+  </div>
+
+  <div class="lab" style="margin-top:20px">
+    <div class="labhead"><h3>Array address calculator</h3><span class="tag">address = base + i × size</span></div>
+    <div class="labbody">
+      <div class="controls">
+        <div class="ctl"><label for="arT">Element type</label><select id="arT"><option value="8" selected>long long (doubleword, 8 B)</option><option value="4">int (word, 4 B)</option><option value="2">short (halfword, 2 B)</option><option value="1">char (byte, 1 B)</option></select></div>
+        <div class="ctl"><label for="arI">Index i <output id="oArI"></output></label><input type="range" id="arI" min="0" max="15" value="8"></div>
+        <div class="ctl"><label for="arB">Base address (in x22)</label><input type="number" id="arB" value="1000" step="8"></div>
+      </div>
+      <div class="readout">
+        <div class="big" id="arAddr"></div>
+        <div class="arr" id="arArr"></div>
+        <div class="formula" id="arCode"></div>
+      </div>
+    </div>
+    <p class="notice-line"><b>What to notice:</b> A[8] of doublewords is 64 bytes from the base. A constant index goes straight into the offset; a variable index needs a shift and an add first.</p>
+  </div>
+
+  <div class="lab" style="margin-top:20px" id="simBox">
+    <div class="labhead"><h3>RISC-V step simulator</h3><span class="tag">registers · memory · stack</span></div>
+    <div class="simbar">
+      <label for="simP" class="m" style="font-size:13px;color:var(--muted)">Program</label>
+      <select id="simP"></select>
+      <button type="button" class="pri" id="simStep">Step</button>
+      <button type="button" id="simRun">Run to end</button>
+      <button type="button" id="simReset">Reset</button>
+      <span class="status" id="simStatus"></span>
+    </div>
+    <div class="sim">
+      <div class="code" id="simCode" aria-label="Program listing"></div>
+      <div class="state">
+        <div id="simExplain" style="font-size:14.5px"></div>
+        <div><div style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Registers in use</div><div class="regs" id="simRegs"></div></div>
+        <div><div style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Memory (doublewords)</div><div class="mem" id="simMem"></div></div>
+      </div>
+    </div>
+    <p class="notice-line"><b>What to notice:</b> in factorial, every call pushes x1 and x10 (16 bytes), so the stack grows four frames deep for fact(3) and then unwinds. Changed registers and memory flash copper; the green edge marks the slot sp points to. The Practice Sheet programs use the sheet's own register choices.</p>
+  </div>
+</section>
+
+<section id="traps">
+  <h2><span class="no">04</span>Common mistakes &amp; exam traps</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Wrong</th><th>Right</th></tr></thead>
+    <tbody>
+      <tr><td><code>ld x9, 8(x22)</code> for A[8]</td><td>Offset = 8 × 8 = 64 for doublewords: <code>ld x9, 64(x22)</code>.</td></tr>
+      <tr><td><code>ld x9, x21(x22)</code> for A[i]</td><td>Offsets must be constants: <code>slli x5, x21, 3</code>, <code>add x5, x5, x22</code>, <code>ld x9, 0(x5)</code>.</td></tr>
+      <tr><td>Binary order funct7 · rs1 · rs2 …</td><td>funct7 · <b>rs2</b> · <b>rs1</b> · funct3 · rd · opcode.</td></tr>
+      <tr><td>sd value placed in rd</td><td>sd has no rd: value → rs2, base → rs1, immediate split imm[11:5] | imm[4:0].</td></tr>
+      <tr><td>Branch offset counted in instructions</td><td>Bytes: target − address of the branch (a multiple of 4 in normal code).</td></tr>
+      <tr><td><code>if (a &lt; b)</code> → <code>blt a, b, Else</code></td><td>Branch on the opposite: <code>bge a, b, Else</code>.</td></tr>
+      <tr><td>Not saving x1 in a procedure that calls another</td><td>Any jal overwrites x1: push it at entry, pop before returning.</td></tr>
+      <tr><td><code>subi x5, x6, 4</code></td><td>No subi: <code>addi x5, x6, −4</code>.</td></tr>
+      <tr><td>lui 0x12345 + addi 0xFFF for 0x12345FFF</td><td>addi sign-extends: use lui 0x12346 + addi −1.</td></tr>
+      <tr><td>Thinking 1000 0000 is −0</td><td>It is −128 (8-bit). Two's complement has a single zero.</td></tr>
+      <tr><td>"RISC-V needs doublewords at multiples of 8"</td><td>It does not require alignment (slides, handout).</td></tr>
+      <tr><td>Leaving opcode/funct3 empty when not given</td><td>Write X for each unknown bit, as Practice Sheet 2 does.</td></tr>
+      <tr><td>ld/sd for 4-byte data (Q18)</td><td>lw/sw with × 4 offsets.</td></tr>
+      <tr><td>Forgetting to push a saved register you reuse (Q5: c in x21)</td><td>Push it on entry, pop it before jalr.</td></tr>
+    </tbody></table></div>
+</section>
+
+<section id="hooks">
+  <h2><span class="no">05</span>Memory hooks</h2>
+  <div class="grid g3">
+    <div class="card"><h4>Formats: "Real Instructions Store Branches Up Jumps"</h4><p>R, I, S, SB, U, UJ, in that order.</p></div>
+    <div class="card"><h4>R-type bit order: "Fat Rabbits Run Fast, Rarely Overeat"</h4><p>funct7, rs2, rs1, funct3, rd, opcode.</p></div>
+    <div class="card"><h4>Design principles: "Simple Small Good Common"</h4><p>Simplicity favors regularity · Smaller is faster · Good design demands good compromises · Make the common case fast.</p></div>
+    <div class="card"><h4>Registers: "t's are temporary, s's are saved"</h4><p>t0–t6 can be trashed by a call. s0–s11 must look untouched when a procedure returns. a0–a7 carry arguments in and results out.</p></div>
+    <div class="card"><h4>Stack = plates in a cafeteria</h4><p>Take the top plate off (addi sp, sp, −8) before you put yours down (sd). Put it back in reverse order on the way out.</p></div>
+    <div class="card"><h4>"Shift 3 for 8"</h4><p>Doubleword index → byte offset is slli 3 (× 8). Word → slli 2. Byte → nothing.</p></div>
+  </div>
+</section>
+
+<section id="pq">
+  <h2><span class="no">06</span>Practice Sheet 2 analysis</h2>
+  <p class="sub">22 questions, sorted by type. Many mix two skills, so counts add to more than 22. Copper bars carry the most marks. Each type has a recipe, a solved sheet question and a button to practise it.</p>
+  <svg id="freqSvg" viewBox="0 0 640 210" style="max-width:640px" aria-label="Question types by count"></svg>
+  <div id="pqTypes"></div>
+  <h3>Likely to appear <span class="pill mid">prediction</span></h3>
+  <ol style="max-width:70ch">
+    <li>Translate C with nested arrays (A[B[i]]) and encode some lines (Q1) <span class="pill hot">very likely</span></li>
+    <li>Loop or if/else with arrays; fill addresses; encode the branches with X (Q2, Q8, Q9) <span class="pill hot">very likely</span></li>
+    <li>Procedure call with stack save/restore (Q5, Q22) <span class="pill hot">likely</span></li>
+    <li>lui + addi constant; multiply by shifts (Q10, Q13, Q21) <span class="pill hot">likely</span></li>
+    <li>Find a label from a branch's machine code (Q16) <span class="pill mid">possible</span></li>
+    <li>Endianness table; RISC-V → C (Q11, Q19, Q12, Q15) <span class="pill mid">possible</span></li>
+  </ol>
+</section>
+
+<section id="practice">
+  <h2><span class="no">07</span>Practice generator</h2>
+  <p class="sub">New numbers every time. Hex answers accept any case, with or without 0x. Instruction answers are checked by assembling what you type, so <code>add x9,x20,x21</code> and <code>add s1, s4, s5</code> both count.</p>
+  <div class="prac">
+    <div class="ptop">
+      <label for="ptype" class="m" style="font-size:13px;color:var(--muted)">Type</label>
+      <select id="ptype"></select>
+      <button type="button" class="pri" id="pNew">New question</button>
+      <span class="score" id="pScore"></span>
+    </div>
+    <div class="ptext" id="pText"></div>
+    <div class="fields" id="pFields"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button type="button" class="pri" id="pCheck">Check</button>
+      <button type="button" id="pShow">Show worked solution</button>
+    </div>
+    <div class="steps" id="pSteps" hidden></div>
+  </div>
+</section>
+
+<section id="test" class="cramkeep">
+  <h2><span class="no">08</span>Self-test</h2>
+  <p class="sub">12 questions with instant feedback. Wrong answers are remembered on this device so you can retry only those.</p>
+  <div class="quiz" id="quiz"></div>
+  <h3>Flashcards</h3>
+  <p class="sub" style="margin-bottom:10px">Tap the card to flip. Built from the quick definitions.</p>
+  <div class="flip"><div class="fc" id="fc" tabindex="0" role="button" aria-label="Flip card"><div class="face front" id="fcF"></div><div class="face back" id="fcB"></div></div></div>
+  <div class="qnav"><button type="button" id="fcPrev">Previous</button><button type="button" id="fcNext">Next</button><button type="button" id="fcShuf">Shuffle</button><span class="score" id="fcPos"></span></div>
+</section>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const NS="http://www.w3.org/2000/svg";
+const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const RI=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+
+/* theme, cram, tabs */
+(function(){const root=document.documentElement;const t=store.get("ch2theme",null);if(t)root.setAttribute("data-theme",t);
+ $("themeBtn").onclick=()=>{const cur=root.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");const nx=cur==="dark"?"light":"dark";root.setAttribute("data-theme",nx);store.set("ch2theme",nx)};
+ const cb=$("cramBtn");function setCram(on){document.body.classList.toggle("cram",on);cb.setAttribute("aria-pressed",on);store.set("ch2cram",on)}
+ setCram(store.get("ch2cram",false));cb.onclick=()=>setCram(!document.body.classList.contains("cram"));
+ const links=[...document.querySelectorAll("nav.tabs a")];const secs=links.map(a=>document.querySelector(a.getAttribute("href")));
+ addEventListener("scroll",()=>{let cur=0;secs.forEach((s,i)=>{if(s&&s.offsetParent!==null&&s.getBoundingClientRect().top<120)cur=i});links.forEach((a,i)=>a.classList.toggle("on",i===cur))},{passive:true})})();
+
+/* ---------- RISC-V assembler / encoder / decoder ---------- */
+const ABI={zero:0,ra:1,sp:2,gp:3,tp:4,t0:5,t1:6,t2:7,s0:8,fp:8,s1:9,a0:10,a1:11,a2:12,a3:13,a4:14,a5:15,a6:16,a7:17,s2:18,s3:19,s4:20,s5:21,s6:22,s7:23,s8:24,s9:25,s10:26,s11:27,t3:28,t4:29,t5:30,t6:31};
+const ABINAME=["zero","ra","sp","gp","tp","t0","t1","t2","s0","s1","a0","a1","a2","a3","a4","a5","a6","a7","s2","s3","s4","s5","s6","s7","s8","s9","s10","s11","t3","t4","t5","t6"];
+const RT={add:[0,0],sub:[32,0],sll:[0,1],slt:[0,2],sltu:[0,3],xor:[0,4],srl:[0,5],sra:[32,5],or:[0,6],and:[0,7],mul:[1,0]};
+const IT={addi:0,slti:2,sltiu:3,xori:4,ori:6,andi:7};
+const SH={slli:[0,1],srli:[0,5],srai:[16,5]};
+const LD={lb:0,lh:1,lw:2,ld:3,lbu:4,lhu:5,lwu:6};
+const ST={sb:0,sh:1,sw:2,sd:3};
+const BR={beq:0,bne:1,blt:4,bge:5,bltu:6,bgeu:7};
+let BR_OPC="1100111",SHOWX=false;
+function reg(t){t=String(t).trim().toLowerCase();if(/^x([0-9]|[12][0-9]|3[01])$/.test(t))return +t.slice(1);if(t in ABI)return ABI[t];throw new Error(`"${t}" is not a register`)}
+function num(t,labels,pc){t=String(t).trim();if(labels&&t in labels)return labels[t]-pc;const v=/^-?0x[0-9a-f]+$/i.test(t)?(t[0]==="-"?-parseInt(t.slice(1),16):parseInt(t,16)):Number(t.replace("−","-"));if(!Number.isInteger(v))throw new Error(`"${t}" is not a number or known label`);return v}
+function memop(t){const m=String(t).replace(/\s/g,"").match(/^(-?[-−0-9a-fx]*)\((\w+)\)$/i);if(!m)throw new Error(`expected offset(reg), got "${t}"`);return [m[1]===""?0:num(m[1]),reg(m[2])]}
+function range(v,bits,name){const lo=-(2**(bits-1)),hi=2**(bits-1)-1;if(v<lo||v>hi)throw new Error(`${name} ${v} is outside ${lo}…${hi}`)}
+function parse(line,labels,pc){
+ const s=line.replace(/#.*/,"").trim();if(!s)return null;
+ const sp=s.indexOf(" ");const op=(sp<0?s:s.slice(0,sp)).toLowerCase();const args=sp<0?[]:s.slice(sp+1).split(",").map(x=>x.trim()).filter(x=>x!=="");
+ const need=n=>{if(args.length!==n)throw new Error(`${op} needs ${n} operands`)};
+ if(op in RT){need(3);return{op,fmt:"R",rd:reg(args[0]),rs1:reg(args[1]),rs2:reg(args[2])}}
+ if(op in IT){need(3);const imm=num(args[2]);range(imm,12,"immediate");return{op,fmt:"I",rd:reg(args[0]),rs1:reg(args[1]),imm}}
+ if(op in SH){need(3);const imm=num(args[2]);if(imm<0||imm>63)throw new Error("shift amount must be 0…63");return{op,fmt:"I",rd:reg(args[0]),rs1:reg(args[1]),imm,shift:true}}
+ if(op in LD){need(2);const [imm,rs1]=memop(args[1]);range(imm,12,"offset");return{op,fmt:"I",rd:reg(args[0]),rs1,imm}}
+ if(op==="jalr"){if(args.length===2){const [imm,rs1]=memop(args[1]);return{op,fmt:"I",rd:reg(args[0]),rs1,imm}}need(3);return{op,fmt:"I",rd:reg(args[0]),rs1:reg(args[1]),imm:num(args[2])}}
+ if(op in ST){need(2);const [imm,rs1]=memop(args[1]);range(imm,12,"offset");return{op,fmt:"S",rs2:reg(args[0]),rs1,imm}}
+ if(op in BR){need(3);const imm=num(args[2],labels,pc);if(imm%2)throw new Error("branch offset must be even");range(imm,13,"branch offset");return{op,fmt:"SB",rs1:reg(args[0]),rs2:reg(args[1]),imm}}
+ if(op==="jal"){let rd=1,t=args[0];if(args.length===2){rd=reg(args[0]);t=args[1]}const imm=num(t,labels,pc);if(imm%2)throw new Error("jump offset must be even");range(imm,21,"jump offset");return{op,fmt:"UJ",rd,imm}}
+ if(op==="lui"||op==="auipc"){need(2);const imm=num(args[1]);if(imm<0||imm>0xFFFFF)throw new Error("upper immediate must be 0…0xFFFFF");return{op,fmt:"U",rd:reg(args[0]),imm}}
+ if(op==="mv"){need(2);return{op:"addi",fmt:"I",rd:reg(args[0]),rs1:reg(args[1]),imm:0}}
+ if(op==="li"){need(2);const imm=num(args[1]);range(imm,12,"immediate");return{op:"addi",fmt:"I",rd:reg(args[0]),rs1:0,imm}}
+ if(op==="j"){need(1);const imm=num(args[0],labels,pc);return{op:"jal",fmt:"UJ",rd:0,imm}}
+ if(op==="ret"){return{op:"jalr",fmt:"I",rd:0,rs1:1,imm:0}}
+ if(op==="nop"){return{op:"addi",fmt:"I",rd:0,rs1:0,imm:0}}
+ throw new Error(`unknown instruction "${op}"`)}
+const bits=(v,n)=>((v>>>0)&(n>=32?0xFFFFFFFF:((1<<n)-1))).toString(2).padStart(n,"0").slice(-n);
+function fields(I){const F=[];const P=(name,b,kind,dec)=>F.push({name,b,kind,dec});
+ if(I.fmt==="R"){const [f7,f3]=RT[I.op];P("funct7",bits(f7,7),"op",f7);P("rs2",bits(I.rs2,5),"reg","x"+I.rs2);P("rs1",bits(I.rs1,5),"reg","x"+I.rs1);P("funct3",bits(f3,3),"op",f3);P("rd",bits(I.rd,5),"reg","x"+I.rd);P("opcode","0110011","op",51)}
+ else if(I.fmt==="I"){let opc,f3;if(I.op in LD){opc="0000011";f3=LD[I.op]}else if(I.op==="jalr"){opc="1100111";f3=0}else if(I.shift){opc="0010011";f3=SH[I.op][1]}else{opc="0010011";f3=IT[I.op]}
+  if(I.shift){P("funct6",bits(SH[I.op][0],6),"op",SH[I.op][0]);P("shamt",bits(I.imm,6),"imm",I.imm)}else P("imm[11:0]",bits(I.imm,12),"imm",I.imm);
+  P("rs1",bits(I.rs1,5),"reg","x"+I.rs1);P("funct3",bits(f3,3),"op",f3);P("rd",bits(I.rd,5),"reg","x"+I.rd);P("opcode",opc,"op",parseInt(opc,2))}
+ else if(I.fmt==="S"){const im=bits(I.imm,12);P("imm[11:5]",im.slice(0,7),"imm","");P("rs2",bits(I.rs2,5),"reg","x"+I.rs2);P("rs1",bits(I.rs1,5),"reg","x"+I.rs1);P("funct3",bits(ST[I.op],3),"op",ST[I.op]);P("imm[4:0]",im.slice(7),"imm","");P("opcode","0100011","op",35)}
+ else if(I.fmt==="SB"){const im=bits(I.imm,13),b=k=>im[12-k];P("imm[12|10:5]",b(12)+[10,9,8,7,6,5].map(b).join(""),"imm","");P("rs2",bits(I.rs2,5),"reg","x"+I.rs2);P("rs1",bits(I.rs1,5),"reg","x"+I.rs1);P("funct3",bits(BR[I.op],3),"op",BR[I.op]);P("imm[4:1|11]",[4,3,2,1].map(b).join("")+b(11),"imm","");P("opcode",BR_OPC,"op",parseInt(BR_OPC,2))}
+ else if(I.fmt==="UJ"){const im=bits(I.imm,21),b=k=>im[20-k];P("imm[20|10:1|11|19:12]",b(20)+[10,9,8,7,6,5,4,3,2,1].map(b).join("")+b(11)+[19,18,17,16,15,14,13,12].map(b).join(""),"imm",I.imm);P("rd",bits(I.rd,5),"reg","x"+I.rd);P("opcode","1101111","op",111)}
+ else if(I.fmt==="U"){P("imm[31:12]",bits(I.imm,20),"imm","0x"+I.imm.toString(16).toUpperCase());P("rd",bits(I.rd,5),"reg","x"+I.rd);P("opcode",I.op==="lui"?"0110111":"0010111","op","")}
+ return F}
+function encode(I){const b=fields(I).map(f=>f.b).join("");return parseInt(b,2)>>>0}
+const hex=w=>"0x"+(w>>>0).toString(16).toUpperCase().padStart(8,"0");
+const sx=(v,n)=>(v&(1<<(n-1)))?v-2**n:v;
+function decode(w){w=w>>>0;const opc=w&127,rd=(w>>>7)&31,f3=(w>>>12)&7,rs1=(w>>>15)&31,rs2=(w>>>20)&31,f7=w>>>25;const X=r=>"x"+r;
+ const find=(T,f)=>Object.keys(T).find(k=>f(T[k]));
+ if(opc===0b0110011){const op=find(RT,v=>v[0]===f7&&v[1]===f3);if(!op)throw new Error("unknown R-type funct");return `${op} ${X(rd)}, ${X(rs1)}, ${X(rs2)}`}
+ if(opc===0b0010011){if(f3===1||f3===5){const f6=w>>>26,sh=(w>>>20)&63;const op=find(SH,v=>v[0]===f6&&v[1]===f3);if(!op)throw new Error("unknown shift");return `${op} ${X(rd)}, ${X(rs1)}, ${sh}`}const op=find(IT,v=>v===f3);return `${op} ${X(rd)}, ${X(rs1)}, ${sx(w>>>20,12)}`}
+ if(opc===0b0000011){const op=find(LD,v=>v===f3);if(!op)throw new Error("unknown load");return `${op} ${X(rd)}, ${sx(w>>>20,12)}(${X(rs1)})`}
+ if(opc===0b1100111&&BR_OPC!=="1100111")return `jalr ${X(rd)}, ${sx(w>>>20,12)}(${X(rs1)})`;
+ if(opc===0b0100011){const op=find(ST,v=>v===f3);if(!op)throw new Error("unknown store");const imm=sx(((w>>>25)<<5)|((w>>>7)&31),12);return `${op} ${X(rs2)}, ${imm}(${X(rs1)})`}
+ if(opc===parseInt(BR_OPC,2)){const op=find(BR,v=>v===f3);if(!op)throw new Error("unknown branch");const imm=sx(((w>>>31)<<12)|(((w>>>7)&1)<<11)|(((w>>>25)&63)<<5)|(((w>>>8)&15)<<1),13);return `${op} ${X(rs1)}, ${X(rs2)}, ${imm}`}
+ if(opc===0b1101111){const imm=sx(((w>>>31)<<20)|(((w>>>12)&255)<<12)|(((w>>>20)&1)<<11)|(((w>>>21)&1023)<<1),21);return `jal ${X(rd)}, ${imm}`}
+ if(opc===0b0110111)return `lui ${X(rd)}, 0x${(w>>>12).toString(16).toUpperCase()}`;
+ if(opc===0b0010111)return `auipc ${X(rd)}, 0x${(w>>>12).toString(16).toUpperCase()}`;
+ throw new Error("unknown opcode "+bits(opc,7))}
+function parseHex(t){t=String(t).trim().replace(/^0x/i,"").replace(/[\s_]/g,"");if(!/^[0-9a-f]{1,8}$/i.test(t))return NaN;return parseInt(t,16)>>>0}
+
+/* encoder UI */
+(function(){const presets=["add x9, x20, x21","sub x8, x9, x10","addi x5, x6, -1","ld x9, 64(x22)","sd x9, 96(x22)","slli x10, x22, 3","bne x9, x24, 12","beq x0, x0, -20","blt x5, x6, 16","bge x22, x21, 20","jal x1, 2000","jalr x0, 0(x1)","lui x19, 0x3D0"];
+ $("encChips").innerHTML=presets.map(p=>`<button type="button">${p}</button>`).join("");
+ $("encChips").onclick=e=>{const b=e.target.closest("button");if(!b)return;$("encIn").value=b.textContent;fromAsm()};
+ const NOTE={R:"R-type: both operands in registers. funct7 and funct3 pick the exact operation.",I:"I-type: one source register plus a 12-bit signed immediate. Loads and jalr use this format too.",S:"S-type: no destination register. The 12-bit offset is split around rs2/rs1 so register fields stay in place.",SB:"SB-type: the 13-bit byte offset (bit 0 always 0) is scattered: imm[12], imm[10:5] … imm[4:1], imm[11].",U:"U-type: 20-bit constant goes into bits 31:12 of rd; the low 12 bits become 0.",UJ:"UJ-type: 21-bit byte offset (bit 0 always 0), range ±1 MiB. jal saves PC + 4 in rd."};
+ function show(I){const F=fields(I);const xs=f=>SHOWX&&/^(funct3|funct7|opcode)$/.test(f.name);
+  $("encStrip").innerHTML=F.map(f=>`<div class="fld ${f.kind}" style="flex:${f.b.length}"><div class="nm">${f.name}</div><div class="bits">${xs(f)?"X".repeat(f.b.length):f.b}</div><div class="dec">${xs(f)?"not given":f.dec}</div></div>`).join("");
+  const w=encode(I);if(SHOWX){$("encHex").textContent=F.map(f=>xs(f)?"X".repeat(f.b.length):f.b).join(" ");$("encBin").textContent="(no hex while bits are unknown)"}else{$("encHex").textContent=hex(w);$("encBin").textContent=bits(w,32).match(/.{4}/g).join(" ")}
+  $("encNote").innerHTML=`<b>${I.fmt}</b> · ${NOTE[I.fmt]}`;return w}
+ function fromAsm(){try{const I=parse($("encIn").value);if(!I)return;const w=show(I);$("decIn").value=hex(w);$("encErr").textContent=""}catch(e){$("encErr").textContent=e.message}}
+ function fromHex(){const w=parseHex($("decIn").value);if(isNaN(w)){$("encErr").textContent="Enter up to 8 hex digits";return}try{const t=decode(w);$("encIn").value=t;show(parse(t));$("encErr").textContent=""}catch(e){$("encErr").textContent=e.message}}
+ $("encIn").oninput=fromAsm;$("decIn").oninput=fromHex;
+ $("encCourse").onchange=()=>{BR_OPC=$("encCourse").checked?"1100111":"1100011";fromAsm()};$("encX").onchange=()=>{SHOWX=$("encX").checked;fromAsm()};fromAsm()})();
+
+/* two's complement */
+(function(){let W=8,v=-10;function clamp(x){const lo=-(2**(W-1)),hi=2**(W-1)-1;return Math.max(lo,Math.min(hi,x))}
+ function pattern(){return Array.from({length:W},(_,i)=>{const k=W-1-i;const u=v<0?v+2**W:v;return Math.floor(u/2**k)%2})}
+ function render(){const p=pattern();$("tcBits").innerHTML=p.map((b,i)=>`<button type="button" class="${b?"one":""} ${i===0?"sign":""}" data-i="${i}" aria-label="bit ${W-1-i}">${b}</button>`).join("");
+  const u=v<0?v+2**W:v;const hx=u.toString(16).toUpperCase().padStart(W/4,"0");
+  const sx64=(v<0?"F".repeat(16-W/4):"0".repeat(16-W/4))+hx;
+  $("tcKV").innerHTML=`<span>Signed value</span><span>${v}</span><span>Unsigned value</span><span>${u}</span><span>Hex</span><span>0x${hx}</span><span>Range (${W}-bit)</span><span>${-(2**(W-1))} … ${2**(W-1)-1}</span><span>Sign-extended to 64 bits</span><span>0x${sx64.match(/.{4}/g).join(" ")}</span>`;
+  const inv=p.map(b=>1-b).join(""),nv=-v;const fits=nv<=2**(W-1)-1;
+  $("tcSteps").textContent=`To negate ${v}:\n  bits     ${p.join("")}\n  invert   ${inv}\n  + 1      ${fits?pattern2(nv):"(overflow: "+v+" has no positive partner)"}${fits?"  = "+nv:""}\nWeights:  ${p[0]?"−"+2**(W-1):"0"}${p.slice(1).map((b,i)=>b?" + "+2**(W-2-i):"").join("")} = ${v}`;
+  $("tcV").value=v}
+ function pattern2(x){const u=x<0?x+2**W:x;return u.toString(2).padStart(W,"0")}
+ $("tcBits").onclick=e=>{const b=e.target.closest("button");if(!b)return;const p=pattern();p[+b.dataset.i]^=1;let val=-p[0]*2**(W-1);for(let i=1;i<W;i++)val+=p[i]*2**(W-1-i);v=val;render()};
+ $("tcV").oninput=()=>{const x=Math.round(+$("tcV").value);if(!isNaN(x)){v=clamp(x);render();$("tcV").value=$("tcV").value}};
+ $("tcW").onchange=()=>{W=+$("tcW").value;v=clamp(v);render()};
+ $("tcNeg").onclick=()=>{if(-v<=2**(W-1)-1)v=-v;render()};render()})();
+
+/* array address */
+(function(){function upd(){const sz=+$("arT").value,i=+$("arI").value,base=+$("arB").value||0;$("oArI").textContent=i;const off=i*sz,addr=base+off;
+ $("arAddr").innerHTML=`${addr} <small>= ${base} + ${i} × ${sz}</small>`;
+ $("arArr").innerHTML=Array.from({length:12},(_,k)=>`<div class="${k===i?"hit":""}">A[${k}]<br>${base+k*sz}</div>`).join("");
+ const L={8:["ld","slli x5, x21, 3"],4:["lw","slli x5, x21, 2"],2:["lh","slli x5, x21, 1"],1:["lbu",null]}[sz];
+ $("arCode").textContent=`# constant index A[${i}]\n${L[0]} x9, ${off}(x22)\n\n# variable index A[i], i in x21\n${L[1]?L[1]+"      # i × "+sz+"\n":""}add  x5, ${L[1]?"x5":"x21"}, x22\n${L[0]}   x9, 0(x5)`}
+ ["arT","arI","arB"].forEach(id=>$(id).oninput=upd);upd()})();
+
+/* simulator */
+const PROGS={
+ q8:{name:"Practice Q8: counter loop at #7060",base:7060,init:{},data:[],src:`      addi x5, x0, 5
+      addi x6, x0, 1
+      addi x25, x0, 0
+Loop: blt  x5, x6, loopBreak
+      addi x25, x25, 1
+      addi x5, x5, -1
+      beq  x0, x0, Loop
+loopBreak:`,explain:"Addresses match the sheet: line 2 is at 7064, blt at 7072 jumps +16, beq at 7084 jumps −12. Expect x25 = 5."},
+ q2:{name:"Practice Q2: for loop with if",init:{x20:4096,x21:6000},data:[{name:"A",at:4096,sz:8,v:[10,11,12,13,4,15,16,17,8]},{name:"B",at:6000,sz:8,v:[0,0,0,5]}],src:`      addi x22, x0, 8     # i = 8
+Loop: beq  x22, x0, Exit
+      slli x5, x22, 3
+      add  x5, x5, x20
+      ld   x6, 0(x5)      # A[i]
+      bne  x6, x22, Inc
+      ld   x7, 24(x21)    # B[3]
+      slli x7, x7, 3
+      add  x7, x7, x20
+      ld   x5, 0(x7)      # A[B[3]]
+      sd   x5, 16(x20)    # A[2]
+Inc:  addi x22, x22, -1
+      beq  x0, x0, Loop
+Exit:`,explain:"A[4] = 4 and A[8] = 8 match their index, so the if-body runs twice and sets A[2] = A[B[3]] = A[5] = 15."},
+ q6:{name:"Practice Q6: is x25 even?",init:{x25:14},data:[],src:`      andi x27, x25, 1
+      bne  x27, x0, Odd
+      addi x26, x0, 1
+      beq  x0, x0, Exit
+Odd:  addi x26, x0, 0
+Exit:`,explain:"x25 = 14 is even, so x26 = 1. Change the init in your head to 15 and the bne is taken."},
+ l3:{name:"Loop Ex: while (A[B[C[i]]] == k)",init:{x25:4096,x26:6000,x27:7000,x28:0,x29:1,x30:9},data:[{name:"A",at:4096,sz:8,v:[9,9,4,7,9,6]},{name:"B",at:6000,sz:4,v:[4,1,0,2]},{name:"C",at:7000,sz:2,v:[2,0,1,3]}],src:`Loop1: slli x5, x28, 1  # i * 2 (halfword)
+      add  x5, x27, x5
+      lh   x6, 0(x5)      # C[i]
+      slli x5, x6, 2      # * 4 (word)
+      add  x5, x5, x26
+      lw   x7, 0(x5)      # B[C[i]]
+      slli x5, x7, 3      # * 8 (doubleword)
+      add  x5, x5, x25
+      ld   x7, 0(x5)      # A[B[C[i]]]
+      bne  x7, x30, breakLoop1
+      slli x5, x6, 3
+      add  x5, x25, x5
+      ld   x6, 0(x5)      # A[C[i]]
+      slli x5, x28, 3
+      add  x5, x5, x25
+      sd   x6, 0(x5)      # A[i] = A[C[i]]
+      add  x28, x29, x0   # i = j
+      addi x29, x29, 1    # j++
+      beq  x0, x0, Loop1
+breakLoop1:`,explain:"Watch the address step change: C uses ×2, B ×4, A ×8. Two iterations run (A[0] and A[1] become 4), then A[B[C[2]]] = 4 ≠ 9 ends the loop with i = 2, j = 3."},
+ l4:{name:"Loop Ex: nested for with if/else",init:{x21:5},data:[],src:`      addi x20, x0, 0
+      addi x23, x0, 15
+Loop1: bge  x20, x23, Loop1Exit
+      addi x24, x0, 5
+      bne  x21, x24, Else
+      add  x22, x0, x20   # j = i
+      addi x25, x0, 12
+Loop2: bge  x22, x25, incrementI
+      addi x21, x21, 2    # a += 2
+      addi x22, x22, 1
+      beq  x0, x0, Loop2
+Else: slli x8, x21, 3     # 8a
+      add  x8, x8, x21    # 9a
+      add  x21, x21, x8   # 10a
+incrementI: addi x20, x20, 2
+      beq  x0, x0, Loop1
+Loop1Exit:`,explain:"a starts at 5: the inner loop runs 12 times (a = 29), then a ×10 on each of the 7 later passes → a = 290,000,000."},
+ q22:{name:"Practice Q22: multiply_add(6, 9)",init:{x2:8192,x13:111,x14:222,x15:333},data:[],src:`main: addi x20, x0, 6
+      addi x21, x0, 9
+      addi x10, x20, 0
+      addi x11, x21, 0
+      jal  x1, multiply_add
+      addi x22, x10, 0
+      beq  x0, x0, Done
+multiply_add: addi x2, x2, -24
+      sd   x13, 0(x2)
+      sd   x14, 8(x2)
+      sd   x15, 16(x2)
+      addi x13, x10, 0
+      addi x14, x11, 0
+      slli x15, x13, 2    # c = a * 4
+      add  x10, x15, x14  # c + b
+      ld   x15, 16(x2)
+      ld   x14, 8(x2)
+      ld   x13, 0(x2)
+      addi x2, x2, 24
+      jalr x0, 0(x1)
+Done:`,explain:"z (x22) = 6 × 4 + 9 = 33. x13–x15 start as 111, 222, 333 and are restored to those values."},
+ loop:{name:"while (save[i] == k) i++",init:{x22:0,x24:7,x25:4096},data:[{name:"save",at:4096,sz:8,v:[7,7,7,3,7]}],src:`Loop: slli x10, x22, 3   # x10 = i * 8
+      add  x10, x10, x25  # address of save[i]
+      ld   x9, 0(x10)     # x9 = save[i]
+      bne  x9, x24, Exit  # leave if save[i] != k
+      addi x22, x22, 1    # i = i + 1
+      beq  x0, x0, Loop   # go back
+Exit:`,explain:"i in x22, k = 7 in x24, save[] at 4096 = {7, 7, 7, 3, 7}. Expect i = 3 at the end."},
+ sum:{name:"for loop: sum of A[0..n-1]",init:{x10:4096,x11:5},data:[{name:"A",at:4096,sz:8,v:[3,1,4,1,5]}],src:`      addi x19, x0, 0     # sum = 0
+      addi x5, x0, 0      # i = 0
+Loop: bge  x5, x11, Exit  # exit when i >= n
+      slli x6, x5, 3      # i * 8
+      add  x6, x10, x6    # &A[i]
+      ld   x7, 0(x6)      # A[i]
+      add  x19, x19, x7   # sum += A[i]
+      addi x5, x5, 1      # i++
+      beq  x0, x0, Loop
+Exit:`,explain:"A = {3, 1, 4, 1, 5}, n = 5. Expect sum (x19) = 14 after 7n + 3 = 38 instructions."},
+ leaf:{name:"leaf_example(5, 3, 4, 1)",init:{x10:5,x11:3,x12:4,x13:1,x2:8192,x20:99,x5:11,x6:22},data:[],src:`main: jal  x1, leaf      # call
+      beq  x0, x0, Done
+leaf: addi sp, sp, -24    # make room for 3 items
+      sd   x5, 16(sp)
+      sd   x6, 8(sp)
+      sd   x20, 0(sp)
+      add  x5, x10, x11   # g + h
+      add  x6, x12, x13   # i + j
+      sub  x20, x5, x6    # f
+      addi x10, x20, 0    # return value
+      ld   x20, 0(sp)     # restore
+      ld   x6, 8(sp)
+      ld   x5, 16(sp)
+      addi sp, sp, 24
+      jalr x0, 0(x1)      # return
+Done:`,explain:"f = (5 + 3) − (4 + 1) = 3 returned in x10. x5, x6 and x20 get their old values (11, 22, 99) back."},
+ fact:{name:"fact(3) recursion",init:{x10:3,x2:8192},data:[],src:`main: jal  x1, fact      # fact(3)
+      beq  x0, x0, Done
+fact: addi sp, sp, -16
+      sd   x1, 8(sp)      # save return address
+      sd   x10, 0(sp)     # save n
+      addi x5, x10, -1
+      bge  x5, x0, L1     # n >= 1 ?
+      addi x10, x0, 1     # return 1
+      addi sp, sp, 16
+      jalr x0, 0(x1)
+L1:   addi x10, x10, -1
+      jal  x1, fact       # fact(n - 1)
+      addi x6, x10, 0
+      ld   x10, 0(sp)     # restore n
+      ld   x1, 8(sp)      # restore ra
+      addi sp, sp, 16
+      mul  x10, x10, x6   # n * fact(n - 1)
+      jalr x0, 0(x1)
+Done:`,explain:"Watch sp drop by 16 per call (fact(3), fact(2), fact(1), fact(0)), then climb back. Expect x10 = 6."}};
+(function(){const S={};const sel=$("simP");sel.innerHTML=Object.keys(PROGS).map(k=>`<option value="${k}">${PROGS[k].name}</option>`).join("");
+ function load(){const P=PROGS[sel.value];const lines=P.src.split("\n");S.ins=[];S.rows=[];const labels={};S.base=P.base||0;let pc=S.base;
+  lines.forEach(l=>{const m=l.match(/^\s*(\w+):\s*(.*)$/);let body=l;if(m){labels[m[1]]=pc;body=m[2]}const code=body.replace(/#.*/,"").trim();S.rows.push({text:l.replace(/^\s{6}/,""),pc:code?pc:null,label:!!m&&!code});if(code)pc+=4});
+  pc=S.base;lines.forEach(l=>{const m=l.match(/^\s*(\w+):\s*(.*)$/);const code=(m?m[2]:l).replace(/#.*/,"").trim();if(code){S.ins.push({I:parse(code,labels,pc),text:code});pc+=4}});
+  S.end=pc;S.pc=S.base;S.x=new Array(32).fill(0);S.x[2]=0;for(const k in P.init)S.x[+k.slice(1)]=P.init[k];S.mem={};S.tag={};(P.data||[]).forEach(d=>d.v.forEach((v,i)=>{const a=d.at+d.sz*i;S.mem[a]=v;S.tag[a]=`${d.name}[${i}]`}));
+  S.used=new Set(Object.keys(P.init).map(k=>+k.slice(1)));S.ins.forEach(({I})=>["rd","rs1","rs2"].forEach(f=>{if(I[f]!==undefined&&I[f]!==0)S.used.add(I[f])}));
+  S.sp0=S.x[2];S.steps=0;S.chg=new Set();S.mchg=new Set();S.msg=P.explain;S.done=false;render()}
+ function step(){if(S.done)return;if(S.pc>=S.end||S.pc<S.base){S.done=true;render();return}const {I,text}=S.ins[(S.pc-S.base)/4];const x=S.x;S.chg=new Set();S.mchg=new Set();let next=S.pc+4,msg="";
+  const W=(r,v)=>{if(r!==0){x[r]=v;S.chg.add(r)}};
+  switch(I.op){case"add":W(I.rd,x[I.rs1]+x[I.rs2]);break;case"sub":W(I.rd,x[I.rs1]-x[I.rs2]);break;case"mul":W(I.rd,x[I.rs1]*x[I.rs2]);break;
+   case"and":W(I.rd,x[I.rs1]&x[I.rs2]);break;case"or":W(I.rd,x[I.rs1]|x[I.rs2]);break;case"xor":W(I.rd,x[I.rs1]^x[I.rs2]);break;
+   case"addi":W(I.rd,x[I.rs1]+I.imm);break;case"slli":W(I.rd,x[I.rs1]*2**I.imm);break;case"srli":case"srai":W(I.rd,Math.floor(x[I.rs1]/2**I.imm));break;
+   case"andi":W(I.rd,x[I.rs1]&I.imm);break;case"slti":W(I.rd,x[I.rs1]<I.imm?1:0);break;case"ori":W(I.rd,x[I.rs1]|I.imm);break;case"xori":W(I.rd,x[I.rs1]^I.imm);break;
+   case"ld":case"lw":case"lh":case"lb":case"lwu":case"lhu":case"lbu":{const a=x[I.rs1]+I.imm;W(I.rd,S.mem[a]||0);msg=`load ${S.tag[a]||"address "+a} = ${S.mem[a]||0}`;break}
+   case"sd":case"sw":case"sh":case"sb":{const a=x[I.rs1]+I.imm;S.mem[a]=x[I.rs2];S.mchg.add(a);msg=`store x${I.rs2} = ${x[I.rs2]} to ${S.tag[a]||"address "+a}`;break}
+   case"beq":case"bne":case"blt":case"bge":{const a=x[I.rs1],b=x[I.rs2];const t={beq:a===b,bne:a!==b,blt:a<b,bge:a>=b}[I.op];if(t)next=S.pc+I.imm;msg=`${a} ${ {beq:"==",bne:"!=",blt:"<",bge:">="}[I.op]} ${b} is ${t} → ${t?"branch to "+(S.pc+I.imm):"fall through"}`;break}
+   case"jal":W(I.rd,S.pc+4);next=S.pc+I.imm;msg=`jump to ${next}${I.rd?`, x${I.rd} = ${S.pc+4} (return address)`:""}`;break;
+   case"jalr":{const t=x[I.rs1]+I.imm;W(I.rd,S.pc+4);next=t;msg=`jump to address in x${I.rs1} = ${t}`;break}
+   case"lui":W(I.rd,I.imm*4096);break;default:msg="not simulated"}
+  S.msg=`<span class="m">${text}</span>${msg?" → "+msg:""}`;S.pc=next;S.steps++;if(S.pc>=S.end){S.done=true}render()}
+ function fmt(v){return String(v)}
+ function render(){const curRow=S.done?-1:S.rows.findIndex(r=>r.pc===S.pc);
+  $("simCode").innerHTML=S.rows.map((r,i)=>`<div class="${i===curRow?"cur":""} ${r.label?"lbl":""}"><span class="ad">${r.pc===null?"":r.pc}</span><span>${r.text.replace(/</g,"&lt;")}</span></div>`).join("");
+  const cr=$("simCode").querySelector(".cur");if(cr){const box=$("simCode");const t=cr.offsetTop-box.offsetTop;if(t<box.scrollTop||t>box.scrollTop+box.clientHeight-30)box.scrollTop=t-60}
+  const regs=[...S.used].concat(S.used.has(2)?[]:[]).sort((a,b)=>a-b);
+  $("simRegs").innerHTML=`<div class="rg"><span>pc</span><span>${S.pc}</span></div>`+regs.map(r=>`<div class="rg ${S.chg.has(r)?"chg":""}"><span>x${r} ${ABINAME[r]}</span><span>${fmt(S.x[r])}</span></div>`).join("");
+  const addrs=Object.keys(S.mem).map(Number);if(S.x[2]&&S.x[2]<S.sp0)for(let a=S.x[2];a<S.sp0;a+=8)if(!addrs.includes(a))addrs.push(a);addrs.sort((a,b)=>b-a);
+  $("simMem").innerHTML=addrs.length?addrs.map(a=>`<div class="${S.mchg.has(a)?"chg":""} ${a===S.x[2]&&S.sp0?"sp":""}"><span>${a}${S.tag[a]?" "+S.tag[a]:""}${a===S.x[2]&&S.sp0?" ← sp":""}</span><span>${a in S.mem?S.mem[a]:"·"}</span></div>`).join(""):`<div><span>no memory used yet</span><span></span></div>`;
+  $("simExplain").innerHTML=S.done?`<span class="pill ok">finished</span> ${S.steps} instructions executed. ${PROGS[sel.value].explain}`:S.msg;
+  $("simStatus").textContent=`step ${S.steps}`}
+ $("simStep").onclick=step;$("simRun").onclick=()=>{let n=0;while(!S.done&&n++<5000)step()};$("simReset").onclick=load;sel.onchange=load;load()})();
+
+/* definitions */
+const DEFS=[
+["Instruction set","The vocabulary of commands a computer understands.","RISC-V, x86, ARM"],
+["Stored-program concept","Instructions and data both live in memory as numbers.","PC fetches them"],
+["Register","One of 32 fast 64-bit locations in the CPU.","x0–x31"],
+["x0","Hard-wired zero; writes are ignored.","addi x5, x0, 7"],
+["Doubleword","64 bits = 8 bytes.","ld / sd"],
+["Word","32 bits = 4 bytes; every instruction's size.","lw / sw"],
+["Base + offset","Memory address = register + constant.","ld x9, 64(x22)"],
+["Alignment","Address is a multiple of the data size; RISC-V does not require it.","slides + handout"],
+["Halfword","16 bits = 2 bytes; index shift slli 1.","lh / lhu / sh"],
+["Little-endian","Least significant byte at the lowest address.","RISC-V, x86"],
+["Immediate","Constant stored inside the instruction.","addi x5, x5, 4"],
+["Two's complement","Signed format; top bit weighs −2ⁿ⁻¹.","1111 0110 = −10"],
+["Sign extension","Widen by copying the sign bit.","0xF6 → 0xFFF6"],
+["Overflow","True result does not fit in the bits.","100 + 50 in 8 bits"],
+["Opcode","Field naming the operation and format.","0110011 = R-type"],
+["R-type","Register-register operations.","add, sub, and"],
+["I-type","Register + 12-bit immediate; loads; jalr.","addi, ld"],
+["S-type","Stores; immediate split in two.","sd, sw"],
+["SB-type","Conditional branches; 13-bit byte offset.","beq, bne"],
+["U-type","20-bit upper immediate.","lui, auipc"],
+["UJ-type","jal with 21-bit byte offset.","jal x1, L"],
+["Basic block","No branches in except start, none out except end.","loop body"],
+["PC-relative","Target = PC + offset in the instruction.","beq, jal"],
+["jal","Jump and save PC + 4 in rd.","call"],
+["jalr","Jump to register + offset.","ret = jalr x0,0(x1)"],
+["Return address","Where to resume after a call: x1 (ra).","saved by non-leaf"],
+["Stack pointer","x2 (sp); top of the stack, grows down.","addi sp, sp, −16"],
+["Leaf procedure","A procedure that calls no other.","no need to save ra"],
+["Procedure frame","Stack area of one call: saved regs + locals.","activation record"],
+["Frame pointer","x8 (fp); fixed pointer into the current frame.","s0"],
+["Pseudo-instruction","Assembler shorthand for a real instruction.","mv, li, j, ret"],
+["Linker","Joins object files, patches addresses.","→ executable"],
+["Loader","Copies the executable into memory and starts it.","→ main"],
+["lr.d / sc.d","Atomic pair for synchronization.","build a lock"]];
+$("defGrid").innerHTML=DEFS.map(d=>`<div class="def"><b>${d[0]}</b><span>${d[1]}</span><i>${d[2]}</i></div>`).join("");
+
+/* question types */
+const PQ=[
+ {t:"A. C → RISC-V (arrays, if, loops)",n:6,qs:"Q1 Q2 Q3 Q4 Q14 Q18",calc:1,go:"offset",recipe:["Write the register map.","Constant index → offset = index × size inside ld/sd. Variable index → slli, add base, ld 0(reg).","if → branch on the opposite condition; && → two branches to the same skip label.","Loop: test at the top, update the counter, beq x0, x0, Loop."],q:"Q3: if (A[i] < i) A[2] = A[B[3]];  A x20, B x21, i x22",a:"slli x5, x22, 3\nadd  x5, x5, x20\nld   x6, 0(x5)      # A[i]\nbge  x6, x22, Exit  # opposite of <\nld   x7, 24(x21)    # B[3]\nslli x7, x7, 3\nadd  x7, x7, x20\nld   x5, 0(x7)      # A[B[3]]\nsd   x5, 16(x20)    # A[2]\nExit:"},
+ {t:"B. Encode (with X when not given)",n:4,qs:"Q1 Q8 Q9 Q20",calc:1,go:"sbfields",recipe:["Name the format.","Write fields in bit order (rs2 before rs1).","Write X for opcode/funct3/funct7 bits the question does not give.","Branches: offset = target − PC → 13-bit → imm[12] | imm[10:5] … imm[4:1] | imm[11]."],q:"Q20: BEQ x6, x0 with target 32 bytes ahead",a:"+32 = 0 0000 0010 0000\nimm[12]=0 imm[10:5]=000001 imm[4:1]=0000 imm[11]=0\n0 000001 00000 00110 XXX 0000 0 XXXXXXX"},
+ {t:"C. Addresses, PC & labels",n:3,qs:"Q8 Q9 Q16",calc:1,go:"findlabel",recipe:["Each instruction is 4 bytes: count up or down from the given address.","Decode the branch's immediate, × 2 = byte offset.","÷ 4 = how many instructions away the label is."],q:"Q16: bge x22, x21, Exit = 0x015B1A67",a:"0 000000 10101 10110 001 1010 0 1100111\nimm[12:1] = 000000001010 → ×2 = 20 bytes\n20 / 4 = 5 → Exit labels sd x10, 0(x5)"},
+ {t:"D. Procedures & stack",n:3,qs:"Q5 Q17 Q22",calc:1,go:"stack",recipe:["Caller: arguments into the stated registers, jal x1, label, copy x10 out.","Callee: push every register it overwrites that the caller needs (and x1 if it calls others).","Result in x10, pop in reverse, jalr x0, 0(x1)."],q:"Q5: c = a + b inside addition, but c uses x21 (which holds y)",a:"addition:\n  addi sp, sp, -8\n  sd   x21, 0(sp)\n  add  x21, x13, x14\n  addi x10, x21, 0\n  ld   x21, 0(sp)\n  addi sp, sp, 8\n  jalr x0, 0(x1)"},
+ {t:"E. lui constants & × by shifts",n:4,qs:"Q10 Q13 Q17 Q21",calc:1,go:"lui",recipe:["More than 12 bits → lui upper 20 + addi lower 12.","If the low 12 bits ≥ 0x800, add 1 to the upper part (addi is signed).","× constant → split into powers of 2 and add shifted copies."],q:"Q13: n = a × 19 without mul (n x21, a x22)",a:"slli x5, x22, 4     # 16a\nslli x6, x22, 1     # 2a\nadd  x21, x5, x6\nadd  x21, x21, x22  # 19a"},
+ {t:"F. Bits & logic",n:2,qs:"Q6 Q7",calc:0,go:"twos",recipe:["andi with 1 isolates the LSB: 0 = even.","xori with −1 = NOT.","x0 is always 0; an immediate avoids reading a register."],q:"Q6: x26 = 1 if x25 is even else 0",a:"andi x27, x25, 1\nbne  x27, x0, Odd\naddi x26, x0, 1\nbeq  x0, x0, Exit\nOdd: addi x26, x0, 0\nExit:"},
+ {t:"G. Endianness",n:2,qs:"Q11 Q19",calc:0,go:"endian",recipe:["Split the value into bytes from the right.","Little endian (RISC-V): rightmost byte at the lowest address.","Big endian: leftmost byte at the lowest address."],q:"Q11: 0xabcdef12 on RISC-V",a:"base+0: 12   base+1: ef   base+2: cd   base+3: ab"},
+ {t:"H. RISC-V → C",n:2,qs:"Q12 Q15",calc:0,go:"decode",recipe:["Name what each register holds after every line.","slli 3 + add base + ld = A[i].","Combine into one C statement."],q:"Q15: slli x10,x22,3 · add x10,x10,x20 · ld x5,0(x10) · addi x5,x5,1 · sd x5,24(x21)   (A x21, B x20)",a:"A[3] = B[i] + 1;"}];
+(function(){const s=$("freqSvg");const L=230,W=340;PQ.forEach((p,i)=>{const y=6+i*25;const t=document.createElementNS(NS,"text");t.setAttribute("x",L-10);t.setAttribute("y",y+15);t.setAttribute("text-anchor","end");t.setAttribute("style","font-size:13px");t.textContent=p.t.replace(/ \(.*\)/,"");s.appendChild(t);
+ const r=document.createElementNS(NS,"rect");r.setAttribute("x",L);r.setAttribute("y",y);r.setAttribute("width",p.n/6*W);r.setAttribute("height",19);r.setAttribute("rx",3);r.setAttribute("fill",p.calc?"var(--copper)":"var(--copper-soft)");r.setAttribute("stroke","var(--copper)");s.appendChild(r);
+ const c=document.createElementNS(NS,"text");c.setAttribute("x",L+p.n/6*W+8);c.setAttribute("y",y+15);c.setAttribute("style","font-size:13px;font-weight:700");c.textContent=p.n+" Qs";s.appendChild(c)})})();
+$("pqTypes").innerHTML=PQ.map((p,i)=>`<details><summary><span class="q">${p.qs}</span>${p.t}</summary><div class="dbody"><p><b>Recipe</b></p><ol>${p.recipe.map(r=>`<li>${r}</li>`).join("")}</ol><p><b>Solved:</b> <span class="m">${p.q}</span></p><div class="formula">${p.a}</div><button type="button" data-go="${p.go}">Practise this type</button></div></details>`).join("");
+$("pqTypes").addEventListener("click",e=>{const btn=e.target.closest("[data-go]");if(!btn)return;$("ptype").value=btn.dataset.go;newQ();$("practice").scrollIntoView()});
+
+/* practice generator */
+function randInstr(){const r=()=>RI(5,31);const kind=pick(["R","R","I","L","S","B"]);
+ if(kind==="R")return `${pick(["add","sub","and","or","xor","sll","srl"])} x${r()}, x${r()}, x${r()}`;
+ if(kind==="I")return `${pick(["addi","andi","ori","xori"])} x${r()}, x${r()}, ${RI(-200,200)}`;
+ if(kind==="L")return `ld x${r()}, ${8*RI(-8,40)}(x${r()})`;
+ if(kind==="S")return `sd x${r()}, ${8*RI(-8,40)}(x${r()})`;
+ return `${pick(["beq","bne","blt","bge"])} x${r()}, x${r()}, ${4*RI(-12,12)||8}`}
+const GEN={
+ encode:{name:"Encode to hex",make(){const t=randInstr();const I=parse(t);const F=fields(I);const w=encode(I);
+  return{text:`Write the 32-bit machine code (hex) for <code>${t}</code>.${I.fmt==="SB"?` Use branch opcode ${BR_OPC}.`:""}`,fields:[{l:"Machine code (hex)",a:w,kind:"hex"}],steps:`Format ${I.fmt}\n${F.map(f=>f.name.padEnd(22)+f.b).join("\n")}\nBinary ${bits(w,32).match(/.{4}/g).join(" ")}\n= <b>${hex(w)}</b>`}}},
+ decode:{name:"Decode hex",make(){const t=randInstr();const w=encode(parse(t));const d=decode(w);
+  return{text:`Which instruction is <code>${hex(w)}</code>? Type it in assembly (e.g. <code>add x5, x6, x7</code>).`,fields:[{l:"Instruction",a:w,kind:"instr"}],steps:`${bits(w,32).match(/.{4}/g).join(" ")}\nopcode ${bits(w&127,7)} → ${parse(d).fmt}-type\n${fields(parse(d)).map(f=>f.name.padEnd(22)+f.b).join("\n")}\n→ <b>${d}</b>`}}},
+ offset:{name:"Array offset / address",make(){const T=pick([["long long",8,"ld"],["int",4,"lw"],["char",1,"lbu"]]);const i=RI(1,30),base=8*RI(100,600);
+  return{text:`${T[0]} A[] starts at address ${base} (in x22). What is the byte offset of A[${i}], and its address?`,fields:[{l:"Byte offset",a:i*T[1]},{l:"Address",a:base+i*T[1]}],steps:`offset = ${i} × ${T[1]} = <b>${i*T[1]}</b>\naddress = ${base} + ${i*T[1]} = <b>${base+i*T[1]}</b>\nRISC-V: ${T[2]} x9, ${i*T[1]}(x22)`}}},
+ twos:{name:"Two's complement",make(){if(Math.random()<.5){const v=RI(-128,-1);const u=(v+256).toString(2).padStart(8,"0");return{text:`What decimal value does the 8-bit two's complement pattern <code>${u.slice(0,4)} ${u.slice(4)}</code> represent?`,fields:[{l:"Value",a:v}],steps:`−128${u.slice(1).split("").map((b,i)=>b==="1"?" + "+2**(6-i):"").join("")} = <b>${v}</b>`}}
+  const v=RI(-32000,-1);const u=v+65536;return{text:`Write ${v} as a 16-bit two's complement number in hex.`,fields:[{l:"Hex (16-bit)",a:u,kind:"hex"}],steps:`${-v} = ${(-v).toString(2).padStart(16,"0")}\ninvert → ${(~(-v)&0xFFFF).toString(2).padStart(16,"0")}\n+1 → ${u.toString(2).padStart(16,"0")} = <b>0x${u.toString(16).toUpperCase()}</b>`}}},
+ branch:{name:"Branch offset",make(){const a=4*RI(10,500),d=4*RI(-15,15)||12,t=a+d;
+  return{text:`A <code>${pick(["beq","bne","blt","bge"])}</code> at address ${a} branches to address ${t}. What byte offset is encoded? How many instructions away is the target?`,fields:[{l:"Offset (bytes)",a:d},{l:"Instructions (signed)",a:d/4}],steps:`offset = target − branch = ${t} − ${a} = <b>${d}</b>\n${d} / 4 = <b>${d/4}</b> instructions`}}},
+ lui:{name:"lui + addi constant",make(){const up=RI(1,0x7FFFF),lo=RI(0,4095);const c=up*4096+lo;const lo12=lo>=2048?lo-4096:lo;const U=lo>=2048?up+1:up;
+  return{text:`Load the constant 0x${c.toString(16).toUpperCase()} into x5 using <code>lui x5, U</code> then <code>addi x5, x5, L</code>. Give U (hex) and L (decimal).`,fields:[{l:"U (hex, 20-bit)",a:U,kind:"hex"},{l:"L (decimal, −2048…2047)",a:lo12}],steps:`low 12 bits = 0x${lo.toString(16).toUpperCase()} = ${lo}${lo>=2048?` ≥ 2048, so as a signed immediate it is ${lo12}; add 1 to the upper part`:""}\nU = 0x${U.toString(16).toUpperCase()}, L = <b>${lo12}</b>\ncheck: 0x${U.toString(16).toUpperCase()}000 + (${lo12}) = 0x${c.toString(16).toUpperCase()}`}}},
+ count:{name:"Count executed instructions",make(){if(Math.random()<.5){const m=RI(0,9);return{text:`In the while loop <code>while (save[i] == k) i++;</code> (6 instructions: slli, add, ld, bne, addi, beq), the first ${m} elements equal k and the next does not. How many instructions execute?`,fields:[{l:"Instructions",a:6*m+4}],steps:`${m} full iterations × 6 = ${6*m}\nfinal check (slli, add, ld, bne) = 4\ntotal = <b>${6*m+4}</b>`}}
+  const n=RI(1,20);return{text:`The array-sum loop (2 setup instructions; loop body bge, slli, add, ld, add, addi, beq) runs with n = ${n}. How many instructions execute?`,fields:[{l:"Instructions",a:7*n+3}],steps:`2 + 7 × ${n} + 1 (final bge) = <b>${7*n+3}</b>`}}},
+ sbfields:{name:"Branch fields with X (Q8/Q9/Q20)",make(){const op=pick(["beq","bne","blt","bge"]);const r1=RI(5,30),r2=pick([0,RI(5,30)]);const pc=4*RI(1000,2000);const d=4*(RI(1,9)*pick([-1,1]));const t=pc+d;
+  const im=bits(d,13),bt=k=>im[12-k];const f12=bt(12),f105=[10,9,8,7,6,5].map(bt).join(""),f41=[4,3,2,1].map(bt).join(""),f11=bt(11);
+  return{text:`<code>${op} x${r1}, x${r2}, L</code> is at address ${pc} and label L is at ${t}. Opcode and funct3 are not given. Fill the immediate fields.`,fields:[{l:"imm[12] (bit 31)",a:f12,kind:"bin"},{l:"imm[10:5] (bits 30:25)",a:f105,kind:"bin"},{l:"imm[4:1] (bits 11:8)",a:f41,kind:"bin"},{l:"imm[11] (bit 7)",a:f11,kind:"bin"}],
+  steps:`offset = ${t} − ${pc} = ${d}
+13-bit two's complement: ${im.slice(0,1)} ${im.slice(1,5)} ${im.slice(5,9)} ${im.slice(9)}
+imm[12]=${f12}  imm[11]=${f11}  imm[10:5]=${f105}  imm[4:1]=${f41}  (bit 0 dropped)
+Word: <b>${f12} ${f105} ${bits(r2,5)} ${bits(r1,5)} XXX ${f41} ${f11} XXXXXXX</b>`}}},
+ findlabel:{name:"Where is the label? (Q16)",make(){const op=pick(["beq","bne","blt","bge"]);const n=RI(-8,9)||3;const I=parse(`${op} x${RI(5,30)}, x${RI(5,30)}, ${4*n}`);const w=encode(I);const F=fields(I);
+  return{text:`A branch has machine code <code>${hex(w)}</code> (branch opcode ${BR_OPC}). How many bytes from the branch is its label, and how many instructions (negative = backwards)?`,fields:[{l:"Byte offset",a:4*n},{l:"Instructions away",a:n}],
+  steps:`${F.map(f=>f.name+" = "+f.b).join("\n")}
+imm[12:1] → ×2 = <b>${4*n}</b> bytes
+${4*n} / 4 = <b>${n}</b> instructions ${n>0?"after":"before"} the branch`}}},
+ endian:{name:"Endianness (Q11/Q19)",make(){const nb=pick([4,8]);const bytes=Array.from({length:nb},()=>RI(16,255));const hexs=bytes.map(x=>x.toString(16).toUpperCase().padStart(2,"0"));const k=RI(0,nb-1);const base=pick([0x2000,0x1000,0x400]);
+  return{text:`The ${nb*8}-bit value <code>0x${hexs.join("")}</code> is stored starting at address 0x${base.toString(16).toUpperCase()}. Which byte is at address 0x${(base+k).toString(16).toUpperCase()} on a little-endian machine (RISC-V), and which on a big-endian machine?`,fields:[{l:"Little endian byte (hex)",a:bytes[nb-1-k],kind:"hex"},{l:"Big endian byte (hex)",a:bytes[k],kind:"hex"}],
+  steps:`Bytes from left: ${hexs.join(" ")}
+Little endian: lowest address gets the rightmost byte → offset ${k} holds <b>${hexs[nb-1-k]}</b>
+Big endian: lowest address gets the leftmost byte → offset ${k} holds <b>${hexs[k]}</b>`}}},
+ mixed:{name:"Element size: shift & offset",make(){const T=pick([["halfword (short)",2,1,"lh"],["word (int)",4,2,"lw"],["doubleword (long long)",8,3,"ld"],["byte (char)",1,0,"lb"]]);const k=RI(1,20);
+  return{text:`C is an array of ${T[0]}s. (a) What slli amount turns a variable index i into a byte offset? (b) What offset goes in <code>${T[3]} x6, ?(x27)</code> for C[${k}]?`,fields:[{l:"slli amount",a:T[2]},{l:"Offset for C["+k+"]",a:k*T[1]}],
+  steps:`${T[0]} = ${T[1]} byte${T[1]>1?"s":""} = 2^${T[2]} → slli by <b>${T[2]}</b>${T[2]===0?" (no shift)":""}
+C[${k}] → ${k} × ${T[1]} = <b>${k*T[1]}</b>`}}},
+ stack:{name:"Stack frame size",make(){const s=RI(0,4),nl=Math.random()<.6;const k=s+(nl?1:0);
+  return{text:`A ${nl?"non-leaf":"leaf"} procedure changes ${s} saved register${s===1?"":"s"} (s-registers) and nothing else that must be preserved. What immediate goes in its first <code>addi sp, sp, ?</code>`,fields:[{l:"Immediate",a:-8*k}],steps:`registers to save: ${nl?"x1 (ra, because it calls others) + ":""}${s} s-register${s===1?"":"s"} = ${k}\n${k} × 8 bytes → <b>addi sp, sp, ${-8*k}</b>${k===0?"\n(nothing to save: no stack frame needed)":""}`}}}
+};
+let curQ=null,pstats=store.get("ch2pstats",{right:0,tried:0});
+$("ptype").innerHTML=`<option value="any">Any type</option>`+Object.keys(GEN).map(k=>`<option value="${k}">${GEN[k].name}</option>`).join("");
+function showScore(){$("pScore").textContent=`${pstats.right} / ${pstats.tried} parts correct`}
+function newQ(){let k=$("ptype").value;if(k==="any")k=pick(Object.keys(GEN));curQ=GEN[k].make();curQ.done=false;
+ $("pText").innerHTML=`<span class="pill mid">${GEN[k].name}</span><br>${curQ.text}`;
+ $("pFields").innerHTML=curQ.fields.map((f,i)=>`<div class="field" id="pf${i}"><label for="pi${i}">${f.l}</label><input type="text" id="pi${i}" autocomplete="off" spellcheck="false" placeholder="${f.kind==="hex"?"e.g. 0x3F":f.kind==="instr"?"e.g. add x5, x6, x7":f.kind==="bin"?"e.g. 0101":"e.g. 64"}"><div class="fb" id="pb${i}"></div></div>`).join("");
+ $("pSteps").hidden=true;$("pSteps").innerHTML=`<div class="formula" style="white-space:pre-wrap">${curQ.steps}</div>`}
+function judge(f,raw){if(f.kind==="bin"){return String(raw).replace(/[\s_]/g,"")===f.a}
+ if(f.kind==="hex"){const v=parseHex(raw);return v===(f.a>>>0)}
+ if(f.kind==="instr"){try{const I=parse(raw);return !!I&&encode(I)===(f.a>>>0)}catch(e){return false}}
+ const v=Number(String(raw).trim().replace("−","-"));return Number.isFinite(v)&&Math.abs(v-f.a)<1e-9}
+$("pNew").onclick=newQ;$("ptype").onchange=newQ;$("pShow").onclick=()=>{$("pSteps").hidden=false};
+$("pCheck").onclick=()=>{if(!curQ)return;let right=0;curQ.fields.forEach((f,i)=>{const raw=$("pi"+i).value;const ok=raw.trim()!==""&&judge(f,raw);
+ $("pf"+i).className="field "+(ok?"ok":"no");$("pb"+i).className="fb "+(ok?"ok":"no");$("pb"+i).textContent=ok?"Correct":raw.trim()===""?"Enter an answer":"Not quite. Try again or open the solution.";if(ok)right++});
+ if(!curQ.done){pstats.tried+=curQ.fields.length;pstats.right+=right;curQ.done=true;store.set("ch2pstats",pstats);showScore()}
+ if(right===curQ.fields.length)$("pSteps").hidden=false};
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id&&e.target.id.startsWith("pi"))$("pCheck").click()});
+showScore();newQ();
+
+/* quiz */
+const QZ=[
+ {q:"A is an array of doublewords with base in x22. Which instruction loads A[8]?",o:["ld x9, 64(x22)","ld x9, 8(x22)","ld x9, 32(x22)","lw x9, 8(x22)"],a:0,e:"Doublewords are 8 bytes: offset = 8 × 8 = 64."},
+ {q:"Which format does sd use?",o:["S","I","R","SB"],a:0,e:"Stores use S-type: no rd; the immediate is split into imm[11:5] and imm[4:0]."},
+ {q:"In R-type, which field comes right after funct7 (bits 24:20)?",o:["rs2","rs1","rd","funct3"],a:0,e:"funct7 · rs2 · rs1 · funct3 · rd · opcode."},
+ {q:"if (i == j) f = g + h;   compiles to a branch on …",o:["bne i, j, Skip","beq i, j, Skip","blt i, j, Skip","bge i, j, Skip"],a:0,e:"Branch on the opposite condition to jump over the then-part."},
+ {q:"A beq at address 80020 jumps back to 80000. The encoded offset is:",o:["−20","−5","+20","−24"],a:0,e:"Offset = target − branch address = 80000 − 80020 = −20 bytes."},
+ {q:"What is 1111 0110 as an 8-bit two's complement value?",o:["−10","246","−118","−9"],a:0,e:"−128 + 64 + 32 + 16 + 4 + 2 = −10."},
+ {q:"Which registers must a callee restore before returning?",o:["s0–s11, sp, ra","t0–t6","a0–a7","All 32 registers"],a:0,e:"Saved registers x8–x9, x18–x27, plus sp and ra are preserved. Temporaries and argument registers are not."},
+ {q:"Why does fact() save x1 on the stack?",o:["Its own jal x1, fact overwrites x1","x1 is a temporary","To pass n to the next call","x1 holds the result"],a:0,e:"A non-leaf procedure loses its return address when it calls another procedure."},
+ {q:"Which design principle explains having only 32 registers?",o:["Smaller is faster","Simplicity favors regularity","Make the common case fast","Good design demands good compromises"],a:0,e:"More registers would lengthen the clock cycle: smaller is faster."},
+ {q:"How do you load 0x12345FFF into x5?",o:["lui x5, 0x12346 then addi x5, x5, −1","lui x5, 0x12345 then addi x5, x5, 0xFFF","addi x5, x0, 0x12345FFF","lui x5, 0x12345FFF"],a:0,e:"addi sign-extends 0xFFF to −1, so the upper part must be 0x12346."},
+ {q:"What does jalr x0, 0(x1) do?",o:["Returns from a procedure","Calls the procedure at x1 and saves PC+4","Jumps to address 0","Clears x1"],a:0,e:"It jumps to the address in x1 and discards the link (rd = x0). Pseudo-instruction: ret."},
+ {q:"Which addressing mode does beq use for its target?",o:["PC-relative","Base (displacement)","Immediate","Register"],a:0,e:"Target = PC + offset in the instruction."},
+ {q:"Which tool resolves references between separately compiled files?",o:["Linker","Assembler","Loader","Compiler"],a:0,e:"The linker patches internal and external references using relocation info and symbol tables."},
+ {q:"Does RISC-V require a doubleword to start at an address that is a multiple of 8?",o:["No: RISC-V has no alignment restriction","Yes, always","Only for stores","Only in RV32"],a:0,e:"Slides and handout: RISC-V does not require alignment, unlike some other ISAs."},
+ {q:"C is an array of halfwords. Which shift turns index i into a byte offset?",o:["slli by 1","slli by 2","slli by 3","No shift"],a:0,e:"Halfword = 2 bytes = 2¹, so shift left by 1 (Loop Examples worksheet)."},
+ {q:"0xabcdef12 is stored at address 100 on RISC-V. Which byte is at address 100?",o:["0x12","0xab","0xcd","0xef"],a:0,e:"RISC-V is little endian: the least significant byte goes to the lowest address."},
+ {q:"Why does addi x20, x20, 3135 not add 3135?",o:["addi's 12-bit immediate is signed: 3135 is read as −961","addi only takes even numbers","3135 needs 13 bits but addi has 20","addi cannot use the same register twice"],a:0,e:"Range is −2048…2047. Use lui with the upper part + 1, then addi −961 (Practice Q10)."},
+ {q:"A branch's stored immediate imm[12:1] is 000000001010. Where is the label?",o:["20 bytes (5 instructions) ahead","10 bytes ahead","40 bytes ahead","5 bytes ahead"],a:0,e:"Rebuild with bit 0 = 0: 10100₂ = 20 bytes, 20 / 4 = 5 instructions (Practice Q16)."},
+ {q:"bgt x22, x21, Exit is a pseudo-instruction for:",o:["blt x21, x22, Exit","bge x22, x21, Exit","blt x22, x21, Exit","bne x22, x21, Exit"],a:0,e:"x22 > x21 is the same as x21 < x22."},
+ {q:"Fastest way to compute 19a without mul (a in x22)?",o:["slli 4 and slli 1, then add both and a","addi x21, x22, 19","slli x21, x22, 19","Add a to itself 19 times"],a:0,e:"19 = 16 + 2 + 1: 16a + 2a + a (Practice Q13)."},
+ {q:"The farthest a conditional branch can jump forward is about:",o:["4 KiB (4094 bytes)","1 MiB","2 KiB","64 KiB"],a:0,e:"12 stored bits × 2 → −4096 … +4094 bytes. jal reaches ±1 MiB."}];
+(function(){let order=[],pos=0,score=0,answered=false,mode="all";let wrong=new Set(store.get("ch2wrong",[]));
+ const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+ function start(m){mode=m;order=m==="wrong"?[...wrong]:shuffle(QZ.map((_,i)=>i)).slice(0,12);pos=0;score=0;render()}
+ function render(){const box=$("quiz");if(!order.length){box.innerHTML=`<p>No saved mistakes. Nice.</p><div class="qnav"><button type="button" class="pri" id="qAll">Start the test</button></div>`;$("qAll").onclick=()=>start("all");return}
+  if(pos>=order.length){box.innerHTML=`<div class="big">${score} / ${order.length}</div><p style="margin-top:8px">${score===order.length?"Full marks.":"Review the explanations, then retry the ones you missed."}</p><div class="qnav"><button type="button" class="pri" id="qAgain">New test</button><button type="button" id="qWrong" ${wrong.size?"":"disabled"}>Retry my mistakes (${wrong.size})</button></div>`;$("qAgain").onclick=()=>start("all");$("qWrong").onclick=()=>start("wrong");return}
+  answered=false;const qi=order[pos],q=QZ[qi];const idx=shuffle(q.o.map((_,i)=>i));
+  box.innerHTML=`<div class="score" style="margin:0 0 8px">Question ${pos+1} of ${order.length}${mode==="wrong"?" · mistakes":""} · score ${score}</div><div class="qq">${q.q}</div><div class="opts">${idx.map(i=>`<button type="button" data-i="${i}">${q.o[i]}</button>`).join("")}</div><div id="qExpl"></div><div class="qnav"><button type="button" class="pri" id="qNext" disabled>Next</button><button type="button" id="qWrong2" ${wrong.size?"":"disabled"}>Retry my mistakes (${wrong.size})</button></div>`;
+  box.querySelectorAll(".opts button").forEach(b=>b.onclick=()=>{if(answered)return;answered=true;const i=+b.dataset.i;const ok=i===q.a;
+   box.querySelectorAll(".opts button").forEach(x=>{if(+x.dataset.i===q.a)x.classList.add("right")});if(!ok)b.classList.add("wrong");
+   if(ok){score++;wrong.delete(qi)}else wrong.add(qi);store.set("ch2wrong",[...wrong]);
+   $("qExpl").innerHTML=`<div class="expl"><b>${ok?"Correct.":"Not quite."}</b> ${q.e}</div>`;$("qNext").disabled=false;$("qNext").focus()});
+  $("qNext").onclick=()=>{pos++;render()};$("qWrong2").onclick=()=>start("wrong")}
+ start("all")})();
+
+/* flashcards */
+(function(){let deck=DEFS.map((_,i)=>i),p=0;const fc=$("fc");
+ function show(){fc.classList.remove("flipped");const d=DEFS[deck[p]];$("fcF").textContent=d[0];$("fcB").innerHTML=`<div>${d[1]}<br><span class="m" style="color:var(--copper)">${d[2]}</span></div>`;$("fcPos").textContent=`${p+1} / ${deck.length}`}
+ fc.onclick=()=>fc.classList.toggle("flipped");fc.onkeydown=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();fc.classList.toggle("flipped")}};
+ $("fcNext").onclick=()=>{p=(p+1)%deck.length;show()};$("fcPrev").onclick=()=>{p=(p-1+deck.length)%deck.length;show()};
+ $("fcShuf").onclick=()=>{for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]]}p=0;show()};show()})();
+</script>
+
+</body></html>

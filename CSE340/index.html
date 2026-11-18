@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CSE340 Study Pages</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{--bg:#f4f6fa;--surface:#fff;--ink:#141a26;--muted:#5a6375;--line:#d8dde8;--accent:#2f5be0;--accent-soft:#e6ecfc;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10141c;--surface:#171d28;--ink:#e6eaf2;--muted:#9aa4b8;--line:#2a3242;--accent:#8aa8ff;--accent-soft:#1e2a48;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10141c;--surface:#171d28;--ink:#e6eaf2;--muted:#9aa4b8;--line:#2a3242;--accent:#8aa8ff;--accent-soft:#1e2a48;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:48px 64px}
+main{max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:32px}
+.eyebrow{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+h1{font-family:"Chakra Petch","Arial Narrow",sans-serif;font-size:clamp(32px,6vw,48px);line-height:1.05;margin:8px 0 12px;text-wrap:balance}
+h2{font-family:"Chakra Petch","Arial Narrow",sans-serif;font-size:22px;margin:0 0 12px}
+p{margin:0;max-width:66ch}
+.sub{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:14px}
+a.card{display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;color:inherit;text-decoration:none;min-width:0}
+a.card:hover,a.card:focus-visible{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.tag{align-self:flex-start;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;padding:2px 9px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
+.card b{font-family:"Chakra Petch","Arial Narrow",sans-serif;font-size:20px}
+.card span{color:var(--muted);font-size:15px}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-size:15px;color:var(--muted)}
+.note b{color:var(--ink)}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="eyebrow">BRAC University · CSE340 Computer Architecture</div>
+  <h1>CSE340 study pages</h1>
+  <p class="sub">Interactive notes, simulations and practice for Chapters 1, 2 and 3, plus printable exam notes. Each page works offline in any browser and remembers your progress on your own device.</p>
+</header>
+
+<div class="note"><b>Midterm syllabus.</b> Chapter 1: full · Chapter 2: slides 1–46 · Chapter 3: slides 9–21. Read both the handouts and the slides. Question formats: True/False, analytical, scenario-based justification, mathematical problems, coding and tracing. On the Chapter 2 page, press <b>Midterm · slides 1–46</b> to hide everything outside the syllabus; every page and PDF has midterm practice in these formats.</div>
+
+<section>
+  <h2>Chapter 1 · Computer abstractions and technology</h2>
+  <div class="grid">
+    <a class="card" href="ch1-quiz-notes.html"><span class="tag">Read</span><b>Quiz notes</b><span>Formula sheet, every Practice Sheet 1 question solved and grouped by type, common mistakes, a night-before checklist and midterm practice.</span></a>
+    <a class="card" href="ch1-practice-lab.html"><span class="tag">Practise</span><b>Practice lab</b><span>Sliders for CPU time, CPI, Amdahl's law, power and wafer yield, plus a question generator and a self-test.</span></a>
+    <a class="card" href="pdf/CSE340_Chapter1_Exam_Notes.pdf"><span class="tag">PDF</span><b>Exam notes (printable)</b><span>Midterm guide with True/False, analytical and scenario practice, then the full chapter notes and every Practice Sheet 1 answer.</span></a>
+  </div>
+</section>
+
+<section>
+  <h2>Chapter 2 · Instructions: language of the computer</h2>
+  <div class="grid">
+    <a class="card" href="ch2-step-by-step.html"><span class="tag">Start here</span><b>Step by step (7 levels)</b><span>Animated walkthrough from registers to procedures: arrays, branches and loops, two's complement, machine-code formats, the stack, then a timed mock quiz.</span></a>
+    <a class="card" href="ch2-practice-lab.html"><span class="tag">Practise</span><b>Practice lab</b><span>Instruction encoder and decoder, a step-by-step RISC-V simulator, Practice Sheet 2 analysis and a question generator.</span></a>
+    <a class="card" href="pdf/CSE340_Chapter2_Exam_Notes.pdf"><span class="tag">PDF</span><b>Exam notes (printable)</b><span>Midterm guide (which pages to skip past slide 46, the branch-immediate rule, practice in all six formats), then the full chapter notes.</span></a>
+  </div>
+</section>
+
+<section>
+  <h2>Chapter 3 · Arithmetic for computers (slides 9–21)</h2>
+  <div class="grid">
+    <a class="card" href="ch3-floating-point.html"><span class="tag">Start here</span><b>Floating point, bit by bit</b><span>IEEE 754 single, double and custom formats: clickable bit explorer, step-by-step encoder and decoder, FP addition and multiplication steppers, every Practice Sheet 3 question solved, midterm practice, quick review and self-test.</span></a>
+    <a class="card" href="pdf/CSE340_Chapter3_Exam_Notes.pdf"><span class="tag">PDF</span><b>Exam notes (printable)</b><span>Midterm guide and practice, then IEEE 754 worked step by step: encode, decode, add, multiply, overflow, and all Practice Sheet 3 answers.</span></a>
+  </div>
+</section>
+
+<div class="note" style="margin-top:0"><b>Check your course materials.</b> These pages follow the BRACU CSE340 slides, handouts and practice sheets. Where a slide or faculty answer has a typo, the page says so and explains the fix. Your course may use some conventions of its own (for example, branch opcode 1100111 instead of the official 1100011), so confirm with your faculty when in doubt.</div>
+</main>
+</body>
+</html>

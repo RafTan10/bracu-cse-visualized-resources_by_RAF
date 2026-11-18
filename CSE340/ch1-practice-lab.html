@@ -1,0 +1,652 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>CSE340 Chapter 1 Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Sans:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: lab bench. Sticky tab bar; one reading column; each simulation is an instrument panel with inputs left, readout right. */
+:root{
+  --bg:#f4f5f2; --surface:#ffffff; --sunk:#eceee9; --ink:#17201c; --muted:#5b6660; --line:#d6dad3;
+  --copper:#b4532a; --copper-soft:#f8e9e0; --green:#22684a; --green-soft:#e1f0e8; --bad:#b0362a; --bad-soft:#fae6e2;
+  --f-disp:"Archivo","Arial Narrow",Arial,sans-serif; --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111613; --surface:#18201c; --sunk:#1f2823; --ink:#e3e9e5; --muted:#9aa7a0; --line:#2e3a34;
+  --copper:#e48455; --copper-soft:#3a2418; --green:#5cc796; --green-soft:#16352a; --bad:#f07a6b; --bad-soft:#3d1d19; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111613; --surface:#18201c; --sunk:#1f2823; --ink:#e3e9e5; --muted:#9aa7a0; --line:#2e3a34;
+  --copper:#e48455; --copper-soft:#3a2418; --green:#5cc796; --green-soft:#16352a; --bad:#f07a6b; --bad-soft:#3d1d19; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.topin{max-width:1060px;margin:0 auto;display:flex;align-items:center;gap:12px;padding-block:8px;flex-wrap:wrap}
+.brand{font-family:var(--f-disp);font-weight:800;font-stretch:85%;font-size:18px;white-space:nowrap}
+.brand span{color:var(--copper)}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;flex:1 1 300px;min-width:0;scrollbar-width:none}
+nav.tabs a{font-size:14px;text-decoration:none;color:var(--muted);padding:6px 10px;border-radius:6px;white-space:nowrap}
+nav.tabs a:hover,nav.tabs a:focus-visible{color:var(--ink);background:var(--sunk);outline:none}
+nav.tabs a.on{color:var(--copper);background:var(--copper-soft)}
+.tools{display:flex;gap:6px}
+button,.btn{font:inherit;font-size:14px;padding:7px 12px;border-radius:7px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--copper);color:var(--copper)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--copper);outline-offset:2px}
+button.pri{background:var(--copper);border-color:var(--copper);color:var(--surface)}
+button.pri:hover{filter:brightness(1.08);color:var(--surface)}
+button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+main{max-width:1060px;margin:0 auto;padding-block:28px 80px;display:flex;flex-direction:column;gap:64px}
+section{scroll-margin-top:80px}
+h1,h2,h3,h4{font-family:var(--f-disp);margin:0;text-wrap:balance}
+h1{font-size:clamp(32px,6vw,54px);font-weight:800;font-stretch:78%;line-height:1}
+h2{font-size:28px;font-weight:800;font-stretch:85%;display:flex;gap:10px;align-items:baseline;margin-bottom:6px}
+h2 .no{font-family:var(--f-mono);font-size:13px;color:var(--copper);font-weight:600}
+h3{font-size:19px;font-weight:700;font-stretch:90%;margin:24px 0 8px}
+p{margin:0 0 10px;max-width:68ch}
+.sub{color:var(--muted);max-width:66ch;margin-bottom:18px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--copper);margin-bottom:10px}
+code,.m{font-family:var(--f-mono);font-size:.88em}
+.formula{font-family:var(--f-mono);font-size:14px;background:var(--sunk);border-radius:8px;padding:12px 14px;white-space:pre;overflow-x:auto;line-height:1.7}
+.formula b{color:var(--copper);font-weight:600}
+.notice{background:var(--copper-soft);border-radius:8px;padding:10px 14px;font-size:14.5px;max-width:72ch}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.card h4{font-size:16px;margin-bottom:4px}
+.card p{font-size:14.5px;color:var(--muted);margin:0}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+svg{display:block;max-width:100%;height:auto}
+svg text{fill:var(--ink);font-family:var(--f-body)}
+
+/* instrument panels */
+.lab{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.labhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.labhead h3{margin:0}
+.labhead .tag{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.labbody{display:grid;grid-template-columns:minmax(0,330px) minmax(0,1fr);gap:0}
+.controls{padding:14px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:14px;background:var(--sunk)}
+.readout{padding:14px 16px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.ctl label{display:flex;justify-content:space-between;font-size:14px;gap:8px}
+.ctl label output{font-family:var(--f-mono);font-weight:600;color:var(--copper)}
+input[type=range]{width:100%;accent-color:var(--copper)}
+input[type=number],input[type=text],select{font:inherit;font-family:var(--f-mono);font-size:15px;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:100%;min-width:0}
+.notice-line{max-width:none;font-size:14px;color:var(--muted);border-top:1px dashed var(--line);padding:10px 16px;margin:0}
+.notice-line b{color:var(--ink)}
+.big{font-family:var(--f-disp);font-weight:800;font-stretch:85%;font-size:34px;line-height:1.1}
+.big small{font-size:16px;color:var(--muted);font-weight:600}
+.pill{display:inline-block;font-family:var(--f-mono);font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px}
+.pill.ok{background:var(--green-soft);color:var(--green)}
+.pill.no{background:var(--bad-soft);color:var(--bad)}
+.pill.hot{background:var(--copper);color:var(--surface)}
+.pill.mid{background:var(--copper-soft);color:var(--copper)}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bar{display:grid;grid-template-columns:80px minmax(0,1fr) 90px;gap:8px;align-items:center;font-size:14px}
+.bar .tr{height:14px;background:var(--sunk);border-radius:4px;overflow:hidden}
+.bar .fl{height:100%;background:var(--copper);border-radius:4px;transition:width .25s}
+.bar .fl.g{background:var(--green)}
+.bar span:last-child{font-family:var(--f-mono);text-align:right}
+.mixrow{display:grid;grid-template-columns:54px minmax(0,1fr) 70px;gap:8px;align-items:center;font-size:14px}
+
+/* definitions */
+.defs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.def{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.def b{font-family:var(--f-disp);font-stretch:90%;font-size:16px;display:block}
+.def span{font-size:14px;color:var(--muted)}
+.def i{display:block;font-style:normal;font-family:var(--f-mono);font-size:12.5px;color:var(--copper);margin-top:4px}
+
+/* details */
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin:8px 0}
+summary{cursor:pointer;padding:11px 14px;font-weight:600;list-style:none;display:flex;gap:10px;align-items:baseline}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"+";font-family:var(--f-mono);color:var(--copper)}
+details[open] summary::before{content:"−"}
+summary .q{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-weight:400}
+.dbody{padding:0 16px 14px;border-top:1px dashed var(--line)}
+.dbody p{margin-top:10px}
+.dbody .formula{margin-top:10px}
+
+/* practice */
+.prac{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.prac .ptop{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.prac select{width:auto}
+.ptext{font-size:16px;max-width:72ch;margin-bottom:12px}
+.fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:12px}
+.field label{display:block;font-size:14px;margin-bottom:4px}
+.field .fb{font-size:13px;margin-top:4px;min-height:1.2em;font-family:var(--f-mono)}
+.field.ok input{border-color:var(--green);background:var(--green-soft)}
+.field.no input{border-color:var(--bad);background:var(--bad-soft)}
+.fb.ok{color:var(--green)} .fb.no{color:var(--bad)}
+.steps{margin-top:12px}
+.score{font-family:var(--f-mono);font-size:14px;color:var(--muted);margin-left:auto}
+
+/* quiz */
+.quiz{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.qq{font-size:17px;font-weight:600;margin-bottom:12px;max-width:70ch}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opts button{text-align:left;padding:10px 12px;font-size:15px}
+.opts button.right{background:var(--green-soft);border-color:var(--green);color:var(--ink)}
+.opts button.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--ink)}
+.expl{margin-top:12px;font-size:15px;background:var(--sunk);padding:10px 12px;border-radius:8px}
+.qnav{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.flip{perspective:900px;max-width:520px}
+.fc{position:relative;height:200px;cursor:pointer;transform-style:preserve-3d;transition:transform .45s}
+.fc.flipped{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:18px;text-align:center}
+.face.front{background:var(--surface);font-family:var(--f-disp);font-weight:800;font-stretch:85%;font-size:28px}
+.face.back{background:var(--copper-soft);transform:rotateY(180deg);font-size:16px}
+
+/* cram mode */
+body.cram main>section:not(.cramkeep){display:none}
+.cramnote{display:none}
+body.cram .cramnote{display:block}
+
+@media (max-width:760px){.brand{order:1;flex:1}.tools{order:2}nav.tabs{order:3;flex-basis:100%}.mapwrap svg{min-width:620px}.labbody{grid-template-columns:minmax(0,1fr)}.controls{border-right:0;border-bottom:1px solid var(--line)}.g2,.g3{grid-template-columns:minmax(0,1fr)}.bar{grid-template-columns:62px minmax(0,1fr) 78px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<header class="top gut">
+  <div class="topin">
+    <div class="brand">CSE340 <span>Ch&nbsp;1</span> Lab</div>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#map">Big picture</a>
+      <a href="#concepts">Concepts</a>
+      <a href="#defs">Definitions</a>
+      <a href="#sims">Simulations</a>
+      <a href="#traps">Traps</a>
+      <a href="#hooks">Memory hooks</a>
+      <a href="#pq">Past questions</a>
+      <a href="#practice">Practice</a>
+      <a href="#test">Self-test</a>
+    </nav>
+    <div class="tools">
+      <button type="button" id="cramBtn" aria-pressed="false">Cram mode</button>
+      <button type="button" id="themeBtn" aria-label="Switch colour theme">Theme</button>
+    </div>
+  </div>
+</header>
+
+<main class="gut">
+<section id="map">
+  <div class="eyebrow">CSE340 · Chapter 1 · Computer Abstractions and Technology</div>
+  <h1>Chapter 1 practice lab</h1>
+  <p class="sub" style="margin-top:12px">Change the numbers and watch the result, then drill generated questions until the method is automatic. Built from the Chapter 1 slides, Practice Sheet 1 and the RISC-V textbook. Use the printable notes for reading; use this page for doing.</p>
+  <p class="cramnote notice">Cram mode is on: only Quick definitions and the Self-test are showing.</p>
+  <div class="mapwrap" style="overflow-x:auto">
+  <svg viewBox="0 0 760 250" role="img" aria-label="Concept map of chapter 1">
+    <g stroke="var(--muted)" stroke-width="1.3" fill="none">
+      <path d="M380,48 L200,82"/><path d="M380,48 L560,82"/>
+      <path d="M140,118 L80,158"/><path d="M200,118 L200,158"/><path d="M260,118 L320,158"/>
+      <path d="M500,118 L440,158"/><path d="M560,118 L560,158"/><path d="M620,118 L680,158"/>
+      <path d="M560,196 L560,208"/>
+    </g>
+    <rect x="290" y="12" width="180" height="36" rx="7" fill="var(--ink)"/>
+    <text x="380" y="35" text-anchor="middle" style="fill:var(--bg);font-weight:700;font-size:15px">Chapter 1</text>
+    <rect x="110" y="82" width="180" height="36" rx="7" fill="var(--copper-soft)" stroke="var(--copper)"/>
+    <text x="200" y="105" text-anchor="middle" style="font-weight:700;font-size:13.5px">What a computer is</text>
+    <rect x="470" y="82" width="180" height="36" rx="7" fill="var(--green-soft)" stroke="var(--green)"/>
+    <text x="560" y="105" text-anchor="middle" style="font-weight:700;font-size:13.5px">How fast / efficient</text>
+    <g style="font-size:12px">
+      <rect x="20" y="158" width="120" height="38" rx="6" fill="var(--surface)" stroke="var(--line)"/><text x="80" y="175" text-anchor="middle">Abstraction</text><text x="80" y="190" text-anchor="middle" style="fill:var(--muted)">HLL → asm → bits</text>
+      <rect x="145" y="158" width="110" height="38" rx="6" fill="var(--surface)" stroke="var(--line)"/><text x="200" y="175" text-anchor="middle">5 components</text><text x="200" y="190" text-anchor="middle" style="fill:var(--muted)">I/O · mem · CPU</text>
+      <rect x="260" y="158" width="120" height="38" rx="6" fill="var(--surface)" stroke="var(--line)"/><text x="320" y="175" text-anchor="middle">Chips &amp; cost</text><text x="320" y="190" text-anchor="middle" style="fill:var(--muted)">wafer · yield</text>
+      <rect x="385" y="158" width="110" height="38" rx="6" fill="var(--surface)" stroke="var(--line)"/><text x="440" y="175" text-anchor="middle">CPU time</text><text x="440" y="190" text-anchor="middle" style="fill:var(--muted)">IC × CPI / f</text>
+      <rect x="505" y="158" width="110" height="38" rx="6" fill="var(--surface)" stroke="var(--line)"/><text x="560" y="175" text-anchor="middle">Power</text><text x="560" y="190" text-anchor="middle" style="fill:var(--muted)">C × V² × f</text>
+      <rect x="625" y="158" width="120" height="38" rx="6" fill="var(--surface)" stroke="var(--line)"/><text x="685" y="175" text-anchor="middle">Benchmarks</text><text x="685" y="190" text-anchor="middle" style="fill:var(--muted)">SPEC · GM</text>
+      <rect x="440" y="208" width="240" height="34" rx="6" fill="var(--surface)" stroke="var(--copper)"/><text x="560" y="230" text-anchor="middle" style="font-weight:700">Power wall → multicore → Amdahl's limit</text>
+    </g>
+  </svg>
+  </div>
+</section>
+
+<section id="concepts">
+  <h2><span class="no">01</span>Core concepts, illustrated</h2>
+  <p class="sub">The five ideas that carry almost every calculation mark.</p>
+  <div class="grid g2">
+    <div class="card"><h4>Performance = 1 / time</h4><p>"X is n times faster than Y" means n = Time<sub>Y</sub> / Time<sub>X</sub>. A: 10 s, B: 15 s → A is 1.5× faster. Always divide, never subtract.</p></div>
+    <div class="card"><h4>The CPU time equation</h4><p>CPU time = IC × CPI / clock rate. IC comes from the program, compiler and ISA. CPI from the hardware and instruction mix. Clock rate from the hardware and technology.</p></div>
+    <div class="card"><h4>Dynamic power = C × V² × f</h4><p>Voltage is squared, so dropping voltage was the main power saver, until leakage below about 1 V created the power wall around 2004.</p></div>
+    <div class="card"><h4>Amdahl's law</h4><p>T<sub>new</sub> = T<sub>affected</sub>/n + T<sub>unaffected</sub>. The unaffected part sets a floor; max speedup = T<sub>old</sub> / T<sub>unaffected</sub>.</p></div>
+    <div class="card"><h4>SPEC uses the geometric mean</h4><p>SPECratio = reference ÷ execution time. The geometric mean of ratios gives the same verdict whichever machine is the reference.</p></div>
+    <div class="card"><h4>Cost per die</h4><p>Wafer cost ÷ (dies × yield), with yield = 1/(1 + D×A)<sup>N</sup>. Bigger dies mean fewer dies and lower yield, so cost rises faster than area.</p></div>
+  </div>
+  <h3>The CPU time equation, unit by unit</h3>
+  <div class="formula">  <b>Seconds</b>        Instructions      Clock cycles        Seconds
+ ─────────   =   ─────────────  ×  ─────────────  ×  ───────────
+  Program          Program         Instruction      Clock cycle
+                    (IC)              (CPI)          (1 / clock rate)</div>
+</section>
+
+<section id="defs" class="cramkeep">
+  <h2><span class="no">02</span>Quick definitions</h2>
+  <p class="sub">The night-before section. One line each.</p>
+  <div class="defs" id="defGrid"></div>
+</section>
+
+<section id="sims">
+  <h2><span class="no">03</span>Simulations</h2>
+  <p class="sub">Move the sliders. Each panel ends with what to notice.</p>
+
+  <div class="lab" id="simCpu">
+    <div class="labhead"><h3>CPU time lab</h3><span class="tag">T = IC × CPI / f</span></div>
+    <div class="labbody">
+      <div class="controls">
+        <div class="ctl"><label for="cIC">Instruction count <output id="oIC"></output></label><input type="range" id="cIC" min="8" max="10.5" step="0.05" value="9.3"></div>
+        <div class="ctl"><label for="cCPI">CPI <output id="oCPI"></output></label><input type="range" id="cCPI" min="0.5" max="5" step="0.05" value="2"></div>
+        <div class="ctl"><label for="cF">Clock rate <output id="oF"></output></label><input type="range" id="cF" min="0.5" max="6" step="0.1" value="2"></div>
+        <button type="button" id="cPin">Pin as machine B</button>
+      </div>
+      <div class="readout">
+        <div class="big" id="cT"></div>
+        <div class="formula" id="cEq"></div>
+        <div class="bars" id="cBars"></div>
+        <div id="cCmp" style="font-size:15px"></div>
+      </div>
+    </div>
+    <p class="notice-line"><b>What to notice:</b> doubling CPI and doubling clock rate cancel exactly. Clock rate alone never decides which machine is faster.</p>
+  </div>
+
+  <div class="lab" id="simMix" style="margin-top:20px">
+    <div class="labhead"><h3>Instruction-mix CPI builder</h3><span class="tag">CPI = Σ CPIᵢ × fractionᵢ</span></div>
+    <div class="labbody">
+      <div class="controls" id="mixCtl"></div>
+      <div class="readout">
+        <div class="big" id="mixCPI"></div>
+        <svg id="mixSvg" viewBox="0 0 520 70" aria-label="CPI contribution per class"></svg>
+        <div class="formula" id="mixEq"></div>
+      </div>
+    </div>
+    <p class="notice-line"><b>What to notice:</b> a rare class with a big CPI (loads at CPI 7) can dominate the average. Loaded with the PS5 numbers from Practice Q2: the answer is 4.0.</p>
+  </div>
+
+  <div class="lab" id="simAmd" style="margin-top:20px">
+    <div class="labhead"><h3>Amdahl's law</h3><span class="tag">T<sub>new</sub> = T<sub>aff</sub>/n + T<sub>unaff</sub></span></div>
+    <div class="labbody">
+      <div class="controls">
+        <div class="ctl"><label for="aF">Time in the improved part <output id="oAF"></output></label><input type="range" id="aF" min="5" max="99" step="1" value="80"></div>
+        <div class="ctl"><label for="aN">Improvement n <output id="oAN"></output></label><input type="range" id="aN" min="1" max="50" step="0.5" value="4"></div>
+        <div class="ctl"><label for="aT">Target overall speedup <output id="oAT"></output></label><input type="range" id="aT" min="1.1" max="10" step="0.1" value="5"></div>
+      </div>
+      <div class="readout">
+        <div class="big" id="aOut"></div>
+        <div id="aVerdict" style="font-size:15px"></div>
+        <svg id="aSvg" viewBox="0 0 520 220" aria-label="Speedup curve"></svg>
+      </div>
+    </div>
+    <p class="notice-line"><b>What to notice:</b> the curve flattens at 1 / (unaffected fraction). If the target is above that line, no n can reach it: write "impossible" and give the limit.</p>
+  </div>
+
+  <div class="lab" id="simPow" style="margin-top:20px">
+    <div class="labhead"><h3>Power ratio</h3><span class="tag">P = C × V² × f</span></div>
+    <div class="labbody">
+      <div class="controls">
+        <div class="ctl"><label for="pC">Capacitive load <output id="oPC"></output></label><input type="range" id="pC" min="50" max="130" step="0.5" value="85"></div>
+        <div class="ctl"><label for="pV">Voltage <output id="oPV"></output></label><input type="range" id="pV" min="50" max="130" step="0.5" value="85"></div>
+        <div class="ctl"><label for="pF">Frequency <output id="oPF"></output></label><input type="range" id="pF" min="50" max="150" step="0.5" value="85"></div>
+      </div>
+      <div class="readout">
+        <div class="big" id="pOut"></div>
+        <div class="formula" id="pEq"></div>
+        <div class="bars" id="pBars"></div>
+      </div>
+    </div>
+    <p class="notice-line"><b>What to notice:</b> move the voltage slider and the power bar moves twice as hard as with any other slider. Starts at the slide example: 0.85⁴ = 0.52.</p>
+  </div>
+
+  <div class="lab" id="simWafer" style="margin-top:20px">
+    <div class="labhead"><h3>Wafer, yield and cost</h3><span class="tag">Yield = 1/(1 + D×A)<sup>N</sup></span></div>
+    <div class="labbody">
+      <div class="controls">
+        <div class="ctl"><label for="wD">Wafer diameter <output id="oWD"></output></label><input type="range" id="wD" min="15" max="30" step="1" value="20"></div>
+        <div class="ctl"><label for="wA">Die area <output id="oWA"></output></label><input type="range" id="wA" min="0.5" max="8" step="0.1" value="3.1"></div>
+        <div class="ctl"><label for="wDef">Defects per cm² <output id="oWDef"></output></label><input type="range" id="wDef" min="0" max="0.2" step="0.001" value="0.031"></div>
+        <div class="ctl"><label for="wN">N (process complexity) <output id="oWN"></output></label><input type="range" id="wN" min="1" max="4" step="1" value="2"></div>
+        <div class="ctl"><label for="wCost">Wafer cost <output id="oWCost"></output></label><input type="range" id="wCost" min="5" max="100" step="1" value="15"></div>
+      </div>
+      <div class="readout">
+        <div class="grid g2" style="align-items:center">
+          <svg id="wSvg" viewBox="0 0 240 240" aria-label="Wafer"></svg>
+          <div id="wOut" style="font-size:15px"></div>
+        </div>
+      </div>
+    </div>
+    <p class="notice-line"><b>What to notice:</b> grey edge dies are why dies per wafer is "≈". Double the die area and the cost per die more than doubles.</p>
+  </div>
+
+  <div class="lab" id="simMean" style="margin-top:20px">
+    <div class="labhead"><h3>Arithmetic vs geometric mean</h3><span class="tag">Practice Q8</span></div>
+    <div class="labbody">
+      <div class="controls">
+        <div class="tablewrap"><table>
+          <thead><tr><th></th><th>Prog 1 (s)</th><th>Prog 2 (s)</th></tr></thead>
+          <tbody>
+            <tr><td>A</td><td><input type="number" id="mA1" value="10" min="0.1" step="any" aria-label="A program 1"></td><td><input type="number" id="mA2" value="100" min="0.1" step="any" aria-label="A program 2"></td></tr>
+            <tr><td>B</td><td><input type="number" id="mB1" value="100" min="0.1" step="any" aria-label="B program 1"></td><td><input type="number" id="mB2" value="10" min="0.1" step="any" aria-label="B program 2"></td></tr>
+          </tbody></table></div>
+      </div>
+      <div class="readout"><div id="mOut"></div></div>
+    </div>
+    <p class="notice-line"><b>What to notice:</b> with the arithmetic mean, the "winner" flips when you swap the reference. The geometric mean never flips.</p>
+  </div>
+</section>
+
+<section id="traps">
+  <h2><span class="no">04</span>Common mistakes &amp; exam traps</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Wrong</th><th>Right</th></tr></thead>
+    <tbody>
+      <tr><td>"A is 5 s faster, so 2× faster"</td><td>n = Time<sub>slow</sub> / Time<sub>fast</sub>; a ratio, never a difference.</td></tr>
+      <tr><td>Average CPI = plain mean of class CPIs</td><td>Weight each CPI by its instruction count or fraction.</td></tr>
+      <tr><td>"Reduced by 15%" → × 0.15</td><td>× 0.85. "Uses 81.3%" → × 0.813. "Increases 20%" → × 1.2.</td></tr>
+      <tr><td>Squaring f in the power equation</td><td>Only V is squared: C × V² × f.</td></tr>
+      <tr><td>SPECratio = execution / reference</td><td>Reference / execution (higher = faster). Write the formula you use.</td></tr>
+      <tr><td>Arithmetic mean of SPECratios</td><td>Geometric mean: n-th root of the product.</td></tr>
+      <tr><td>Amdahl giving a negative n</td><td>Target ≤ unaffected time → "impossible"; state the max speedup.</td></tr>
+      <tr><td>Higher MIPS / higher GHz = faster</td><td>Only execution time compares machines, especially across ISAs.</td></tr>
+      <tr><td>Forgetting 10⁹ or 10⁻¹²</td><td>GHz → ×10⁹ Hz; ns → ×10⁻⁹ s; ps → ×10⁻¹² s.</td></tr>
+      <tr><td>Forcing every given number into the answer</td><td>Some values are distractors (Q15). Say they are not needed.</td></tr>
+    </tbody></table></div>
+</section>
+
+<section id="hooks">
+  <h2><span class="no">05</span>Memory hooks</h2>
+  <div class="grid g3">
+    <div class="card"><h4>Seven great ideas: "A C P P P H D"</h4><p><b>A</b>bstraction, <b>C</b>ommon case fast, <b>P</b>arallelism, <b>P</b>ipelining, <b>P</b>rediction, <b>H</b>ierarchy of memories, <b>D</b>ependability via redundancy. "A Common Processor Pipelines, Predicts, Hides Delays."</p></div>
+    <div class="card"><h4>Five components: "I O M D C"</h4><p>Input, Output, Memory, Datapath, Control. "I Only Make Dumb Code." Datapath + Control = processor.</p></div>
+    <div class="card"><h4>Power wall in 4 beats</h4><p>Faster clock → more power → lower the voltage → voltage hits ~1 V, leakage wins → multicore.</p></div>
+    <div class="card"><h4>Amdahl = a traffic jam</h4><p>A faster motorway does not help if half your trip is the same red light. The red light is T<sub>unaffected</sub>.</p></div>
+    <div class="card"><h4>Yield exponent</h4><p>"Big die, big risk": every extra cm² is another chance to land on a defect, and N makes it worse.</p></div>
+    <div class="card"><h4>MIPS lies</h4><p>"Meaningless Indicator of Processor Speed": instruction counts differ across ISAs, so compare seconds.</p></div>
+  </div>
+</section>
+
+<section id="pq">
+  <h2><span class="no">06</span>Past-question analysis</h2>
+  <p class="sub">Practice Sheet 1's 15 questions, sorted by type. Calculation types (copper) carry most marks.</p>
+  <svg id="freqSvg" viewBox="0 0 640 210" style="max-width:640px" aria-label="Question types by count"></svg>
+  <div id="pqTypes"></div>
+  <h3>Likely to appear <span class="pill mid">prediction</span></h3>
+  <ol style="max-width:70ch">
+    <li>Weighted CPI + execution time + "how many times faster" <span class="pill hot">very likely</span></li>
+    <li>Find a new clock rate or CPI when another factor changes (Q3c) <span class="pill hot">very likely</span></li>
+    <li>Amdahl's law with an "is it possible?" part <span class="pill hot">likely</span></li>
+    <li>Power ratio with percentage wording + the power-wall story <span class="pill hot">likely</span></li>
+    <li>Timing-diagram reading (Q7) <span class="pill mid">possible</span></li>
+    <li>SPECratio + geometric mean; MIPS vs time <span class="pill mid">possible</span></li>
+    <li>Yield and cost per die <span class="pill mid">possible</span></li>
+  </ol>
+</section>
+
+<section id="practice">
+  <h2><span class="no">07</span>Practice generator</h2>
+  <p class="sub">Fresh numbers every time, in the style of Practice Sheet 1. Type your answers (3 significant figures is fine; within 2% counts), press Check, then open the worked solution.</p>
+  <div class="prac">
+    <div class="ptop">
+      <label for="ptype" class="m" style="font-size:13px;color:var(--muted)">Type</label>
+      <select id="ptype"></select>
+      <button type="button" class="pri" id="pNew">New question</button>
+      <span class="score" id="pScore"></span>
+    </div>
+    <div class="ptext" id="pText"></div>
+    <div class="fields" id="pFields"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button type="button" class="pri" id="pCheck">Check</button>
+      <button type="button" id="pShow">Show worked solution</button>
+    </div>
+    <div class="steps" id="pSteps" hidden></div>
+  </div>
+</section>
+
+<section id="test" class="cramkeep">
+  <h2><span class="no">08</span>Self-test</h2>
+  <p class="sub">12 questions with instant feedback. Wrong answers are remembered on this device so you can retry only those.</p>
+  <div class="quiz" id="quiz"></div>
+  <h3>Flashcards</h3>
+  <p class="sub" style="margin-bottom:10px">Tap the card to flip. Built from the quick definitions.</p>
+  <div class="flip"><div class="fc" id="fc" tabindex="0" role="button" aria-label="Flip card"><div class="face front" id="fcF"></div><div class="face back" id="fcB"></div></div></div>
+  <div class="qnav"><button type="button" id="fcPrev">Previous</button><button type="button" id="fcNext">Next</button><button type="button" id="fcShuf">Shuffle</button><span class="score" id="fcPos"></span></div>
+</section>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const NS="http://www.w3.org/2000/svg";
+function el(tag,attrs,parent,text){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!==undefined)e.textContent=text;if(parent)parent.appendChild(e);return e}
+const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+function sig(x,n=4){if(!isFinite(x))return "—";if(x===0)return "0";const a=Math.abs(x);if(a>=1e4||a<1e-3){const e=Math.floor(Math.log10(a));const m=x/10**e;return (+m.toPrecision(n))+"×10"+sup(e)}return String(+x.toPrecision(n))}
+function sup(e){return String(e).split("").map(c=>"⁰¹²³⁴⁵⁶⁷⁸⁹"["0123456789".indexOf(c)]||(c==="-"?"⁻":c)).join("")}
+function fmtTime(s){if(s>=1)return sig(s)+" s";if(s>=1e-3)return sig(s*1e3)+" ms";if(s>=1e-6)return sig(s*1e6)+" µs";if(s>=1e-9)return sig(s*1e9)+" ns";return sig(s*1e12)+" ps"}
+
+/* theme + cram */
+(function(){const root=document.documentElement;let t=store.get("ch1theme",null);if(t)root.setAttribute("data-theme",t);
+ $("themeBtn").onclick=()=>{const cur=root.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");const nx=cur==="dark"?"light":"dark";root.setAttribute("data-theme",nx);store.set("ch1theme",nx)};
+ const cb=$("cramBtn");function setCram(on){document.body.classList.toggle("cram",on);cb.setAttribute("aria-pressed",on);store.set("ch1cram",on)}
+ setCram(store.get("ch1cram",false));cb.onclick=()=>setCram(!document.body.classList.contains("cram"));
+ const links=[...document.querySelectorAll("nav.tabs a")];const secs=links.map(a=>document.querySelector(a.getAttribute("href")));
+ addEventListener("scroll",()=>{let cur=0;secs.forEach((s,i)=>{if(s&&s.offsetParent!==null&&s.getBoundingClientRect().top<120)cur=i});links.forEach((a,i)=>a.classList.toggle("on",i===cur))},{passive:true});
+})();
+
+/* definitions */
+const DEFS=[
+["Abstraction","Hide lower-level detail behind a simpler model.","HLL → asm → binary"],
+["ISA","Interface between hardware and lowest-level software.","RISC-V, x86, ARM"],
+["ABI","User ISA + OS interfaces; standard for binary portability.","run the same binary"],
+["Implementation","Hardware that obeys the architecture abstraction.","same ISA, many chips"],
+["Compiler","Translates high-level language into assembly.","C → RISC-V asm"],
+["Assembler","Translates assembly into binary machine code.","add x5,x6,x7 → bits"],
+["Operating system","Manages I/O, memory, storage; shares the machine.","Linux, Windows"],
+["Datapath","Part of the processor that performs arithmetic.","ALU, registers"],
+["Control","Directs datapath, memory and I/O per instruction.","the conductor"],
+["Volatile memory","Loses data when power is off.","DRAM, SRAM"],
+["Nonvolatile memory","Keeps data without power.","flash, disk"],
+["Cache","Small fast SRAM buffer for a slower memory.","SRAM near CPU"],
+["Transistor","An on/off switch controlled by electricity.","billions per chip"],
+["Moore's law","Transistors per chip double every 18–24 months.","2× / ~2 years"],
+["Die","One rectangular chip cut from a wafer.","one CPU"],
+["Yield","Percentage of good dies out of all dies on a wafer.","1/(1+D·A)^N"],
+["Response time","Time to complete one task, start to finish.","seconds per task"],
+["Throughput","Tasks completed per unit time.","tasks per hour"],
+["CPU time","Time the CPU computes this task (user + system).","excludes I/O wait"],
+["Clock period","Duration of one clock cycle.","250 ps"],
+["Clock rate","Cycles per second = 1 / period.","4 GHz"],
+["CPI","Average clock cycles per instruction.","cycles ÷ IC"],
+["Instruction count","Number of instructions the program executes.","IC"],
+["Power wall","Clock-rate limit from power, heat and minimum voltage.","~2004"],
+["Multicore","Several processors (cores) on one chip.","needs parallel code"],
+["Benchmark","Program chosen to compare performance.","SPEC CPU"],
+["SPECratio","Reference time ÷ execution time.","higher = faster"],
+["Amdahl's law","Speedup is limited by the part not improved.","T/n + T_un"],
+["MIPS","Million instructions per second; misleading metric.","f / (CPI×10⁶)"],
+["PMD","Battery-powered, wireless personal mobile device.","phone, tablet"],
+["Cloud / WSC","Warehouse-scale computers serving over the Internet.","SaaS"]];
+$("defGrid").innerHTML=DEFS.map(d=>`<div class="def"><b>${d[0]}</b><span>${d[1]}</span><i>${d[2]}</i></div>`).join("");
+
+/* CPU time lab */
+(function(){let pinned={ic:2e9,cpi:1.2,f:3e9};
+ function upd(){const ic=10**+$("cIC").value,cpi=+$("cCPI").value,f=+$("cF").value*1e9;const T=ic*cpi/f;
+  $("oIC").textContent=sig(ic,3);$("oCPI").textContent=cpi.toFixed(2);$("oF").textContent=(f/1e9).toFixed(1)+" GHz";
+  $("cT").innerHTML=fmtTime(T)+" <small>execution time</small>";
+  $("cEq").textContent=`T = ${sig(ic,3)} × ${cpi.toFixed(2)} / ${(f/1e9).toFixed(1)}×10⁹ = ${fmtTime(T)}`;
+  const TB=pinned.ic*pinned.cpi/pinned.f;const mx=Math.max(T,TB);
+  $("cBars").innerHTML=`<div class="bar"><span>Machine A</span><div class="tr"><div class="fl" style="width:${T/mx*100}%"></div></div><span>${fmtTime(T)}</span></div><div class="bar"><span>Machine B</span><div class="tr"><div class="fl g" style="width:${TB/mx*100}%"></div></div><span>${fmtTime(TB)}</span></div>`;
+  const r=T<TB?`<b>A</b> is ${(TB/T).toFixed(2)}× faster than B`:`<b>B</b> is ${(T/TB).toFixed(2)}× faster than A`;
+  $("cCmp").innerHTML=`B = ${sig(pinned.ic,3)} instr, CPI ${pinned.cpi.toFixed(2)}, ${(pinned.f/1e9).toFixed(1)} GHz → ${r}`}
+ ["cIC","cCPI","cF"].forEach(i=>$(i).oninput=upd);
+ $("cPin").onclick=()=>{pinned={ic:10**+$("cIC").value,cpi:+$("cCPI").value,f:+$("cF").value*1e9};upd()};upd()})();
+
+/* mix */
+(function(){const cls=[["A",0.3,7],["B",0.5,2],["C",0.1,3],["D",0.1,6]];const ctl=$("mixCtl");
+ ctl.innerHTML=`<div class="mixrow" style="color:var(--muted);font-size:12px"><span>Class</span><span>Share of instructions</span><span>CPI</span></div>`+cls.map((c,i)=>`<div class="mixrow"><span class="m">${c[0]} <output id="mo${i}"></output></span><input type="range" id="mf${i}" min="0" max="100" step="1" value="${c[1]*100}" aria-label="share of class ${c[0]}"><input type="number" id="mc${i}" value="${c[2]}" min="0.1" step="0.1" aria-label="CPI of class ${c[0]}"></div>`).join("")+`<button type="button" id="mixReset">Load PS5 (Q2)</button>`;
+ const cols=["var(--copper)","var(--green)","var(--muted)","var(--bad)"];
+ function upd(){const w=cls.map((c,i)=>+$("mf"+i).value),tot=w.reduce((a,b)=>a+b,0)||1;const fr=w.map(x=>x/tot);const cp=cls.map((c,i)=>+$("mc"+i).value||0);
+  fr.forEach((f,i)=>$("mo"+i).textContent=Math.round(f*100)+"%");
+  const parts=fr.map((f,i)=>f*cp[i]);const cpi=parts.reduce((a,b)=>a+b,0);
+  $("mixCPI").innerHTML=cpi.toFixed(3)+" <small>average CPI</small>";
+  $("mixEq").textContent="CPI = "+fr.map((f,i)=>`${f.toFixed(2)}×${cp[i]}`).join(" + ")+` = ${cpi.toFixed(3)}`;
+  const s=$("mixSvg");s.innerHTML="";let x=0;const W=520;parts.forEach((p,i)=>{const w=cpi?p/cpi*W:0;el("rect",{x,y:8,width:Math.max(w,0),height:30,fill:cols[i]},s);if(w>34)el("text",{x:x+w/2,y:28,"text-anchor":"middle",style:"fill:var(--surface);font-size:12px;font-weight:700"},s,cls[i][0]);x+=w});
+  el("text",{x:0,y:58,style:"font-size:12px;fill:var(--muted)"},s,"Width = share of the average CPI each class contributes")}
+ cls.forEach((c,i)=>{$("mf"+i).oninput=upd;$("mc"+i).oninput=upd});
+ $("mixReset").onclick=()=>{cls.forEach((c,i)=>{$("mf"+i).value=c[1]*100;$("mc"+i).value=c[2]});upd()};upd()})();
+
+/* amdahl */
+(function(){function upd(){const f=+$("aF").value/100,n=+$("aN").value,t=+$("aT").value;
+ $("oAF").textContent=Math.round(f*100)+"%";$("oAN").textContent=n+"×";$("oAT").textContent=t.toFixed(1)+"×";
+ const sp=1/(f/n+(1-f));const lim=1/(1-f);
+ $("aOut").innerHTML=sp.toFixed(2)+"× <small>overall speedup</small>";
+ const tgt=1/t;const need=tgt-(1-f);
+ $("aVerdict").innerHTML=need<=1e-9?`<span class="pill no">impossible</span> Target ${t.toFixed(1)}× needs time ${(tgt*100).toFixed(1)}%, but the unaffected part alone is ${((1-f)*100).toFixed(0)}%. Max = ${lim.toFixed(2)}×.`:`<span class="pill ok">possible</span> ${t.toFixed(1)}× needs n = ${(f*100).toFixed(0)} / ${(need*100).toFixed(2)} = <b>${(f/need).toFixed(2)}</b>`;
+ const s=$("aSvg");s.innerHTML="";const L=40,R=505,T=14,B=185,ymax=Math.max(lim,t,2)*1.1;const X=v=>L+(v-1)/49*(R-L),Y=v=>B-(v)/ymax*(B-T);
+ const step=ymax>8?2:1;for(let v=0;v<=ymax;v+=step){el("line",{x1:L,x2:R,y1:Y(v),y2:Y(v),stroke:"var(--line)"},s);el("text",{x:L-6,y:Y(v)+4,"text-anchor":"end",style:"font-size:11px;fill:var(--muted)"},s,v+"×")}
+ [1,10,20,30,40,50].forEach(v=>el("text",{x:X(v),y:B+15,"text-anchor":"middle",style:"font-size:11px;fill:var(--muted)"},s,v));
+ el("text",{x:(L+R)/2,y:B+31,"text-anchor":"middle",style:"font-size:11px;fill:var(--muted)"},s,"improvement n");
+ el("line",{x1:L,x2:R,y1:Y(lim),y2:Y(lim),stroke:"var(--bad)","stroke-dasharray":"5 4"},s);el("text",{x:R,y:Y(lim)-5,"text-anchor":"end",style:"font-size:11px;fill:var(--bad);font-weight:700"},s,"limit "+lim.toFixed(2)+"×");
+ el("line",{x1:L,x2:R,y1:Y(t),y2:Y(t),stroke:"var(--green)","stroke-dasharray":"2 4"},s);el("text",{x:L+4,y:Y(t)-5,style:"font-size:11px;fill:var(--green);font-weight:700"},s,"target "+t.toFixed(1)+"×");
+ let d="";for(let v=1;v<=50;v+=.25)d+=(v===1?"M":"L")+X(v)+","+Y(1/(f/v+1-f));el("path",{d,fill:"none",stroke:"var(--copper)","stroke-width":2.5},s);
+ el("circle",{cx:X(n),cy:Y(sp),r:5,fill:"var(--copper)"},s)}
+ ["aF","aN","aT"].forEach(i=>$(i).oninput=upd);upd()})();
+
+/* power */
+(function(){function upd(){const c=+$("pC").value/100,v=+$("pV").value/100,f=+$("pF").value/100;
+ $("oPC").textContent=(c*100).toFixed(1)+"%";$("oPV").textContent=(v*100).toFixed(1)+"%";$("oPF").textContent=(f*100).toFixed(1)+"%";
+ const r=c*v*v*f;$("pOut").innerHTML=(r*100).toFixed(1)+"% <small>of old power ("+(r<1?((1-r)*100).toFixed(1)+"% less":((r-1)*100).toFixed(1)+"% more")+")</small>";
+ $("pEq").textContent=`P_new/P_old = ${c.toFixed(3)} × ${v.toFixed(3)}² × ${f.toFixed(3)} = ${r.toFixed(4)}`;
+ const mx=Math.max(1,r);$("pBars").innerHTML=`<div class="bar"><span>Old</span><div class="tr"><div class="fl g" style="width:${100/mx}%"></div></div><span>100%</span></div><div class="bar"><span>New</span><div class="tr"><div class="fl" style="width:${r/mx*100}%"></div></div><span>${(r*100).toFixed(1)}%</span></div>`}
+ ["pC","pV","pF"].forEach(i=>$(i).oninput=upd);upd()})();
+
+/* wafer */
+(function(){let seed=7;function rnd(){seed=(seed*16807)%2147483647;return seed/2147483647}
+ function upd(){const dia=+$("wD").value,A=+$("wA").value,D=+$("wDef").value,N=+$("wN").value,cost=+$("wCost").value;
+ $("oWD").textContent=dia+" cm";$("oWA").textContent=A.toFixed(1)+" cm²";$("oWDef").textContent=D.toFixed(3);$("oWN").textContent=N;$("oWCost").textContent=cost;
+ const area=Math.PI*(dia/2)**2,dies=area/A,y=1/(1+D*A)**N,cpd=cost/(dies*y);
+ const s=$("wSvg");s.innerHTML="";const cx=120,cy=120,R=112,sc=R/(dia/2),side=Math.sqrt(A)*sc;
+ el("circle",{cx,cy,r:R,fill:"var(--sunk)",stroke:"var(--ink)","stroke-width":1.5},s);
+ const n=Math.ceil(R/side)+1;let full=0;seed=11;
+ for(let i=-n;i<n;i++)for(let j=-n;j<n;j++){const x=cx+i*side,yy=cy+j*side;const cs=[[x,yy],[x+side,yy],[x,yy+side],[x+side,yy+side]];const din=cs.filter(([a,b])=>Math.hypot(a-cx,b-cy)<=R).length;if(!din)continue;
+  const ok=din===4;if(ok)full++;const bad=ok&&rnd()>y;
+  el("rect",{x:x+.6,y:yy+.6,width:Math.max(side-1.2,.5),height:Math.max(side-1.2,.5),fill:ok?(bad?"var(--bad-soft)":"var(--copper-soft)"):"var(--line)",stroke:ok?(bad?"var(--bad)":"var(--copper)"):"none","stroke-width":.6},s)}
+ $("wOut").innerHTML=`<div class="formula" style="white-space:pre-wrap">Wafer area = π(${dia/2})² = ${area.toFixed(2)} cm²
+Dies ≈ ${area.toFixed(2)} / ${A.toFixed(1)} = <b>${dies.toFixed(1)}</b>
+Yield = 1/(1 + ${D.toFixed(3)}×${A.toFixed(1)})^${N} = <b>${y.toFixed(3)}</b>
+Cost/die = ${cost} / (${dies.toFixed(1)} × ${y.toFixed(3)}) = <b>${cpd.toFixed(3)}</b></div><p style="font-size:14px;color:var(--muted);margin-top:8px">Whole dies actually drawn: ${full}, versus the area estimate of ${dies.toFixed(0)}. Red dies are failed ones (a random sample at this yield).</p>`}
+ ["wD","wA","wDef","wN","wCost"].forEach(i=>$(i).oninput=upd);upd()})();
+
+/* means */
+(function(){function upd(){const a1=+$("mA1").value,a2=+$("mA2").value,b1=+$("mB1").value,b2=+$("mB2").value;if(!(a1>0&&a2>0&&b1>0&&b2>0)){$("mOut").textContent="Enter positive times.";return}
+ const rB=[a1/b1,a2/b2],rA=[b1/a1,b2/a2];const am=r=>(r[0]+r[1])/2,gm=r=>Math.sqrt(r[0]*r[1]);
+ const verdict=(x,who,other)=>x>1.0001?`${who} is ${x.toFixed(2)}× faster`:x<0.9999?`${other} is ${(1/x).toFixed(2)}× faster`:"equal";
+ $("mOut").innerHTML=`<div class="tablewrap"><table><thead><tr><th>Reference</th><th>Ratios of the other</th><th>Arithmetic mean</th><th>Geometric mean</th></tr></thead><tbody>
+ <tr><td>A</td><td class="m">B: ${sig(rB[0],3)}, ${sig(rB[1],3)}</td><td>${sig(am(rB),3)} → ${verdict(am(rB),"B","A")}</td><td>${sig(gm(rB),3)} → ${verdict(gm(rB),"B","A")}</td></tr>
+ <tr><td>B</td><td class="m">A: ${sig(rA[0],3)}, ${sig(rA[1],3)}</td><td>${sig(am(rA),3)} → ${verdict(am(rA),"A","B")}</td><td>${sig(gm(rA),3)} → ${verdict(gm(rA),"A","B")}</td></tr></tbody></table></div>
+ <p style="margin-top:10px;font-size:15px">${(am(rB)>1)===(am(rA)>1)&&Math.abs(am(rB)-1)>1e-4?'<span class="pill no">contradiction</span> The arithmetic mean says each machine beats the other.':'<span class="pill ok">consistent</span> No contradiction with these numbers. Try 10/100 and 100/10.'}</p>`}
+ ["mA1","mA2","mB1","mB2"].forEach(i=>$(i).oninput=upd);upd()})();
+
+/* past-question types */
+const PQ=[
+ {t:"A. CPU time / CPI / clock",n:6,qs:"Q2, Q3, Q5, Q7, Q14, Q15",calc:1,recipe:["Write T = IC × CPI / f first.","Convert units: GHz → ×10⁹, ps → ×10⁻¹².","For a mix, weight each CPI by its fraction.","For “find the new X”, write the old and new equations and cancel what stays the same."],solved:{q:"Q3c: P1 at 3 GHz must cut time by 30% while CPI rises 20%. New clock rate?",a:"0.7 × IC·CPI / f = IC·(1.2 CPI) / f_new\nf_new = f × 1.2 / 0.7 = 3 × 1.714 = <b>5.14 GHz</b>"},marks:"Formula · ratio set-up · unit · final value"},
+ {t:"B. SPEC & means",n:4,qs:"Q2(3), Q7f, Q8, Q11",calc:1,recipe:["SPECratio = reference ÷ execution for each program.","Multiply the ratios and take the n-th root.","For “why GM?”, show the AM verdict flips with the reference."],solved:{q:"Q8: A = (10 s, 100 s), B = (100 s, 10 s). Is the AM fair?",a:"Ref A → B ratios 0.1, 10 → AM 5.05 (B wins)\nRef B → A ratios 0.1, 10 → AM 5.05 (A wins)  ✗\nGM = √(0.1×10) = <b>1</b> both ways  ✓"},marks:"Both cases computed · contradiction named · GM conclusion"},
+ {t:"C. Amdahl's law",n:2,qs:"Q4, Q12",calc:1,recipe:["Split time into affected + unaffected.","Target = affected/n + unaffected; solve for n.","If target ≤ unaffected → impossible; give max speedup."],solved:{q:"Q12a: CPU 25%, GPU 60%, I/O 15%. 3× by improving the GPU only?",a:"33.33 = 25 + 15 + 60/n → 60/n = −6.67\n<b>Impossible</b>; max = 100/40 = 2.5×"},marks:"Equation · negative/zero n spotted · reason · max speedup"},
+ {t:"D. Power & power wall",n:3,qs:"Q6, Q9, Q13",calc:1,recipe:["Ratio = C ratio × (V ratio)² × f ratio.","Read the % words: “x% less” → 1 − x/100.","C = P / (V² f). Static P = V × I_leak."],solved:{q:"Q6: 14.3% less load, 81.3% of V and f.",a:"0.857 × 0.813² × 0.813 = 0.4605\nPower reduced by <b>53.9%</b>"},marks:"Correct factors · V squared · % stated"},
+ {t:"E. Wafer / yield / cost",n:1,qs:"Q1",calc:0,recipe:["Wafer area π(d/2)² → die area.","Yield = 1/(1 + D × A)^N.","Cost = wafer cost / (dies × yield)."],solved:{q:"Q1 (Y): 20 cm, 100 dies, D = 0.031, cost 15, N = 2.",a:"Die = 314.16/100 = 3.142 cm²\nYield = 1/(1 + 0.031×3.142)² = <b>0.830</b>\nCost = 15/(100 × 0.830) = <b>0.181</b>"},marks:"Area · yield · cost, 3–4 sig. figs"},
+ {t:"F. MIPS trap",n:2,qs:"Q5, Q10",calc:0,recipe:["MIPS = f / (CPI × 10⁶) or IC / (T × 10⁶).","Then compute execution time.","Conclude with time, and say why MIPS misleads."],solved:{q:"Q10: Alex 10×10⁹ instr in 5 s; Ben 15×10⁹ in 6.8 s.",a:"MIPS 2000 vs 2206 (Ben higher)\nTime 5.0 vs 6.8 s → Alex <b>1.36×</b> faster"},marks:"Both MIPS · both times · reason: different ISA"},
+ {t:"G. Short theory",n:5,qs:"Q1A–B, Q8, Q9, Q10",calc:0,recipe:["Definition in one line.","One reason or example linked to a formula.","Use the chapter's key terms."],solved:{q:"Q9: why did the industry move to multicore?",a:"Clock ↑ → power ↑ (C V² f) → voltage lowered 5 V → 1 V\n→ leakage below ~1 V, cooling limit → <b>power wall</b> (~2004)\n→ multicore: more throughput, needs parallel code"},marks:"Four steps in order · power formula cited"}];
+(function(){const s=$("freqSvg");const L=200,W=380;PQ.forEach((p,i)=>{const y=8+i*28;el("text",{x:L-10,y:y+15,"text-anchor":"end",style:"font-size:13px"},s,p.t);
+ el("rect",{x:L,y,width:p.n/6*W,height:20,rx:3,fill:p.calc?"var(--copper)":"var(--copper-soft)",stroke:"var(--copper)"},s);el("text",{x:L+p.n/6*W+8,y:y+15,style:"font-size:13px;font-weight:700"},s,p.n+" Qs")});
+ $("pqTypes").innerHTML=PQ.map((p,i)=>`<details><summary><span class="q">${p.qs}</span>${p.t}</summary><div class="dbody"><p><b>Recipe</b></p><ol>${p.recipe.map(r=>`<li>${r}</li>`).join("")}</ol><p><b>Solved:</b> ${p.solved.q}</p><div class="formula">${p.solved.a}</div><p style="font-size:14px;color:var(--muted)"><b>Marks for:</b> ${p.marks}</p><button type="button" data-go="${i}">Practise this type</button></div></details>`).join("");
+ $("pqTypes").addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(!b)return;const map={0:"cpu",1:"spec",2:"amdahl",3:"power",4:"yield",5:"mips",6:"cpu"};$("ptype").value=map[b.dataset.go];newQ();$("practice").scrollIntoView()})})();
+
+/* practice generator */
+const R=(a,b,st=1)=>{const n=Math.round((b-a)/st);return +(a+st*Math.floor(Math.random()*(n+1))).toFixed(6)};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const GEN={
+ cpu:{name:"CPU time & weighted CPI",make(){const f=R(2,4,0.1),fr=pick([[.4,.3,.2,.1],[.3,.5,.1,.1],[.5,.2,.2,.1],[.25,.25,.25,.25]]),cp=[R(1,3),R(2,5),R(1,4),R(3,8)],IC=R(1,9)*10**pick([6,8,9]);
+  const cpi=fr.reduce((s,x,i)=>s+x*cp[i],0),T=IC*cpi/(f*1e9);
+  return{text:`A program executes ${sig(IC)} instructions on a ${f} GHz processor. The instruction mix is ALU ${fr[0]*100}%, load ${fr[1]*100}%, store ${fr[2]*100}%, branch ${fr[3]*100}% with CPIs ${cp.join(", ")}. Find the average CPI and the execution time.`,
+  fields:[{l:"Average CPI",a:cpi},{l:"Execution time (seconds)",a:T,u:"s"}],
+  steps:`CPI = ${fr.map((x,i)=>`${x}×${cp[i]}`).join(" + ")} = <b>${sig(cpi)}</b>\nT = IC × CPI / f = ${sig(IC)} × ${sig(cpi)} / ${f}×10⁹ = <b>${sig(T)} s</b> (${fmtTime(T)})`}}},
+ clock:{name:"Find the new clock rate",make(){const t=R(5,40,5),c=R(5,40,5),f=R(2,4,0.5);const fn=f*(1+c/100)/(1-t/100);
+  return{text:`A processor runs at ${f} GHz. Designers want to cut execution time by ${t}%, but the change raises CPI by ${c}%. The instruction count stays the same. What clock rate is needed?`,fields:[{l:"New clock rate (GHz)",a:fn}],
+  steps:`${(1-t/100).toFixed(2)} × IC·CPI / f = IC·(${(1+c/100).toFixed(2)} CPI) / f_new\nf_new = f × ${(1+c/100).toFixed(2)} / ${(1-t/100).toFixed(2)} = ${f} × ${sig((1+c/100)/(1-t/100))} = <b>${sig(fn)} GHz</b>`}}},
+ cycles:{name:"Clock cycles, target time",make(){const T=R(4,20,1),f=R(1.5,4,0.5),k=R(1.1,1.6,0.1),T2=R(2,T-1,1);const cyc=T*f*1e9,fb=k*cyc/T2;
+  return{text:`Computer A runs a program in ${T} s with a ${f} GHz clock. Computer B must run it in ${T2} s but needs ${k}× as many clock cycles as A. Find A's clock cycles and B's clock rate.`,fields:[{l:"Clock cycles on A",a:cyc},{l:"Clock rate of B (GHz)",a:fb/1e9}],
+  steps:`Cycles_A = ${T} × ${f}×10⁹ = <b>${sig(cyc)}</b>\nCycles_B = ${k} × ${sig(cyc)} = ${sig(k*cyc)}\nf_B = ${sig(k*cyc)} / ${T2} s = <b>${sig(fb/1e9)} GHz</b>`}}},
+ timing:{name:"Timing diagram (Q7 style)",make(){const p=pick([100,125,200,250,500]),ca=R(2,5),cs=R(1,4),na=R(5,30),ns=R(2,10);const cyc=na*ca+ns*cs,T=cyc*p;
+  return{text:`In a clock diagram each cycle lasts ${p} ps. An add spans ${ca} cycles and a sub spans ${cs} cycles. The program runs ${na} adds and ${ns} subs. Find the frequency (GHz), the average CPI and the execution time (ps).`,fields:[{l:"Frequency (GHz)",a:1000/p},{l:"Average CPI",a:cyc/(na+ns)},{l:"Execution time (ps)",a:T}],
+  steps:`f = 1 / ${p} ps = <b>${sig(1000/p)} GHz</b>\nCPI = (${na}×${ca} + ${ns}×${cs}) / ${na+ns} = ${cyc}/${na+ns} = <b>${sig(cyc/(na+ns))}</b>\nT = ${cyc} cycles × ${p} ps = <b>${T} ps</b>`}}},
+ amdahl:{name:"Amdahl's law",make(){const T=R(50,300,10),fpct=R(40,85,5),aff=T*fpct/100,un=T-aff,s=pick([1.5,2,2.5,3,4,5]);const tgt=T/s,need=tgt-un;const poss=need>1e-9;
+  return{text:`A program takes ${T} s; ${aff} s of it is floating-point work. How much faster must the FP part become for the program to run ${s}× faster? Enter 0 if impossible. Also give the maximum possible speedup.`,fields:[{l:"Required improvement n (0 = impossible)",a:poss?aff/need:0},{l:"Maximum speedup",a:T/un}],
+  steps:`Target = ${T}/${s} = ${sig(tgt)} s\n${sig(tgt)} = ${aff}/n + ${un}  →  ${aff}/n = ${sig(need)}\n${poss?`n = <b>${sig(aff/need)}</b>`:`<b>Impossible</b>: the unaffected ${un} s already exceeds ${sig(tgt)} s`}\nMax speedup = ${T}/${un} = <b>${sig(T/un)}×</b>`}}},
+ power:{name:"Power ratio",make(){const c=R(5,25,1),v=R(5,25,1),fu=pick([-1,1]),f=R(5,20,1);const fr=1+fu*f/100;const r=(1-c/100)*(1-v/100)**2*fr;
+  return{text:`A new processor has ${c}% less capacitive load than the old one. Its voltage is reduced by ${v}% and its frequency is ${fu>0?"increased":"reduced"} by ${f}%. What fraction of the old dynamic power does it use?`,fields:[{l:"P_new / P_old (e.g. 0.52)",a:r}],
+  steps:`P_new/P_old = ${(1-c/100).toFixed(2)} × ${(1-v/100).toFixed(2)}² × ${fr.toFixed(2)} = <b>${sig(r)}</b>\n→ ${r<1?`${sig((1-r)*100,3)}% less`:`${sig((r-1)*100,3)}% more`} power`}}},
+ cap:{name:"Capacitance & static power",make(){const P=R(40,130,5),V=R(0.8,1.4,0.05),f=R(2,4.5,0.5),st=R(5,30,1);const C=P/(V*V*f*1e9);
+  return{text:`A processor dissipates ${P} W of dynamic power and ${st} W of static power at ${V} V and ${f} GHz. Find the capacitive load and the static share of total power (as a decimal).`,fields:[{l:"Capacitive load (F)",a:C},{l:"Static / total",a:st/(P+st)}],
+  steps:`C = P/(V² f) = ${P} / (${V}² × ${f}×10⁹) = <b>${sig(C)} F</b>\nStatic share = ${st}/(${P}+${st}) = <b>${sig(st/(P+st))}</b>`}}},
+ yield:{name:"Yield & cost per die",make(){const d=pick([15,20,25,30]),A=R(1,4,0.25),D=R(0.01,0.05,0.005),N=2,c=R(10,60,5);const area=Math.PI*(d/2)**2,dies=area/A,y=1/(1+D*A)**N,cpd=c/(dies*y);
+  return{text:`A ${d} cm wafer costs ${c}. Die area ${A} cm², ${D} defects/cm², N = ${N}. Find dies per wafer (area estimate, no rounding), the yield and the cost per die.`,fields:[{l:"Dies per wafer",a:dies},{l:"Yield",a:y},{l:"Cost per die",a:cpd}],
+  steps:`Area = π(${d/2})² = ${sig(area)} cm²   dies ≈ ${sig(area)}/${A} = <b>${sig(dies)}</b>\nYield = 1/(1 + ${D}×${A})² = <b>${sig(y)}</b>\nCost = ${c}/(${sig(dies)} × ${sig(y)}) = <b>${sig(cpd)}</b>`}}},
+ spec:{name:"SPECratio & geometric mean",make(){const n=pick([3,4]);const ref=[],ex=[];for(let i=0;i<n;i++){ex.push(R(5,60,1));ref.push(R(50,400,10))}const r=ref.map((x,i)=>x/ex[i]),gm=r.reduce((a,b)=>a*b,1)**(1/n);
+  return{text:`${n} benchmarks have execution times ${ex.join(" s, ")} s and reference times ${ref.join(" s, ")} s. Find the SPEC score (geometric mean of SPECratios).`,fields:[{l:"SPEC score",a:gm}],
+  steps:`Ratios = ${r.map(x=>sig(x,4)).join(", ")}\nGM = (${r.map(x=>sig(x,4)).join(" × ")})^(1/${n}) = <b>${sig(gm)}</b>`}}},
+ mips:{name:"MIPS vs execution time",make(){const f1=R(2,4,0.5),c1=R(0.8,2,0.1),i1=R(2,9,1),f2=R(2,4,0.5),c2=R(0.8,2.5,0.1),i2=R(1,6,1);const m1=f1*1e3/c1,m2=f2*1e3/c2,t1=i1*c1/f1,t2=i2*c2/f2;
+  return{text:`M1: ${f1} GHz, CPI ${c1}, program needs ${i1}×10⁹ instructions. M2 (different ISA): ${f2} GHz, CPI ${c2}, needs ${i2}×10⁹ instructions. Find both MIPS ratings and both execution times.`,fields:[{l:"MIPS of M1",a:m1},{l:"MIPS of M2",a:m2},{l:"Time on M1 (s)",a:t1},{l:"Time on M2 (s)",a:t2}],
+  steps:`MIPS = f/(CPI×10⁶): M1 = <b>${sig(m1)}</b>, M2 = <b>${sig(m2)}</b>\nT = IC×CPI/f: M1 = <b>${sig(t1)} s</b>, M2 = <b>${sig(t2)} s</b>\n${t1<t2?"M1":"M2"} is ${sig(Math.max(t1,t2)/Math.min(t1,t2),3)}× faster${(m1>m2)!==(t1<t2)?" even though it has the lower MIPS":""}.`}}}
+};
+let curQ=null,pstats=store.get("ch1pstats",{right:0,tried:0});
+(function(){const sel=$("ptype");sel.innerHTML=`<option value="any">Any type</option>`+Object.keys(GEN).map(k=>`<option value="${k}">${GEN[k].name}</option>`).join("")})();
+function showScore(){$("pScore").textContent=`${pstats.right} / ${pstats.tried} parts correct`}
+function newQ(){let k=$("ptype").value;if(k==="any")k=pick(Object.keys(GEN));curQ=GEN[k].make();curQ.k=k;curQ.done=false;
+ $("pText").innerHTML=`<span class="pill mid">${GEN[k].name}</span><br>${curQ.text}`;
+ $("pFields").innerHTML=curQ.fields.map((f,i)=>`<div class="field" id="pf${i}"><label for="pi${i}">${f.l}</label><input type="text" inputmode="decimal" id="pi${i}" autocomplete="off" placeholder="e.g. 1.25 or 3e9"><div class="fb" id="pb${i}"></div></div>`).join("");
+ $("pSteps").hidden=true;$("pSteps").innerHTML=`<div class="formula" style="white-space:pre-wrap">${curQ.steps}</div>`}
+function parseNum(s){s=String(s).trim().replace(/,/g,"").replace(/×\s*10\^?/g,"e").replace(/x\s*10\^/gi,"e");const v=Number(s);return isFinite(v)?v:NaN}
+$("pNew").onclick=newQ;$("ptype").onchange=newQ;$("pShow").onclick=()=>{$("pSteps").hidden=false};
+$("pCheck").onclick=()=>{if(!curQ)return;let right=0;curQ.fields.forEach((f,i)=>{const v=parseNum($("pi"+i).value);const ok=f.a===0?Math.abs(v)<1e-9:Math.abs(v-f.a)/Math.abs(f.a)<=0.02;
+ $("pf"+i).className="field "+(ok?"ok":"no");$("pb"+i).className="fb "+(ok?"ok":"no");$("pb"+i).textContent=ok?"Correct":isNaN(v)?"Enter a number":"Not quite. Try again or open the solution.";if(ok)right++});
+ if(!curQ.done){pstats.tried+=curQ.fields.length;pstats.right+=right;curQ.done=true;store.set("ch1pstats",pstats);showScore()}
+ if(right===curQ.fields.length)$("pSteps").hidden=false};
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id&&e.target.id.startsWith("pi"))$("pCheck").click()});
+showScore();newQ();
+
+/* quiz */
+const QZ=[
+ {q:"Computer A runs a program in 10 s, B in 15 s. Which statement is correct?",o:["A is 1.5 times faster than B","A is 5 times faster than B","B is 1.5 times faster than A","A is 0.67 times faster than B"],a:0,e:"n = Time_B / Time_A = 15/10 = 1.5. Divide, never subtract."},
+ {q:"Which factor does the ISA NOT affect?",o:["Instruction count","CPI","Clock rate","None: the ISA can affect all three"],a:3,e:"The ISA affects IC, CPI and clock rate. The algorithm affects IC (and possibly CPI); the compiler affects IC and CPI."},
+ {q:"CPI classes 1, 2, 3. Sequence: 2 A, 1 B, 2 C. Average CPI?",o:["2.0","1.5","2.5","6"],a:0,e:"Cycles = 2(1) + 1(2) + 2(3) = 10; IC = 5; CPI = 10/5 = 2.0."},
+ {q:"Capacitive load −15%, voltage −15%, frequency −15%. New dynamic power?",o:["0.52 of the old","0.61 of the old","0.85 of the old","0.72 of the old"],a:0,e:"0.85 × 0.85² × 0.85 = 0.85⁴ = 0.52."},
+ {q:"Multiply takes 80 s of a 100 s program. To make it 5× faster overall, multiply must be:",o:["Impossible to reach","16× faster","20× faster","5× faster"],a:0,e:"20 = 80/n + 20 needs 80/n = 0; no finite n works. (4× overall needs n = 16.)"},
+ {q:"Why does SPEC summarise with the geometric mean?",o:["Its comparison does not depend on the reference machine","It is always larger than the arithmetic mean","It weights long programs more","It ignores outliers"],a:0,e:"GM(X/ref) ÷ GM(Y/ref) = GM(X/Y): the reference cancels."},
+ {q:"Why did clock rates stop rising around 2004?",o:["Power and heat limits, with voltage unable to drop further due to leakage","Moore's law ended completely","Compilers could not use faster clocks","DRAM became too slow"],a:0,e:"That is the power wall: P = C V² f, voltage stuck near 1 V, cooling at its limit."},
+ {q:"A die-per-wafer count is written with ≈ because:",o:["Partial dies at the round edge are wasted","Yield is never 100%","Wafers shrink in the furnace","Dies are tested after cutting"],a:0,e:"Wafer area ÷ die area counts the partial edge dies too, so it overestimates."},
+ {q:"Which memory is volatile?",o:["DRAM","Flash","Magnetic disk","Optical disk"],a:0,e:"DRAM and SRAM lose data without power. Flash and disk are nonvolatile."},
+ {q:"Adding more processors to a server that handles separate tasks improves:",o:["Throughput only","Response time only","Both","Neither"],a:0,e:"Each task still takes as long; more tasks finish per second."},
+ {q:"A 250 ps clock period is a clock rate of:",o:["4 GHz","2.5 GHz","250 MHz","40 GHz"],a:0,e:"f = 1 / (250×10⁻¹² s) = 4×10⁹ Hz."},
+ {q:"Which is NOT one of the seven great ideas (RISC-V 2nd ed.)?",o:["Make the rare case fast","Performance via prediction","Hierarchy of memories","Dependability via redundancy"],a:0,e:"The idea is make the COMMON case fast."},
+ {q:"M1 has 4444 MIPS, M2 has 4000 MIPS on the same task. Which is faster?",o:["You can't tell from MIPS; compare execution time","M1","M2","They are equal"],a:0,e:"In Practice Q5 the lower-MIPS machine finished 4.5× sooner because it ran far fewer instructions."},
+ {q:"Static power in CMOS comes from:",o:["Leakage current: P = V × I_leak","Switching: P = C V² f","Clock skew","Cache misses"],a:0,e:"Static power flows even when transistors are not switching, and grows in share as voltage falls."}];
+(function(){let order=[],pos=0,score=0,answered=false,mode="all";let wrong=new Set(store.get("ch1wrong",[]));
+ function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+ function start(m){mode=m;order=m==="wrong"?[...wrong]:shuffle(QZ.map((_,i)=>i)).slice(0,12);pos=0;score=0;render()}
+ function render(){const box=$("quiz");if(!order.length){box.innerHTML=`<p>No saved mistakes. Nice.</p><div class="qnav"><button type="button" class="pri" id="qAll">Start the test</button></div>`;$("qAll").onclick=()=>start("all");return}
+  if(pos>=order.length){box.innerHTML=`<div class="big">${score} / ${order.length}</div><p style="margin-top:8px">${score===order.length?"Full marks.":"Review the explanations, then retry the ones you missed."}</p><div class="qnav"><button type="button" class="pri" id="qAgain">New test</button><button type="button" id="qWrong" ${wrong.size?"":"disabled"}>Retry my mistakes (${wrong.size})</button></div>`;$("qAgain").onclick=()=>start("all");$("qWrong").onclick=()=>start("wrong");return}
+  answered=false;const qi=order[pos],q=QZ[qi];const idx=shuffle(q.o.map((_,i)=>i));
+  box.innerHTML=`<div class="score" style="margin:0 0 8px">Question ${pos+1} of ${order.length}${mode==="wrong"?" · mistakes":""} · score ${score}</div><div class="qq">${q.q}</div><div class="opts">${idx.map(i=>`<button type="button" data-i="${i}">${q.o[i]}</button>`).join("")}</div><div id="qExpl"></div><div class="qnav"><button type="button" class="pri" id="qNext" disabled>Next</button><button type="button" id="qWrong2" ${wrong.size?"":"disabled"}>Retry my mistakes (${wrong.size})</button></div>`;
+  box.querySelectorAll(".opts button").forEach(b=>b.onclick=()=>{if(answered)return;answered=true;const i=+b.dataset.i;const ok=i===q.a;
+   box.querySelectorAll(".opts button").forEach(x=>{if(+x.dataset.i===q.a)x.classList.add("right")});if(!ok)b.classList.add("wrong");
+   if(ok){score++;wrong.delete(qi)}else wrong.add(qi);store.set("ch1wrong",[...wrong]);
+   $("qExpl").innerHTML=`<div class="expl"><b>${ok?"Correct.":"Not quite."}</b> ${q.e}</div>`;$("qNext").disabled=false;$("qNext").focus()});
+  $("qNext").onclick=()=>{pos++;render()};$("qWrong2").onclick=()=>start("wrong")}
+ start("all")})();
+
+/* flashcards */
+(function(){let deck=DEFS.map((_,i)=>i),p=0;const fc=$("fc");
+ function show(){fc.classList.remove("flipped");const d=DEFS[deck[p]];$("fcF").textContent=d[0];$("fcB").innerHTML=`<div>${d[1]}<br><span class="m" style="color:var(--copper)">${d[2]}</span></div>`;$("fcPos").textContent=`${p+1} / ${deck.length}`}
+ fc.onclick=()=>fc.classList.toggle("flipped");fc.onkeydown=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();fc.classList.toggle("flipped")}};
+ $("fcNext").onclick=()=>{p=(p+1)%deck.length;show()};$("fcPrev").onclick=()=>{p=(p-1+deck.length)%deck.length;show()};
+ $("fcShuf").onclick=()=>{for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]]}p=0;show()};show()})();
+</script>
+
+</body></html>

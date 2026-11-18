@@ -1,0 +1,1422 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>[hidden]{display:none!important}body{margin:0}</style>
+<title>CSE340 Ch 3 Floating Point</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600;700&display=swap">
+<style>
+/* Layout: sticky header with level tabs, one view at a time, tools are framed "instrument" panels; the bit strip (S|E|F) is the visual signature */
+:root{
+  --bg:#f2f5f6; --surface:#ffffff; --sunk:#e9eef0; --ink:#0f1a20; --muted:#52636d; --line:#d3dce0;
+  --accent:#2457b8; --accent-soft:#e3ebfa;
+  --sgn:#b3264f; --sgn-soft:#f8e2e9;
+  --exp:#0a7586; --exp-soft:#dcf0f3;
+  --frc:#8f6300; --frc-soft:#f6ebcf;
+  --good:#1d7a3d; --good-soft:#e0f2e5; --bad:#b3332b; --bad-soft:#f9e0de; --warn:#8f6300; --warn-soft:#fbf1d8;
+  --pad:#c2410c;
+  --display:"Chakra Petch","Arial Narrow",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+  --hdr:118px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0c1317; --surface:#131d23; --sunk:#0f181d; --ink:#e2eaee; --muted:#93a4ae; --line:#26343c;
+  --accent:#86aff5; --accent-soft:#1a2a45;
+  --sgn:#f07c9d; --sgn-soft:#3a1824; --exp:#4fc4d5; --exp-soft:#0e2f38; --frc:#e3b54e; --frc-soft:#33280f;
+  --good:#5ccb82; --good-soft:#11301c; --bad:#f28d85; --bad-soft:#3a1714; --warn:#e3b54e; --warn-soft:#33280f; --pad:#fb923c;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c1317; --surface:#131d23; --sunk:#0f181d; --ink:#e2eaee; --muted:#93a4ae; --line:#26343c;
+  --accent:#86aff5; --accent-soft:#1a2a45;
+  --sgn:#f07c9d; --sgn-soft:#3a1824; --exp:#4fc4d5; --exp-soft:#0e2f38; --frc:#e3b54e; --frc-soft:#33280f;
+  --good:#5ccb82; --good-soft:#11301c; --bad:#f28d85; --bad-soft:#3a1714; --warn:#e3b54e; --warn-soft:#33280f; --pad:#fb923c;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--body);overflow-x:clip}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+a{color:var(--accent)}
+code,.mono{font-family:var(--mono);font-size:.92em}
+h1,h2,h3{font-family:var(--display);line-height:1.15;text-wrap:balance;margin:0}
+h2{font-size:clamp(24px,4vw,32px)}
+h3{font-size:20px}
+p{margin:0;max-width:68ch}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;flex-direction:column;gap:8px;padding-block:10px 0}
+.brand{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between}
+.brand .t{display:flex;flex-direction:column;min-width:0}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.brand b{font-family:var(--display);font-size:20px;line-height:1.1}
+.ctrls{display:flex;gap:8px;flex-wrap:wrap}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:thin}
+.tabs a{flex:0 0 auto;text-decoration:none;color:var(--muted);font-size:14px;padding:8px 12px 10px;border-bottom:3px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.tabs a .n{font-family:var(--mono);font-size:11px;color:var(--muted);opacity:.8}
+.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:700}
+.tabs a.seen .n::after{content:" ✓";color:var(--good)}
+.tabs a:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+body.cram .tabs a:not([data-cram]){display:none}
+
+/* buttons */
+.btn{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer;min-height:36px}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,.chip:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:700}
+.btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--sunk);color:var(--ink);border-radius:99px;padding:4px 11px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+.chip.on{background:var(--accent-soft);border-color:var(--accent)}
+input[type=text],input[type=number],select{font:inherit;font-size:15px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 9px;min-height:38px;min-width:0}
+input.mono{font-family:var(--mono)}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--muted);min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+
+/* views */
+main{padding-block:28px 80px}
+.view{display:flex;flex-direction:column;gap:28px}
+.view[hidden]{display:none!important}
+.lead{font-size:18px;color:var(--muted)}
+.vhead{display:flex;flex-direction:column;gap:8px}
+.vhead .eyebrow{color:var(--accent)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.tool{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:0}
+.tool>.th{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 16px;background:var(--sunk);border-bottom:1px solid var(--line)}
+.tool>.th h3{font-size:18px}
+.tool>.th .tag{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tool>.tb{padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.notice{font-size:14px;color:var(--muted)}
+.notice b{color:var(--ink)}
+.callout{border-radius:10px;padding:12px 14px;font-size:15px;border:1px solid var(--line);background:var(--sunk);display:flex;flex-direction:column;gap:6px}
+.callout.warn{background:var(--warn-soft);border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+.callout.good{background:var(--good-soft);border-color:color-mix(in srgb,var(--good) 45%,transparent)}
+.callout b.h{font-family:var(--display);font-size:16px}
+ul.clean,ol.clean{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--sunk);font-weight:700}
+tr:last-child td{border-bottom:0}
+td.num,th.num{font-variant-numeric:tabular-nums}
+pre.mermaid{overflow-x:auto;margin:0;background:transparent;text-align:center}
+.math{font-family:var(--mono);font-size:15px;background:var(--sunk);border-radius:8px;padding:10px 12px;overflow-x:auto;white-space:pre;line-height:1.7}
+sup{font-size:.72em}
+
+/* bit strip */
+.sef{display:inline-flex;gap:0;font-family:var(--mono);font-weight:600;border-radius:6px;overflow:hidden;vertical-align:middle}
+.sef span{padding:1px 6px}
+.s-c{color:var(--sgn)} .e-c{color:var(--exp)} .f-c{color:var(--frc)}
+.s-bg{background:var(--sgn-soft);color:var(--sgn)} .e-bg{background:var(--exp-soft);color:var(--exp)} .f-bg{background:var(--frc-soft);color:var(--frc)}
+.pad{color:var(--pad);font-weight:700}
+.drop{color:var(--muted);text-decoration:line-through;opacity:.7}
+.strip{display:flex;flex-direction:column;gap:6px;min-width:0}
+.strip .lbls,.strip .cells{display:grid;gap:2px}
+.strip .cells button{font-family:var(--mono);font-weight:700;font-size:15px;border:1px solid transparent;border-radius:4px;height:36px;min-width:0;padding:0;cursor:pointer;color:inherit}
+.strip .cells button.S{background:var(--sgn-soft);color:var(--sgn);border-color:color-mix(in srgb,var(--sgn) 35%,transparent)}
+.strip .cells button.E{background:var(--exp-soft);color:var(--exp);border-color:color-mix(in srgb,var(--exp) 35%,transparent)}
+.strip .cells button.F{background:var(--frc-soft);color:var(--frc);border-color:color-mix(in srgb,var(--frc) 35%,transparent)}
+.strip .cells button[aria-pressed="true"]{filter:saturate(1.4)}
+.strip .cells button:hover{outline:2px solid var(--accent);outline-offset:-2px}
+.strip .lbls div{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:2px 4px;border-top:3px solid;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.strip .lbls .S{border-color:var(--sgn);color:var(--sgn)} .strip .lbls .E{border-color:var(--exp);color:var(--exp)} .strip .lbls .F{border-color:var(--frc);color:var(--frc)}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:10px}
+.readout div{background:var(--sunk);border-radius:8px;padding:8px 10px;min-width:0}
+.readout small{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.readout b{font-family:var(--mono);font-size:15px;word-break:break-all}
+.big{font-family:var(--mono);font-size:clamp(18px,3vw,24px);font-weight:700;word-break:break-all}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:28px;align-items:center}
+@media (max-width:800px){.hero{grid-template-columns:1fr}}
+.hero h1{font-size:clamp(34px,6.4vw,56px);letter-spacing:-.01em}
+.hero .lead{margin-top:12px}
+.formula{font-family:var(--mono);font-size:clamp(15px,2.4vw,19px);font-weight:600;padding:14px 16px;border-radius:12px;background:var(--surface);border:1px solid var(--line);overflow-x:auto;white-space:nowrap}
+.hero-strip{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.hero-strip .cells button{height:30px;font-size:13px;cursor:default}
+
+/* steps */
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;counter-reset:st}
+.steps>li{counter-increment:st;display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;align-items:start;background:var(--sunk);border-radius:10px;padding:10px 12px;border-left:4px solid var(--line)}
+.steps>li::before{content:counter(st);font-family:var(--display);font-weight:700;font-size:16px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line)}
+.steps>li>div{display:flex;flex-direction:column;gap:6px;min-width:0}
+.steps>li b.k{font-family:var(--display);font-size:16px}
+.steps.compact{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:10px}
+.steps>li.ok{border-left-color:var(--good)} .steps>li.bad{border-left-color:var(--bad)} .steps>li.hl{border-left-color:var(--accent)}
+.steps .math{background:var(--surface)}
+.verdict{display:inline-flex;align-items:center;gap:6px;font-weight:700;border-radius:99px;padding:2px 10px;font-size:14px;width:fit-content}
+.verdict.ok{background:var(--good-soft);color:var(--good)} .verdict.bad{background:var(--bad-soft);color:var(--bad)}
+.result{display:flex;flex-direction:column;gap:8px;border:2px solid var(--accent);border-radius:12px;padding:12px 14px;background:var(--accent-soft)}
+.err{color:var(--bad);font-weight:700}
+.stepper{display:flex;flex-direction:column;gap:10px}
+.stepper .ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.stepper .steps>li.future{display:none}
+.x2{font-family:var(--mono);font-size:14px;border-collapse:collapse;width:auto}
+.x2 td{padding:2px 10px;border:0}
+.x2 td.bit{font-weight:700;color:var(--frc)}
+
+/* ruler */
+.ruler{position:relative;height:56px;margin:8px 4px 30px}
+.ruler .bar{position:absolute;left:0;right:0;top:18px;height:16px;border-radius:4px;overflow:hidden;display:flex}
+.ruler .bar i{display:block;height:100%}
+.ruler .mk{position:absolute;top:2px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;font-family:var(--mono);font-size:12px;font-weight:700;pointer-events:none}
+.ruler .mk::after{content:"";width:2px;height:34px;background:var(--ink)}
+.ruler .tk{position:absolute;top:38px;transform:translateX(-50%);font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+
+/* cards / review */
+.defs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:10px}
+.def{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.def b{font-family:var(--display);font-size:16px}
+.def span{font-size:14.5px}
+.def code{color:var(--muted);font-size:13px}
+.traps li{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;list-style:none}
+.traps{padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.traps .no{color:var(--bad);font-weight:700} .traps .yes{color:var(--good);font-weight:700}
+details.sol{border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+details.sol>summary{cursor:pointer;padding:10px 14px;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:8px}
+details.sol>summary::-webkit-details-marker{display:none}
+details.sol>summary::after{content:"Show";font-weight:400;color:var(--accent);font-size:14px}
+details.sol[open]>summary::after{content:"Hide"}
+details.sol>div{padding:0 14px 14px;display:flex;flex-direction:column;gap:10px}
+.qtype{display:flex;flex-direction:column;gap:14px;border-top:1px solid var(--line);padding-top:24px}
+.qtype .meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pill{font-family:var(--mono);font-size:12px;padding:2px 9px;border-radius:99px;background:var(--sunk);border:1px solid var(--line);color:var(--muted)}
+.freq{display:flex;flex-direction:column;gap:8px}
+.freq .r{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr) 34px;gap:10px;align-items:center;font-size:14px}
+.freq .r i{display:block;height:14px;border-radius:4px;background:var(--accent)}
+.freq .r span.c{font-family:var(--mono);text-align:right}
+
+/* quiz */
+.q{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.q .opts{display:flex;flex-direction:column;gap:6px}
+.q .opts button{text-align:left;font:inherit;font-size:15px;border:1px solid var(--line);background:var(--sunk);color:var(--ink);border-radius:8px;padding:8px 12px;cursor:pointer}
+.q .opts button:hover:not(:disabled){border-color:var(--accent)}
+.q .opts button.right{background:var(--good-soft);border-color:var(--good)}
+.q .opts button.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.q .why{font-size:14.5px;border-left:3px solid var(--accent);padding-left:10px}
+.flash{perspective:1000px;max-width:520px;width:100%}
+.flash .inner{position:relative;min-height:190px;transition:transform .45s;transform-style:preserve-3d;cursor:pointer}
+.flash.flip .inner{transform:rotateY(180deg)}
+.flash .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;border:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;padding:18px;text-align:center}
+.flash .back{transform:rotateY(180deg);background:var(--accent-soft)}
+.flash .face b{font-family:var(--display);font-size:24px}
+@media (prefers-reduced-motion:reduce){.flash .inner{transition:none}}
+.score{font-family:var(--display);font-size:28px}
+.fmtgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}
+.fmtc .eg{font-family:var(--mono);font-size:13.5px;background:var(--sunk);border-radius:8px;padding:8px 10px}
+.fmtc .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tf{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:start;padding:10px 0;border-bottom:1px solid var(--line)}
+.tf:last-child{border-bottom:0}
+.tf .n{font-family:var(--mono);color:var(--muted);font-size:13px;padding-top:3px}
+.tf .btns{display:flex;gap:6px}
+.tf .btns button{min-width:64px}
+.tf .btns button.right{background:var(--good-soft);border-color:var(--good)}
+.tf .btns button.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.tf .why{grid-column:2/-1;font-size:15px;background:var(--sunk);border-radius:8px;padding:8px 10px}
+@media (max-width:560px){.tf{grid-template-columns:24px minmax(0,1fr)}.tf .btns{grid-column:2}}
+footer{border-top:1px solid var(--line);padding-block:20px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <div class="t"><span class="eyebrow">CSE340 · Chapter 3 · slides 9–21</span><b>Floating point, bit by bit</b></div>
+      <div class="ctrls">
+        <button class="btn" id="cramBtn" aria-pressed="false" type="button">Cram mode</button>
+        <button class="btn" id="themeBtn" type="button">Theme: system</button>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs" aria-label="Sections">
+      <a href="#start"><span class="n">01</span>Big picture</a>
+      <a href="#format"><span class="n">02</span>The format</a>
+      <a href="#range"><span class="n">03</span>Range &amp; specials</a>
+      <a href="#encode"><span class="n">04</span>Decimal → IEEE</a>
+      <a href="#decode"><span class="n">05</span>IEEE → decimal</a>
+      <a href="#add"><span class="n">06</span>Addition</a>
+      <a href="#multiply"><span class="n">07</span>Multiplication</a>
+      <a href="#sheet"><span class="n">08</span>Practice Sheet 3</a>
+      <a href="#midterm" data-cram><span class="n">★</span>Midterm</a>
+      <a href="#review" data-cram><span class="n">09</span>Quick review</a>
+      <a href="#test" data-cram><span class="n">10</span>Self-test</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- ============ 01 BIG PICTURE ============ -->
+<section class="view" data-view="start">
+  <div class="hero">
+    <div>
+      <span class="eyebrow">Slides 9–10 · §3.5 Floating Point</span>
+      <h1>Every real number is a sign, a fraction and a power of two.</h1>
+      <p class="lead">Integers can't hold 0.75, 6.02 × 10<sup>23</sup> or 1.2 × 10<sup>−38</sup>. Floating point stores a number like scientific notation, but in base 2. The binary point "floats" to sit right after the first 1.</p>
+    </div>
+    <div class="hero-strip">
+      <span class="eyebrow">Slide 15 · −0.75 in single precision</span>
+      <div class="strip" id="heroStrip"></div>
+      <div class="formula">(−1)<sup>1</sup> × 1.1<sub>2</sub> × 2<sup>126 − 127</sup> = −0.75</div>
+      <div class="legend"><span><i style="background:var(--sgn)"></i>Sign · 1 bit</span><span><i style="background:var(--exp)"></i>Exponent · 8 bits</span><span><i style="background:var(--frc)"></i>Fraction · 23 bits</span></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Scientific notation, two bases</h3>
+      <div class="tbl"><table>
+        <tr><th>Decimal (slide 9)</th><th>Normalized?</th></tr>
+        <tr><td class="mono">–2.34 × 10<sup>56</sup></td><td><span class="verdict ok">yes</span> one non-zero digit before the point</td></tr>
+        <tr><td class="mono">+0.002 × 10<sup>–4</sup></td><td><span class="verdict bad">no</span> leading digit is 0</td></tr>
+        <tr><td class="mono">+987.02 × 10<sup>9</sup></td><td><span class="verdict bad">no</span> three digits before the point</td></tr>
+      </table></div>
+      <p>In binary the rule is the same, and the digit before the point can only be <b>1</b>: <span class="mono">±1.xxxxxxx<sub>2</sub> × 2<sup>yyyy</sup></span>. C calls these types <code>float</code> and <code>double</code>.</p>
+    </div>
+    <div class="card">
+      <h3>IEEE Std 754-1985</h3>
+      <p>Before 1985, every manufacturer stored floats differently, so scientific code gave different answers on different machines. IEEE 754 fixed one layout that almost every CPU now uses.</p>
+      <div class="tbl"><table>
+        <tr><th>Format</th><th class="num">Bits</th><th>C type</th><th class="num">S · E · F</th></tr>
+        <tr><td>Single precision</td><td class="num">32</td><td><code>float</code></td><td class="num mono">1 · 8 · 23</td></tr>
+        <tr><td>Double precision</td><td class="num">64</td><td><code>double</code></td><td class="num mono">1 · 11 · 52</td></tr>
+      </table></div>
+      <p class="notice">Double has more exponent bits (bigger and smaller numbers) <b>and</b> more fraction bits (more precision).</p>
+    </div>
+  </div>
+
+  <div class="tool">
+    <div class="th"><h3>Normalizer</h3><span class="tag">handout · normalized number</span></div>
+    <div class="tb">
+      <p class="notice">Type any binary or decimal number and its current exponent. Watch where the point moves. <b>Shift the point left → add to the exponent. Shift right → subtract.</b></p>
+      <div class="row">
+        <label class="f" style="flex:1 1 200px">Number<input type="text" class="mono" id="nmVal" value="110.111" autocomplete="off"></label>
+        <label class="f" style="width:110px">Base<select id="nmBase"><option value="2">Binary</option><option value="10">Decimal</option></select></label>
+        <label class="f" style="width:120px">× base^<input type="number" id="nmExp" value="35"></label>
+      </div>
+      <div class="chips" id="nmChips"></div>
+      <div id="nmOut"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>How the chapter fits together</h3>
+    <pre class="mermaid">
+flowchart LR
+  A["Real number<br/>e.g. 50.6749"] --> B["Binary<br/>×2 method"]
+  B --> C["Normalize<br/>1.xxx × 2^E"]
+  C --> D["Sign bit S"]
+  C --> E["Biased exponent<br/>E + bias"]
+  C --> F["Fraction<br/>bits after the 1"]
+  D --> G["IEEE word → hex"]
+  E --> G
+  F --> G
+  E --> H{"1 ≤ biased ≤ 2^k − 2 ?"}
+  H -- "too big" --> I["Overflow"]
+  H -- "too small" --> J["Underflow"]
+</pre>
+    <p class="notice">Addition and multiplication (slides 18–21) reuse the same pieces: normalize, check the exponent, then cut the fraction to fit.</p>
+  </div>
+</section>
+
+<!-- ============ 02 FORMAT ============ -->
+<section class="view" data-view="format" hidden>
+  <div class="vhead"><span class="eyebrow">Slide 11 · IEEE floating-point format</span><h2>Three fields, one formula</h2>
+    <p class="lead">Every IEEE number is read with the same formula. Learn it once and every encode and decode question becomes plugging in numbers.</p></div>
+  <div class="formula">x = (−1)<sup class="s-c">S</sup> × (1 + <span class="f-c">Fraction</span>) × 2<sup>(<span class="e-c">Exponent</span> − Bias)</sup></div>
+
+  <div class="grid3">
+    <div class="card"><h3 class="s-c">S · sign</h3><p>1 bit. <b>0</b> means non-negative, <b>1</b> means negative. Nothing else about the sign is stored anywhere.</p></div>
+    <div class="card"><h3 class="e-c">Exponent · biased</h3><p>Stored as <b>actual exponent + bias</b>, so it is always an unsigned number. Single: 8 bits, bias 127. Double: 11 bits, bias 1023.</p></div>
+    <div class="card"><h3 class="f-c">Fraction · after the 1</h3><p>The bits after the leading 1 of the normalized number. The leading 1 itself is <b>not stored</b> (the hidden bit). Single: 23 bits. Double: 52 bits.</p></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Hidden bit</h3>
+      <p>A normalized binary number always starts with <span class="mono">1.</span> (1.0 ≤ significand &lt; 2.0). Since that 1 is always there, IEEE doesn't spend a bit on it. The <b>significand</b> is the fraction with the "1." put back.</p>
+      <div class="math">value  1.0110 × 2⁵
+stored       0110        ← fraction only
+read back  1.0110        ← hardware restores the 1</div>
+    </div>
+    <div class="card">
+      <h3>Bias, for any exponent size</h3>
+      <div class="math">bias = 2^(k − 1) − 1      k = number of exponent bits</div>
+      <div class="tbl"><table>
+        <tr><th>Format</th><th class="num">S</th><th class="num">k (exp)</th><th class="num">f (frac)</th><th class="num">Bias</th></tr>
+        <tr><td>Single 32-bit</td><td class="num">1</td><td class="num">8</td><td class="num">23</td><td class="num">127</td></tr>
+        <tr><td>Double 64-bit</td><td class="num">1</td><td class="num">11</td><td class="num">52</td><td class="num">1023</td></tr>
+        <tr><td>12-bit (handout, Q3)</td><td class="num">1</td><td class="num">4</td><td class="num">7</td><td class="num">7</td></tr>
+        <tr><td>18-bit (Q12)</td><td class="num">1</td><td class="num">5</td><td class="num">12</td><td class="num">15</td></tr>
+        <tr><td>34-bit (Q5, Q6)</td><td class="num">1</td><td class="num">10</td><td class="num">23</td><td class="num">511</td></tr>
+      </table></div>
+      <p class="notice">Custom formats give you <b>one</b> field size. Get the other from <span class="mono">total = 1 + k + f</span>. Example: 18-bit with 12 fraction bits → k = 18 − 1 − 12 = 5.</p>
+    </div>
+  </div>
+
+  <div class="callout warn"><b class="h">Slide typo</b><span>Slide 11 prints "Double: Bias = 1203". The correct value is <b>1023</b> = 2<sup>10</sup> − 1. Slide 13 uses 1023 correctly.</span></div>
+
+  <div class="tool" id="bx">
+    <div class="th"><h3>Bit explorer</h3><span class="tag">click any bit</span></div>
+    <div class="tb">
+      <div class="row">
+        <label class="f" style="flex:1 1 220px">Format<select id="bxFmt"></select></label>
+        <label class="f" style="width:90px" id="bxKw">k (exp)<input type="number" id="bxK" min="2" max="15" value="5"></label>
+        <label class="f" style="width:90px" id="bxFw">f (frac)<input type="number" id="bxF" min="1" max="52" value="10"></label>
+        <label class="f" style="flex:1 1 200px">Load hex<input type="text" class="mono" id="bxHex" placeholder="0xC0A00000" autocomplete="off"></label>
+        <button class="btn" id="bxLoad" type="button">Load</button>
+      </div>
+      <div class="chips" id="bxChips"></div>
+      <div class="strip" id="bxStrip"></div>
+      <div class="readout" id="bxRead"></div>
+      <div class="math" id="bxMath"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 03 RANGE ============ -->
+<section class="view" data-view="range" hidden>
+  <div class="vhead"><span class="eyebrow">Slides 12–14, 17 · range, precision, ∞ and NaN</span><h2>How big, how small, how exact</h2>
+    <p class="lead">Two exponent patterns are reserved. That single fact gives you the range, the overflow rule and the special values.</p></div>
+
+  <div class="tool">
+    <div class="th"><h3>Exponent ruler · overflow / underflow check</h3><span class="tag">handout · overflow-underflow detection</span></div>
+    <div class="tb">
+      <div class="row">
+        <label class="f" style="flex:1 1 200px">Format<select id="rgFmt"></select></label>
+        <label class="f" style="width:90px" id="rgKw">k (exp)<input type="number" id="rgK" min="2" max="15" value="5"></label>
+        <label class="f" style="width:150px">Actual exponent<input type="number" id="rgE" value="130"></label>
+      </div>
+      <input type="range" id="rgSlide" min="-200" max="200" value="130" aria-label="Actual exponent">
+      <div class="ruler" id="rgRuler"></div>
+      <div class="legend"><span><i style="background:var(--bad)"></i>reserved (0 and 2<sup>k</sup>−1)</span><span><i style="background:var(--good)"></i>valid normal exponents</span></div>
+      <div id="rgOut"></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Single-precision range · slide 12</h3>
+      <div class="math">Exponents 00000000 and 11111111 are reserved
+
+Smallest:  exponent 00000001 → 1 − 127 = −126
+           fraction 000…0    → significand 1.0
+           ±1.0 × 2⁻¹²⁶ ≈ ±1.2 × 10⁻³⁸
+
+Largest:   exponent 11111110 → 254 − 127 = +127
+           fraction 111…1    → significand ≈ 2.0
+           ±2.0 × 2¹²⁷  ≈ ±3.4 × 10³⁸</div>
+    </div>
+    <div class="card">
+      <h3>Double-precision range · slide 13</h3>
+      <div class="math">Exponents 000…0 and 111…1 are reserved
+
+Smallest:  exponent 00000000001 → 1 − 1023 = −1022
+           ±1.0 × 2⁻¹⁰²² ≈ ±2.2 × 10⁻³⁰⁸
+
+Largest:   exponent 11111111110 → 2046 − 1023 = +1023
+           ±2.0 × 2¹⁰²³  ≈ ±1.8 × 10³⁰⁸</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Where numbers live (log scale, positive side)</h3>
+    <div style="overflow-x:auto"><svg id="rgLine" viewBox="0 0 900 150" style="width:100%;min-width:600px;height:auto" role="img" aria-label="Single and double ranges on a log scale"></svg></div>
+    <p class="notice">Anything closer to 0 than the smallest normal value <b>underflows</b>. Anything past the largest <b>overflows</b>. The negative side is a mirror image.</p>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Precision · slide 14</h3>
+      <p>All fraction bits are significant, so the gap between neighbouring numbers is about <b>2<sup>−f</sup></b> of the value.</p>
+      <div class="math">Single  2⁻²³  →  23 × log₁₀2 ≈ 23 × 0.3 ≈  6 decimal digits
+Double  2⁻⁵²  →  52 × log₁₀2 ≈ 52 × 0.3 ≈ 16 decimal digits</div>
+      <div class="row">
+        <label class="f" style="flex:1 1 200px">Try a decimal<input type="text" class="mono" id="prIn" value="0.1" autocomplete="off"></label>
+      </div>
+      <div id="prOut"></div>
+    </div>
+    <div class="card">
+      <h3>Infinities and NaNs · slide 17</h3>
+      <div class="tbl"><table>
+        <tr><th>Exponent</th><th>Fraction</th><th>Meaning</th><th></th></tr>
+        <tr><td class="mono">111…1</td><td class="mono">000…0</td><td><b>±Infinity</b> (overflow, x/0)</td><td><button class="chip" data-bx="0x7F800000">+∞</button></td></tr>
+        <tr><td class="mono">111…1</td><td class="mono">≠ 0</td><td><b>NaN</b> (illegal: 0.0/0.0)</td><td><button class="chip" data-bx="0x7FC00000">NaN</button></td></tr>
+        <tr><td class="mono">000…0</td><td class="mono">000…0</td><td><b>±0</b></td><td><button class="chip" data-bx="0x00000000">0</button></td></tr>
+        <tr><td class="mono">000…0</td><td class="mono">≠ 0</td><td>denormal (not in your slides)</td><td></td></tr>
+        <tr><td class="mono">anything else</td><td class="mono">any</td><td>normal number</td><td><button class="chip" data-bx="0x3F800000">1.0</button></td></tr>
+      </table></div>
+      <p class="notice">∞ and NaN can be used in later calculations, so a program doesn't need an overflow check after every step. The chips open the bit explorer.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 04 ENCODE ============ -->
+<section class="view" data-view="encode" hidden>
+  <div class="vhead"><span class="eyebrow">Slide 15 · handout · Practice Q6–Q8</span><h2>Decimal → IEEE in six steps</h2>
+    <p class="lead">Convert, normalize, bias, sign, fraction, encode. Every encode question is these six steps, in this order.</p></div>
+  <ol class="steps compact">
+    <li class="hl"><div><b class="k">Convert to binary</b><span>Integer part: place values (or divide by 2). Fraction part: multiply by 2 repeatedly and write down each integer part. Keep exactly the number of bits the question says ("consider 10 bits").</span></div></li>
+    <li class="hl"><div><b class="k">Normalize</b><span>Move the point until exactly one 1 is before it. Point left → exponent up. Point right → exponent down.</span></div></li>
+    <li class="hl"><div><b class="k">Biased exponent</b><span>bias = 2<sup>k−1</sup> − 1. Biased = actual + bias, written in k bits.</span></div></li>
+    <li class="hl"><div><b class="k">Sign bit</b><span>0 for positive, 1 for negative.</span></div></li>
+    <li class="hl"><div><b class="k">Fraction</b><span>The bits after the leading 1. Pad with zeros on the <b>right</b> up to f bits (or cut off extra bits).</span></div></li>
+    <li class="hl"><div><b class="k">Encode</b><span>Write S | exponent | fraction, then group into 4s from the right for hex.</span></div></li>
+  </ol>
+
+  <div class="tool" id="enc">
+    <div class="th"><h3>Encoder · shows every step</h3><span class="tag">matches the faculty's method</span></div>
+    <div class="tb">
+      <div class="row">
+        <label class="f" style="flex:2 1 200px">Number<input type="text" class="mono" id="enVal" value="50.6749" autocomplete="off"></label>
+        <label class="f" style="width:110px">Base<select id="enBase"><option value="10">Decimal</option><option value="2">Binary</option></select></label>
+        <label class="f" style="width:110px" id="enPw">× 2^<input type="number" id="enP" value="0"></label>
+      </div>
+      <div class="row">
+        <label class="f" style="flex:1 1 220px">Format<select id="enFmt"></select></label>
+        <label class="f" style="width:90px" id="enKw">k (exp)<input type="number" id="enK" min="2" max="15" value="5"></label>
+        <label class="f" style="width:90px" id="enFw">f (frac)<input type="number" id="enF" min="1" max="52" value="10"></label>
+        <label class="f" style="width:150px" id="enNw">Bits after point<input type="number" id="enN" min="1" max="200" value="10"></label>
+        <label class="f" style="flex-direction:row;align-items:center;gap:6px;color:var(--ink)"><input type="checkbox" id="enExact"> Exact (no limit)</label>
+      </div>
+      <div class="chips" id="enChips"></div>
+      <div id="enOut"></div>
+    </div>
+  </div>
+
+  <div class="callout warn"><b class="h">"Consider 10 bits" changes the answer</b>
+    <span>The faculty stops the ×2 table after the stated number of bits, then normalizes and pads the fraction with zeros. For −0.0232 (handout, 12-bit) the handout stops after 7 bits and gets <b>0x880</b>. Keeping 10 bits gives <b>0x8B8</b>; the exact value gives <b>0x8BE</b>. Always use the bit count your question states. If none is stated, ask, or keep enough bits to fill the fraction field.</span></div>
+</section>
+
+<!-- ============ 05 DECODE ============ -->
+<section class="view" data-view="decode" hidden>
+  <div class="vhead"><span class="eyebrow">Slide 16 · handout · Practice Q9</span><h2>IEEE → decimal: run the formula backwards</h2>
+    <p class="lead">Split the bits into S, exponent and fraction, then plug them into (−1)<sup>S</sup> × (1 + F) × 2<sup>E − bias</sup>.</p></div>
+  <ol class="steps compact">
+    <li class="hl"><div><b class="k">Get the binary</b><span>Hex → 4 bits per digit. A decimal or octal pattern (Q9 ii, iii) → convert to binary first, padded to the full width.</span></div></li>
+    <li class="hl"><div><b class="k">Split</b><span>1 sign bit, k exponent bits, f fraction bits.</span></div></li>
+    <li class="hl"><div><b class="k">Sign</b><span>S = 1 → negative.</span></div></li>
+    <li class="hl"><div><b class="k">Actual exponent</b><span>biased − bias.</span></div></li>
+    <li class="hl"><div><b class="k">Fraction to decimal</b><span>bit 1 after the point is worth 2<sup>−1</sup> = 0.5, bit 2 is 0.25, bit 3 is 0.125, …</span></div></li>
+    <li class="hl"><div><b class="k">Final number</b><span>(−1)<sup>S</sup> × (1 + fraction) × 2<sup>actual exponent</sup>.</span></div></li>
+  </ol>
+  <div class="tool" id="dec">
+    <div class="th"><h3>Decoder · shows every step</h3><span class="tag">hex · binary · decimal · octal input</span></div>
+    <div class="tb">
+      <div class="row">
+        <label class="f" style="flex:2 1 220px">Bit pattern<input type="text" class="mono" id="deVal" value="0xC0A00000" autocomplete="off"></label>
+        <label class="f" style="width:120px">Given in<select id="deBase"><option value="16">Hex</option><option value="2">Binary</option><option value="10">Decimal</option><option value="8">Octal</option></select></label>
+      </div>
+      <div class="row">
+        <label class="f" style="flex:1 1 220px">Format<select id="deFmt"></select></label>
+        <label class="f" style="width:90px" id="deKw">k (exp)<input type="number" id="deK" min="2" max="15" value="5"></label>
+        <label class="f" style="width:90px" id="deFw">f (frac)<input type="number" id="deF" min="1" max="52" value="10"></label>
+      </div>
+      <div class="chips" id="deChips"></div>
+      <div id="deOut"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 06 ADD ============ -->
+<section class="view" data-view="add" hidden>
+  <div class="vhead"><span class="eyebrow">Slides 18–19 · Practice Q13–Q15</span><h2>Addition: line up the points first</h2>
+    <p class="lead">You can only add significands when the exponents match. So the number with the <b>smaller</b> exponent is shifted right until they do.</p></div>
+
+  <div class="card stepper" data-stepper>
+    <h3>Slide 18 · decimal, 4 significant digits</h3>
+    <div class="math">9.999 × 10¹ + 1.610 × 10⁻¹</div>
+    <ol class="steps">
+      <li class="hl"><div><b class="k">Align decimal points</b><span>Shift the number with the smaller exponent: 1.610 × 10⁻¹ → <span class="mono">0.016 × 10¹</span> (only 4 digits fit, so the last 0 falls off).</span></div></li>
+      <li class="hl"><div><b class="k">Add significands</b><span class="mono">9.999 × 10¹ + 0.016 × 10¹ = 10.015 × 10¹</span></div></li>
+      <li class="hl"><div><b class="k">Normalize, check over/underflow</b><span class="mono">10.015 × 10¹ → 1.0015 × 10²</span></div></li>
+      <li class="hl"><div><b class="k">Round and renormalize</b><span class="mono">1.0015 × 10² → 1.002 × 10²</span><span class="notice">Only 4 digits fit. If rounding produced 10.00, you would normalize again.</span></div></li>
+    </ol>
+    <div class="ctl"><button class="btn" data-prev type="button">Back</button><button class="btn primary" data-next type="button">Next step</button><button class="btn" data-all type="button">Show all</button></div>
+  </div>
+
+  <div class="tool" id="ad">
+    <div class="th"><h3>Binary addition / subtraction stepper</h3><span class="tag">slide 19 method</span></div>
+    <div class="tb">
+      <div class="grid2" style="gap:12px">
+        <div class="row">
+          <label class="f" style="flex:2 1 140px">A<input type="text" class="mono" id="adA" autocomplete="off"></label>
+          <label class="f" style="width:100px">Base<select id="adAb"><option value="10">Decimal</option><option value="2">Binary</option></select></label>
+          <label class="f" style="width:80px">× 2^<input type="number" id="adAp" value="0"></label>
+        </div>
+        <div class="row">
+          <label class="f" style="width:70px">Op<select id="adOp"><option value="+">+</option><option value="-">−</option></select></label>
+          <label class="f" style="flex:2 1 140px">B<input type="text" class="mono" id="adB" autocomplete="off"></label>
+          <label class="f" style="width:100px">Base<select id="adBb"><option value="10">Decimal</option><option value="2">Binary</option></select></label>
+          <label class="f" style="width:80px">× 2^<input type="number" id="adBp" value="0"></label>
+        </div>
+      </div>
+      <div class="row">
+        <label class="f" style="flex:1 1 220px">Format<select id="adFmt"></select></label>
+        <label class="f" style="width:90px" id="adKw">k (exp)<input type="number" id="adK" min="2" max="15" value="8"></label>
+        <label class="f" style="width:90px" id="adFw">f (frac)<input type="number" id="adF" min="1" max="52" value="3"></label>
+        <label class="f" style="width:150px">Bits after point<input type="number" id="adN" min="1" max="200" value="10"></label>
+      </div>
+      <div class="chips" id="adChips"></div>
+      <div id="adOut"></div>
+    </div>
+  </div>
+  <div class="callout"><b class="h">Subtraction is addition</b><span>A − B = A + (−B). So 18.71 − (−7.01) (Q15) becomes 18.71 + 7.01. When the signs differ, subtract the smaller magnitude from the larger and keep the larger one's sign.</span></div>
+</section>
+
+<!-- ============ 07 MULTIPLY ============ -->
+<section class="view" data-view="multiply" hidden>
+  <div class="vhead"><span class="eyebrow">Slides 20–21 · Practice Q10–Q12</span><h2>Multiplication: add exponents, multiply significands</h2>
+    <p class="lead">Exactly like (a × 10<sup>x</sup>)(b × 10<sup>y</sup>) = ab × 10<sup>x+y</sup>. No aligning needed. Then check the exponent for overflow or underflow.</p></div>
+
+  <div class="card stepper" data-stepper>
+    <h3>Slide 20 · decimal, 4 significant digits</h3>
+    <div class="math">1.110 × 10¹⁰ × 9.200 × 10⁻⁵</div>
+    <ol class="steps">
+      <li class="hl"><div><b class="k">Add exponents</b><span class="mono">10 + (−5) = 5</span><span class="notice">With biased exponents, subtract the bias once from the sum.</span></div></li>
+      <li class="hl"><div><b class="k">Multiply significands</b><span class="mono">1.110 × 9.200 = 10.212 → 10.212 × 10⁵</span></div></li>
+      <li class="hl"><div><b class="k">Normalize, check over/underflow</b><span class="mono">10.212 × 10⁵ → 1.0212 × 10⁶</span></div></li>
+      <li class="hl"><div><b class="k">Round and renormalize</b><span class="mono">1.0212 × 10⁶ → 1.021 × 10⁶</span></div></li>
+      <li class="hl"><div><b class="k">Sign from the operand signs</b><span class="mono">+ × + → +1.021 × 10⁶</span></div></li>
+    </ol>
+    <div class="ctl"><button class="btn" data-prev type="button">Back</button><button class="btn primary" data-next type="button">Next step</button><button class="btn" data-all type="button">Show all</button></div>
+  </div>
+
+  <div class="card">
+    <h3>Why subtract the bias once?</h3>
+    <div class="math">biased₁ + biased₂ = (E₁ + bias) + (E₂ + bias) = E₁ + E₂ + 2·bias
+                                        one bias too many ↑
+new biased exponent = biased₁ + biased₂ − bias
+
+Slide 21: (−1 + 127) + (−2 + 127) − 127 = −3 + 127 = 124</div>
+  </div>
+
+  <div class="tool" id="mu">
+    <div class="th"><h3>Binary multiplication stepper</h3><span class="tag">slide 21 method + overflow check</span></div>
+    <div class="tb">
+      <div class="grid2" style="gap:12px">
+        <div class="row">
+          <label class="f" style="flex:2 1 140px">A<input type="text" class="mono" id="muA" autocomplete="off"></label>
+          <label class="f" style="width:100px">Base<select id="muAb"><option value="10">Decimal</option><option value="2">Binary</option></select></label>
+          <label class="f" style="width:80px">× 2^<input type="number" id="muAp" value="0"></label>
+        </div>
+        <div class="row">
+          <label class="f" style="flex:2 1 140px">× B<input type="text" class="mono" id="muB" autocomplete="off"></label>
+          <label class="f" style="width:100px">Base<select id="muBb"><option value="10">Decimal</option><option value="2">Binary</option></select></label>
+          <label class="f" style="width:80px">× 2^<input type="number" id="muBp" value="0"></label>
+        </div>
+      </div>
+      <div class="row">
+        <label class="f" style="flex:1 1 220px">Format<select id="muFmt"></select></label>
+        <label class="f" style="width:90px" id="muKw">k (exp)<input type="number" id="muK" min="2" max="15" value="8"></label>
+        <label class="f" style="width:90px" id="muFw">f (frac)<input type="number" id="muF" min="1" max="52" value="3"></label>
+        <label class="f" style="width:150px">Bits after point<input type="number" id="muN" min="1" max="200" value="10"></label>
+      </div>
+      <div class="chips" id="muChips"></div>
+      <div id="muOut"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 08 PRACTICE SHEET ============ -->
+<section class="view" data-view="sheet" hidden>
+  <div class="vhead"><span class="eyebrow">Practice Sheet 3 + faculty solution</span><h2>Every question type, solved</h2>
+    <p class="lead">The sheet's 15 questions fall into six types. Each has a fixed recipe. Buttons open the matching tool already filled in, so you can watch every step.</p></div>
+
+  <div class="card">
+    <h3>Where the marks are</h3>
+    <div class="freq" id="freq"></div>
+    <p class="notice">Count of sheet questions per type. Multiplication + overflow check fills three of the five solved pages.</p>
+  </div>
+
+  <div class="callout warn">
+    <b class="h">Corrections to the course material</b>
+    <ul class="clean">
+      <li><b>Slide 11:</b> double bias is 1023, not "1203".</li>
+      <li><b>Q11 solution:</b> writes the 11-bit range as "0 to 2048, valid 1 to 2047". It is <b>0 to 2047, valid 1 to 2046</b> (0 and 2047 reserved). The overflow verdict doesn't change.</li>
+      <li><b>Q10 iii, Q11 iii:</b> the product significand is written as 1.01101. Exact is 1.011010011001 and 1.0110111001. Both still overflow.</li>
+      <li><b>Q10 v</b> lists only one number (0.001100₂), so there is nothing to multiply. Skip it or ask your faculty.</li>
+      <li><b>Handout 50.6749:</b> one line says ".6740", but the ×2 table and the answer 0x424AB300 use .6749.</li>
+      <li><b>"Consider 10 decimal digits"</b> on the sheet means 10 <b>binary</b> digits after the point; that is what the solutions use.</li>
+    </ul>
+  </div>
+
+  <div id="qtypes"></div>
+
+  <div class="card">
+    <h3>Likely to appear <span class="pill">prediction</span></h3>
+    <p class="notice">Based on what the handout works through and what the faculty solved in full. A prediction, not a promise.</p>
+    <ol class="clean">
+      <li><b>Multiply two numbers and say overflow / underflow</b>, often in a custom size (18-bit) or double. Three solved pages.</li>
+      <li><b>Decimal → IEEE in hex</b>, in a custom size (12-bit, 34-bit) with "consider N bits".</li>
+      <li><b>Hex → decimal</b> (Q9 style), including a pattern given in decimal or octal.</li>
+      <li><b>Biased exponent</b> for an unusual exponent width.</li>
+      <li><b>Add or subtract</b> two decimals in single precision.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ MIDTERM ============ -->
+<section class="view" data-view="midterm" hidden>
+  <div class="vhead"><span class="eyebrow">Midterm · Chapter 3 slides 9–21</span><h2>Midterm practice in every question format</h2>
+    <p class="lead">Your midterm covers Chapter 1 (full), Chapter 2 slides 1–46 and Chapter 3 slides 9–21, from both the slides and the handouts. These are the six question formats, applied to floating point.</p></div>
+  <div class="fmtgrid" id="m3fmt"></div>
+  <div class="card"><h3>True / False</h3><p class="notice">Decide, then read the reason. If the exam asks you to justify a False, the reason is the mark.</p><div id="m3tf"></div><div class="row"><span class="score" id="m3tfScore">0 / 0</span><button class="btn" id="m3tfReset" type="button">Start over</button></div></div>
+  <div class="card"><h3>Analytical</h3><p class="notice">Name the rule, then connect it to the example. Write yours first.</p><div id="m3ana" style="display:flex;flex-direction:column;gap:8px"></div></div>
+  <div class="card"><h3>Scenario-based justification</h3><p class="notice">Verdict, reason, fix: three separate marks.</p><div id="m3scen" style="display:flex;flex-direction:column;gap:8px"></div></div>
+  <div class="card"><h3>Tracing</h3><p class="notice">Write every step on paper, then open it in the stepper to check each line.</p><div id="m3tr" style="display:flex;flex-direction:column;gap:8px"></div></div>
+</section>
+
+<!-- ============ 09 REVIEW ============ -->
+<section class="view" data-view="review" hidden>
+  <div class="vhead"><span class="eyebrow">Night-before sheet</span><h2>Quick review</h2>
+    <p class="lead">Everything you must have memorized, on one screen. Cram mode keeps only this and the self-test.</p></div>
+  <div class="card">
+    <h3>Formula sheet</h3>
+    <div class="math">x        = (−1)^S × (1 + F) × 2^(E_biased − bias)
+bias     = 2^(k−1) − 1           127 single · 1023 double · 15 for k=5 · 7 for k=4
+biased   = actual + bias          actual = biased − bias
+valid    = 1 … 2^k − 2            single 1…254 · double 1…2046
+fields   = 1 + k + f              single 1·8·23 · double 1·11·52
+multiply : biased_new = biased₁ + biased₂ − bias
+add      : align → add → normalize → round
+multiply : add exps → multiply → normalize → round → sign
+×2 table : fraction × 2, write the integer part, repeat
+point ←  : exponent +1 per place      point → : exponent −1 per place</div>
+  </div>
+  <div><h3 style="margin-bottom:10px">Quick definitions</h3><div class="defs" id="defs"></div></div>
+  <div class="grid2">
+    <div><h3 style="margin-bottom:10px">Exam traps</h3><ul class="traps" id="traps"></ul></div>
+    <div class="card">
+      <h3>Memory hooks</h3>
+      <ul class="clean">
+        <li><b>"1 ate 23"</b>: single is 1 · 8 · 23. Double adds to 64: 1 · 11 · 52.</li>
+        <li><b>Bias is "half minus one"</b>: 8 bits hold 256 values, half is 128, minus one is 127.</li>
+        <li><b>"Point goes Left, exponent Lifts"</b>: moving the point left raises the exponent.</li>
+        <li><b>Adding needs Agreement</b>: align exponents first. Multiplying doesn't care; it just adds them.</li>
+        <li><b>All 1s is Infinity</b> when the fraction is quiet (0), and Not a Number when it isn't.</li>
+        <li><b>Hidden 1</b>: it's always there, so it's never stored. Write the fraction, restore the "1." when reading.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 10 TEST ============ -->
+<section class="view" data-view="test" hidden>
+  <div class="vhead"><span class="eyebrow">Self-test</span><h2>Check yourself</h2>
+    <p class="lead">Every answer comes with the reason. Wrong answers are remembered on this device, so you can retry only those.</p></div>
+  <div class="row"><span class="score" id="qScore">0 / 0</span><button class="btn" id="qReset" type="button">Start over</button><button class="btn" id="qRetry" type="button">Retry my mistakes</button></div>
+  <div class="grid2" id="quiz"></div>
+  <div class="card" style="align-items:center">
+    <h3>Flashcards</h3>
+    <div class="flash" id="flash"><div class="inner"><div class="face front"><b id="fcT"></b><span class="notice">tap to flip</span></div><div class="face back"><span id="fcD"></span></div></div></div>
+    <div class="row"><button class="btn" id="fcPrev" type="button">Previous</button><span class="mono" id="fcN"></span><button class="btn" id="fcNext" type="button">Next</button><button class="btn" id="fcShuf" type="button">Shuffle</button></div>
+  </div>
+</section>
+</main>
+<footer><div class="wrap">CSE340 study pages · Chapter 3 slides 9–21, Handout Chapter 3 (PBK), Practice Sheet 3 and its solution. Every worked answer on this page is computed by the tools above and was checked independently. A study aid, not official course material.</div></footer>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const store={get(k,d){try{const v=localStorage.getItem('cse340ch3:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('cse340ch3:'+k,JSON.stringify(v))}catch(e){}}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const SUP={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻','+':'⁺'};
+const sup=n=>String(n).replace(/[-+0-9]/g,c=>SUP[c]);
+const minus=s=>String(s).replace(/-/g,'−');
+
+/* ---------- formats ---------- */
+const FMTS=[
+  {id:'single',name:'Single · 32-bit (1·8·23)',k:8,f:23},
+  {id:'double',name:'Double · 64-bit (1·11·52)',k:11,f:52},
+  {id:'b12',name:'12-bit · k=4, f=7 (handout)',k:4,f:7},
+  {id:'b16',name:'16-bit · k=5, f=10',k:5,f:10},
+  {id:'b18',name:'18-bit · k=5, f=12 (Q12)',k:5,f:12},
+  {id:'b34',name:'34-bit · k=10, f=23 (Q5, Q6)',k:10,f:23},
+  {id:'slide',name:'Slides 19/21 · 4-bit significand (k=8, f=3)',k:8,f:3},
+  {id:'custom',name:'Custom…',k:5,f:10}
+];
+function fmtPicker(prefix,init,onChange,opts={}){
+  const sel=$('#'+prefix+'Fmt'), kI=$('#'+prefix+'K'), fI=$('#'+prefix+'F'), kW=$('#'+prefix+'Kw'), fW=fI?$('#'+prefix+'Fw'):null;
+  const list=FMTS.filter(x=>!opts.noSlide||x.id!=='slide');
+  sel.innerHTML=list.map(x=>`<option value="${x.id}">${x.name}</option>`).join('');
+  const sync=()=>{const custom=sel.value==='custom';kW.hidden=!custom;if(fW)fW.hidden=!custom};
+  const api={get(){const x=FMTS.find(z=>z.id===sel.value);if(x.id==='custom'){const k=Math.max(2,Math.min(15,+kI.value||5));const f=fI?Math.max(1,Math.min(52,+fI.value||10)):10;return{k,f,id:'custom'}}return{k:x.k,f:x.f,id:x.id}},
+    set(id,k,f){sel.value=id;if(id==='custom'){if(k)kI.value=k;if(f&&fI)fI.value=f}sync()}};
+  sel.addEventListener('change',()=>{sync();onChange()});kI.addEventListener('input',onChange);if(fI)fI.addEventListener('input',onChange);
+  api.set(init);return api;
+}
+
+/* ---------- BigInt number engine ---------- */
+const B=BigInt;
+const p2=k=>1n<<B(k);
+const blen=m=>m===0n?0:m.toString(2).length;
+const p10=k=>10n**B(k);
+// parse "50.6749" -> {neg,n,d,p}  (value = n/10^p)
+function parseDec(t){
+  t=String(t).trim().replace(/[−–]/g,'-').replace(/\s/g,'');
+  const m=t.match(/^([+-]?)(\d*)(?:\.(\d*))?$/); if(!m||(m[2]===''&&(m[3]||'')===''))return null;
+  const fr=m[3]||''; const n=B((m[2]||'0')+fr); return {neg:m[1]==='-',n,d:p10(fr.length),p:fr.length};
+}
+function parseBin(t){
+  t=String(t).trim().replace(/[−–]/g,'-').replace(/\s/g,'').replace(/[₂]$/,'');
+  const m=t.match(/^([+-]?)([01]*)(?:\.([01]*))?$/); if(!m||(m[2]===''&&(m[3]||'')===''))return null;
+  const fr=m[3]||''; return {neg:m[1]==='-',m:B('0b'+((m[2]||'0')+fr)),e:-fr.length};
+}
+// decimal string of n/10^p exactly
+function decStr(n,p){const s=n.toString().padStart(p+1,'0');return p?s.slice(0,s.length-p)+'.'+s.slice(s.length-p):s}
+// binary string of m*2^e with point; keepFrac = minimum fraction digits shown
+function binPoint(m,e,trim=true){
+  let s=m.toString(2);
+  if(e>=0) return s+'0'.repeat(e);
+  const fl=-e; if(s.length<=fl) s='0'.repeat(fl-s.length+1)+s;
+  let ip=s.slice(0,s.length-fl), fp=s.slice(s.length-fl);
+  if(trim) fp=fp.replace(/0+$/,'');
+  return fp?ip+'.'+fp:ip;
+}
+// decimal -> dyadic with N bits after the point (truncate), plus x2 table rows
+function decToDy(pd,N){
+  const intPart=pd.n/pd.d; let fr=pd.n%pd.d; const rows=[]; let bits='';
+  for(let i=0;i<N;i++){const f2=fr*2n;const b=f2>=pd.d?1:0;rows.push([fr,f2,b]);bits+=b;fr=f2-(b?pd.d:0n);}
+  const m=(intPart<<B(N))+(N?B('0b'+bits):0n);
+  return {neg:pd.neg,m,e:-N,intPart,bits,rows,rest:fr,p:pd.p};
+}
+// read an operand {t,base,pow} -> {neg,m,e,conv}
+function operand(t,base,pow,N,exact){
+  if(base==2){const b=parseBin(t);if(!b)return{err:'Use only 0, 1 and one point, e.g. 1101.1111'};return{neg:b.neg,m:b.m,e:b.e+(+pow||0),src:'bin',txt:t,pow:+pow||0}}
+  const d=parseDec(t);if(!d)return{err:'Type a decimal number, e.g. 7.01'};
+  const n=exact?400:N; const c=decToDy(d,n); return {neg:c.neg,m:c.m,e:c.e,src:'dec',conv:c,N:n,exact,txt:t};
+}
+function normalizeDy(m,e){const L=blen(m);return{E:L-1+e,sig:m,L,fracBits:m.toString(2).slice(1)}}
+const biasOf=k=>(2**(k-1))-1;
+function rangeCheck(be,k){const top=2**k-2;if(be<1)return{ok:false,kind:'Underflow',top};if(be>top)return{ok:false,kind:'Overflow',top};return{ok:true,kind:'No overflow / underflow',top}}
+function hexOf(bits){const pad=(4-bits.length%4)%4;const w='0'.repeat(pad)+bits;let h='';for(let i=0;i<w.length;i+=4)h+=parseInt(w.slice(i,i+4),2).toString(16).toUpperCase();return{hex:'0x'+h,pad,groups:w.match(/.{4}/g)}}
+function sci(n,d,sig=10){ // n,d positive BigInt
+  if(n===0n)return{m:'0',x:0};
+  let p=n.toString().length-d.toString().length;
+  const ge=q=>q>=0?n>=d*p10(q):n*p10(-q)>=d;
+  while(!ge(p))p--; while(ge(p+1))p++;
+  const s=sig-1-p; let N=n,D=d; if(s>=0)N*=p10(s);else D*=p10(-s);
+  let q=N/D; const r=N%D; if(2n*r>=D)q+=1n; let str=q.toString(); if(str.length>sig){str=str.slice(0,sig);p+=1}
+  return{m:str[0]+(sig>1?'.'+str.slice(1):''),x:p};
+}
+function sciStr(neg,n,d,sig=10){const r=sci(n,d,sig);return (neg?'−':'')+r.m+' × 10'+sup(r.x)}
+function plain(neg,n,d,maxd=12){ // exact if terminates within maxd digits else rounded
+  const ip=n/d; let r=n%d; let s=''; for(let i=0;i<maxd&&r;i++){r*=10n;s+=(r/d).toString();r%=d}
+  if(r){const nx=(r*10n)/d; if(nx>=5n){let v=B(ip.toString()+s)+1n;let vs=v.toString().padStart(s.length+1,'0');return (neg?'−':'')+(s.length?vs.slice(0,vs.length-s.length)+'.'+vs.slice(vs.length-s.length):vs)+'…'} return (neg?'−':'')+ip+(s?'.'+s:'')+'…'}
+  return (neg?'−':'')+ip+(s?'.'+s:'');
+}
+const dyRat=(m,e)=>e>=0?[m*p2(e),1n]:[m,p2(-e)];
+function valueText(neg,m,e){
+  if(m===0n)return'0';
+  const [n,d]=dyRat(m,e); const s=sci(n,d,10);
+  const pl=(s.x>=-6&&s.x<=12)?plain(neg,n,d,12):null;
+  return pl&&pl.replace(/[−.…]/g,'').replace(/^0+/,'').length<=16?`${pl}  (${sciStr(neg,n,d)})`:sciStr(neg,n,d);
+}
+function fieldHTML(s,ebits,fbits,opt={}){
+  return `<span class="sef"><span class="s-bg">${s}</span><span class="e-bg">${ebits}</span><span class="f-bg">${opt.fhtml||fbits}</span></span>`;
+}
+function fracHTML(raw,f){ // raw bits after the leading 1
+  if(raw.length>=f){const keep=raw.slice(0,f),drop=raw.slice(f);return{bits:keep,html:esc(keep)+(drop?`<span class="drop">${esc(drop.length>24?drop.slice(0,24)+'…':drop)}</span>`:''),dropped:drop.replace(/0+$/,'').length>0,padded:0}}
+  const padN=f-raw.length;return{bits:raw+'0'.repeat(padN),html:esc(raw)+`<span class="pad">${'0'.repeat(padN)}</span>`,dropped:false,padded:padN}
+}
+function group4(bits){return bits.match(/.{1,4}/g).join(' ')}
+function wordHTML(s,eb,fh){return `<span class="s-c">${s}</span> <span class="e-c">${eb}</span> <span class="f-c">${fh}</span>`}
+
+/* ---------- views & routing ---------- */
+const VIEWS=['start','format','range','encode','decode','add','multiply','sheet','midterm','review','test'];
+let seen=store.get('seen',[]);
+function route(){
+  let v=(location.hash||'#start').slice(1); if(!VIEWS.includes(v))v='start';
+  if(document.body.classList.contains('cram')&&!['midterm','review','test'].includes(v))v='review';
+  $$('.view').forEach(s=>s.hidden=s.dataset.view!==v);
+  $$('#tabs a').forEach(a=>{const on=a.getAttribute('href')==='#'+v;a.toggleAttribute('aria-current',on);if(on)a.setAttribute('aria-current','page');if(on)a.scrollIntoView({block:'nearest',inline:'nearest'})});
+  if(!seen.includes(v)){seen.push(v);store.set('seen',seen)}
+  $$('#tabs a').forEach(a=>a.classList.toggle('seen',seen.includes(a.getAttribute('href').slice(1))));
+  window.scrollTo({top:0});
+}
+window.addEventListener('hashchange',route);
+function go(v){if(location.hash==='#'+v)route();else location.hash=v}
+// cram + theme
+const setCram=on=>{document.body.classList.toggle('cram',on);$('#cramBtn').setAttribute('aria-pressed',on);store.set('cram',on)};
+$('#cramBtn').addEventListener('click',()=>{setCram(!document.body.classList.contains('cram'));route()});
+setCram(store.get('cram',false));
+const THEMES=['system','light','dark'];let th=store.get('theme','system');
+const applyTheme=()=>{if(th==='system')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',th);$('#themeBtn').textContent='Theme: '+th};
+$('#themeBtn').addEventListener('click',()=>{th=THEMES[(THEMES.indexOf(th)+1)%3];store.set('theme',th);applyTheme();drawLine()});applyTheme();
+const hdr=()=>document.documentElement.style.setProperty('--hdr',$('.top').offsetHeight+'px');window.addEventListener('resize',hdr);
+
+/* ---------- strip renderer ---------- */
+function strip(el,bits,k,f,clickable,onFlip){
+  const total=1+k+f; const per=total>34?32:total; // wrap doubles into rows of 32
+  const cols=`repeat(${per},minmax(0,1fr))`;
+  let cells='',lbl='';
+  for(let r=0;r<total;r+=per){
+    let row='';for(let i=r;i<Math.min(total,r+per);i++){const cls=i===0?'S':(i<=k?'E':'F');row+=`<button type="button" class="${cls}" data-i="${i}" ${clickable?'':'tabindex="-1"'} aria-label="bit ${total-1-i}, ${cls==='S'?'sign':cls==='E'?'exponent':'fraction'}, ${bits[i]}" aria-pressed="${bits[i]==='1'}">${bits[i]}</button>`}
+    cells+=`<div class="cells" style="grid-template-columns:${cols}">${row}</div>`;
+  }
+  // labels for first row
+  const segs=[];const span=(cls,txt,n)=>segs.push(`<div class="${cls}" style="grid-column:span ${n}">${txt}</div>`);
+  span('S','S',1); const eIn=Math.min(k,per-1); span('E',eIn>=3?'Exponent':'E',eIn); if(per-1-eIn>0)span('F','Fraction',per-1-eIn);
+  lbl=`<div class="lbls" style="grid-template-columns:${cols}">${segs.join('')}</div>`;
+  el.innerHTML=lbl+cells;
+  if(clickable)el.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>onFlip(+b.dataset.i)));
+}
+strip($('#heroStrip'),'10111111010000000000000000000000',8,23,false);
+
+/* ---------- normalizer ---------- */
+function normalizer(){
+  const base=+$('#nmBase').value, t=$('#nmVal').value, ex=parseInt($('#nmExp').value)||0, out=$('#nmOut');
+  let digits,pointPos,neg=false;
+  const clean=String(t).trim().replace(/[−–]/g,'-');
+  const re=base==2?/^([+-]?)([01]*)(?:\.([01]*))?$/:/^([+-]?)(\d*)(?:\.(\d*))?$/;
+  const m=clean.match(re); if(!m||(!m[2]&&!m[3])){out.innerHTML=`<p class="err">Type a ${base==2?'binary':'decimal'} number like ${base==2?'110.111':'1584.234'}.</p>`;return}
+  neg=m[1]==='-'; const ip=m[2]||'', fp=m[3]||''; digits=ip+fp; pointPos=ip.length;
+  const first=digits.search(/[1-9]/); if(first<0){out.innerHTML='<p class="err">Zero has no normalized form (all-zero exponent and fraction).</p>';return}
+  const shift=pointPos-first-1; // positive = point moves left
+  const newE=ex+shift; const rest=digits.slice(first+1).replace(/0+$/,'');
+  const norm=(neg?'−':'')+digits[first]+'.'+(rest||'0');
+  const b=base==2?'2':'10';
+  const dir=shift>0?`Point moves <b>${shift} left</b> → exponent <b>+${shift}</b>`:shift<0?`Point moves <b>${-shift} right</b> → exponent <b>−${-shift}</b>`:'Already normalized: no move needed';
+  out.innerHTML=`<div class="math">${esc(clean)} × ${b}${sup(ex)}
+= ${norm} × ${b}${sup(ex)}${shift>=0?'⁺':''}${sup(shift)}
+= <b>${norm} × ${b}${sup(newE)}</b></div><p>${dir}.</p>`;
+}
+const NM=[['110.111 × 2³⁵ (handout)','110.111',2,35],['0.00110 (handout)','0.00110',2,0],['Q1 iv 110101.1111₂','110101.1111',2,0],['Q1 v 0.001100₂','0.001100',2,0],['Q1 vi 1101.1111₂ × 2⁵','1101.1111',2,5],['Q1 i 0.0000124678','0.0000124678',10,0],['Q1 ii 1584.234 × 10⁵','1584.234',10,5]];
+$('#nmChips').innerHTML=NM.map((x,i)=>`<button class="chip" type="button" data-i="${i}">${x[0]}</button>`).join('');
+$('#nmChips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const x=NM[+b.dataset.i];$('#nmVal').value=x[1];$('#nmBase').value=x[2];$('#nmExp').value=x[3];normalizer()});
+['nmVal','nmBase','nmExp'].forEach(id=>$('#'+id).addEventListener('input',normalizer));normalizer();
+
+/* ---------- bit explorer ---------- */
+let bxBits='';
+const bx=fmtPicker('bx','single',()=>{bxResize();bxRender()});
+function bxResize(){const {k,f}=bx.get();const t=1+k+f;if(bxBits.length!==t){bxBits=(bxBits+'0'.repeat(t)).slice(0,t)}}
+function decodeBits(bits,k,f){
+  const s=+bits[0], eb=bits.slice(1,1+k), fb=bits.slice(1+k); const be=parseInt(eb,2); const bias=biasOf(k); const allOne=be===2**k-1;
+  const fm=fb?B('0b'+fb):0n;
+  if(allOne) return {s,eb,fb,be,bias,special:fm===0n?(s?'−Infinity':'+Infinity'):'NaN'};
+  if(be===0){ if(fm===0n)return{s,eb,fb,be,bias,special:s?'−0':'+0'}; return{s,eb,fb,be,bias,denorm:true,actual:1-bias,m:fm,e:1-bias-f} }
+  return{s,eb,fb,be,bias,actual:be-bias,m:p2(f)+fm,e:be-bias-f};
+}
+function fracDec(fb){ // exact decimal of 0.fb
+  if(!/1/.test(fb))return'0';const m=B('0b'+fb);const [n,d]=[m,p2(fb.length)];return plain(false,n,d,12)}
+function bxRender(){
+  const {k,f}=bx.get(); const total=1+k+f;
+  strip($('#bxStrip'),bxBits,k,f,true,i=>{bxBits=bxBits.slice(0,i)+(bxBits[i]==='1'?'0':'1')+bxBits.slice(i+1);bxRender()});
+  const r=decodeBits(bxBits,k,f); const hx=hexOf(bxBits).hex;
+  let val,form;
+  if(r.special){val=r.special;form=r.special.includes('Inf')?`Exponent all 1s and fraction 0 → ${r.special}`:r.special==='NaN'?'Exponent all 1s and fraction ≠ 0 → NaN (illegal result, e.g. 0.0 / 0.0)':`Exponent and fraction all 0 → ${r.special} (zero has its own pattern)`}
+  else if(r.denorm){val=valueText(!!r.s,r.m,r.e);form=`Exponent all 0s, fraction ≠ 0 → denormal (not in your slides): (−1)${sup(r.s)} × 0.${r.fb.replace(/0+$/,'')} × 2${sup(1-r.bias)}`}
+  else{val=valueText(!!r.s,r.m,r.e);form=`x = (−1)${sup(r.s)} × (1 + ${fracDec(r.fb)}) × 2${sup('('+r.be+' − '+r.bias+')')}
+  = ${r.s?'−':'+'}1.${r.fb.replace(/0+$/,'')||'0'}₂ × 2${sup(r.actual)}
+  = ${val}`}
+  $('#bxRead').innerHTML=`<div><small>Sign</small><b class="s-c">${r.s} → ${r.s?'negative':'positive'}</b></div>
+  <div><small>Exponent field</small><b class="e-c">${r.eb} = ${r.be}</b></div>
+  <div><small>Bias · actual exponent</small><b>${r.bias} · ${r.special?'—':r.denorm?minus(1-r.bias)+' (denormal)':minus(r.actual)}</b></div>
+  <div><small>Fraction</small><b class="f-c">0.${r.fb.length>24?r.fb.slice(0,24)+'…':r.fb} = ${fracDec(r.fb)}</b></div>
+  <div><small>Hex (${total} bits)</small><b>${hx}</b></div>`;
+  $('#bxMath').textContent=form;
+}
+function bxLoadHex(h,fmt){ if(fmt)bx.set(fmt);const {k,f}=bx.get();const t=1+k+f;let s=String(h).trim().replace(/^0x/i,'').replace(/\s/g,'');if(!/^[0-9a-f]+$/i.test(s))return;let v=B('0x'+s);if(v>=p2(t))v=v&(p2(t)-1n);bxBits=v.toString(2).padStart(t,'0');bxRender()}
+const BXP=[['−0.75 (slide 15)','0xBF400000','single'],['−5.0 (slide 16)','0xC0A00000','single'],['1.0','0x3F800000','single'],['Smallest normal','0x00800000','single'],['Largest','0x7F7FFFFF','single'],['+∞','0x7F800000','single'],['NaN','0x7FC00000','single'],['0xF2400120 (handout)','0xF2400120','single'],['−0.75 double','0xBFE8000000000000','double'],['0x880 (12-bit)','0x880','b12']];
+$('#bxChips').innerHTML=BXP.map((x,i)=>`<button class="chip" type="button" data-i="${i}">${x[0]}</button>`).join('');
+$('#bxChips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const x=BXP[+b.dataset.i];bxLoadHex(x[1],x[2]);$('#bxHex').value=x[1]});
+$('#bxLoad').addEventListener('click',()=>bxLoadHex($('#bxHex').value));
+$('#bxHex').addEventListener('keydown',e=>{if(e.key==='Enter')bxLoadHex($('#bxHex').value)});
+bxBits='10111111010000000000000000000000';bxRender();
+$$('[data-bx]').forEach(b=>b.addEventListener('click',()=>{go('format');bxLoadHex(b.dataset.bx,'single');$('#bxHex').value=b.dataset.bx}));
+
+/* ---------- range ruler ---------- */
+const rg=fmtPicker('rg','single',()=>rgRender(),{noSlide:true});
+function rgRender(src){
+  const {k}=rg.get(); const bias=biasOf(k); const top=2**k-1;
+  const sl=$('#rgSlide'); sl.min=-(bias+Math.max(10,Math.round(bias*.4))); sl.max=bias+Math.max(10,Math.round(bias*.4)+2);
+  if(src==='slide')$('#rgE').value=sl.value; else sl.value=$('#rgE').value;
+  const E=parseInt($('#rgE').value)||0; const be=E+bias; const c=rangeCheck(be,k);
+  const lo=Math.min(0,be)-0, hi=Math.max(top,be);
+  const span=hi-lo||1; const pos=v=>((v-lo)/span*100);
+  const segs=[];
+  if(be<0)segs.push([pos(be),pos(0),'var(--bad-soft)']);
+  segs.push([pos(0),pos(1),'var(--bad)']); segs.push([pos(1),pos(top),'var(--good)']); segs.push([pos(top),pos(top+1)>100?100:pos(top+1),'var(--bad)']);
+  if(be>top)segs.push([pos(top+1),100,'var(--bad-soft)']);
+  const bar=segs.map(([a,b,col])=>`<i style="position:absolute;left:${a}%;width:${Math.max(.6,b-a)}%;background:${col}"></i>`).join('');
+  const ticks=[[0,'0'],[1,'1'],[top-1,String(top-1)],[top,String(top)]];
+  $('#rgRuler').innerHTML=`<div class="bar" style="position:absolute">${bar}</div><div class="mk" style="left:${Math.max(0,Math.min(100,pos(be)))}%">${be}</div>`+ticks.filter((t,i,a)=>i===0||Math.abs(pos(t[0])-pos(a[i-1][0]))>6).map(t=>`<span class="tk" style="left:${pos(t[0])}%">${t[1]}</span>`).join('');
+  $('#rgOut').innerHTML=`<div class="math">bias      = 2^(${k}−1) − 1 = ${bias}
+biased    = actual + bias = ${minus(E)} + ${bias} = ${minus(be)}
+valid     = 1 … 2^${k} − 2 = 1 … ${top-1}    (0 and ${top} are reserved)</div>
+<span class="verdict ${c.ok?'ok':'bad'}">${c.kind}</span> <span class="notice">${c.ok?`1 ≤ ${be} ≤ ${top-1}`:be<1?`${minus(be)} &lt; 1, too small to store`:`${be} &gt; ${top-1}, too big to store`}</span>`;
+}
+$('#rgE').addEventListener('input',()=>rgRender());$('#rgSlide').addEventListener('input',()=>rgRender('slide'));rgRender();
+
+function drawLine(){
+  const svg=$('#rgLine'); if(!svg)return; const cs=getComputedStyle(document.documentElement);
+  const C=n=>cs.getPropertyValue(n).trim();
+  const L=40,R=870,lo=-330,hi=330,x=v=>L+(v-lo)/(hi-lo)*(R-L);
+  const row=(y,name,mn,mx)=>`<text x="${L}" y="${y-12}" fill="${C('--ink')}" style="font-family:var(--body)" font-size="14" font-weight="700">${name}</text>
+   <rect x="${L}" y="${y}" width="${x(mn)-L}" height="16" fill="${C('--bad-soft')}"/><rect x="${x(mn)}" y="${y}" width="${x(mx)-x(mn)}" height="16" fill="${C('--good')}" opacity=".85"/><rect x="${x(mx)}" y="${y}" width="${R-x(mx)}" height="16" fill="${C('--bad-soft')}"/>
+   <text x="${x(mn)}" y="${y+30}" fill="${C('--muted')}" font-size="11" style="font-family:var(--mono)" text-anchor="middle">${mn===-38?'1.2×10⁻³⁸':'2.2×10⁻³⁰⁸'}</text><text x="${x(mx)}" y="${y+30}" fill="${C('--muted')}" font-size="11" style="font-family:var(--mono)" text-anchor="middle">${mx===38?'3.4×10³⁸':'1.8×10³⁰⁸'}</text>`;
+  const ax=[-300,-200,-100,0,100,200,300].map(v=>`<text x="${x(v)}" y="146" fill="${C('--muted')}" font-size="11" style="font-family:var(--mono)" text-anchor="middle">10${sup(v)}</text><line x1="${x(v)}" x2="${x(v)}" y1="20" y2="132" stroke="${C('--line')}"/>`).join('');
+  svg.innerHTML=ax+row(36,'Single',-38,38)+row(92,'Double',-308,308);
+}
+drawLine();
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',drawLine)}catch(e){}
+function precision(){
+  const t=$('#prIn').value.trim().replace(/[−–]/g,'-'); const v=Number(t);const out=$('#prOut');
+  if(!parseDec(t)||!isFinite(v)||v===0){out.innerHTML='<p class="err">Type a decimal like 0.1 or 3.14159265358979</p>';return}
+  const f32=Math.fround(v); const dv=new DataView(new ArrayBuffer(4)); dv.setFloat32(0,v);const h='0x'+dv.getUint32(0).toString(16).toUpperCase().padStart(8,'0');
+  const match=(a)=>{const A=a.toPrecision(20).replace('-','').replace('.','').replace(/^0+/,'');const T=t.replace(/[^0-9]/g,'').replace(/^0+/,'').padEnd(20,'0');let i=0;while(i<A.length&&A[i]===T[i])i++;return i};
+  out.innerHTML=`<div class="tbl"><table><tr><th>Stored as</th><th>Value actually kept</th><th class="num">Digits right</th></tr>
+  <tr><td>Single (${h})</td><td class="mono">${f32.toPrecision(20)}</td><td class="num">${Math.min(match(f32),20)}</td></tr>
+  <tr><td>Double</td><td class="mono">${v.toPrecision(20)}</td><td class="num">${Math.min(match(v),20)}</td></tr></table></div>
+  <p class="notice">0.1 has no exact binary form (like 1/3 in decimal), so both formats store the nearest value they can.</p>`;
+}
+$('#prIn').addEventListener('input',precision);precision();
+
+/* ---------- ENCODER ---------- */
+const en=fmtPicker('en','single',()=>encRender(),{noSlide:true});
+$('#enBase').addEventListener('change',()=>{encSync();encRender()});
+function encSync(){const bin=$('#enBase').value==='2';$('#enNw').hidden=bin;$('#enExact').parentElement.hidden=bin}
+['enVal','enP','enN'].forEach(id=>$('#'+id).addEventListener('input',()=>encRender()));$('#enExact').addEventListener('change',()=>encRender());
+function x2Table(c,maxRows=24){
+  const z=c.rows.findIndex(r=>r[0]===0n); const done=z>=0;
+  if(done)maxRows=Math.min(maxRows,z);
+  const rows=c.rows.slice(0,maxRows).map(([fr,f2,b])=>`<tr><td>${decStr(fr,c.p)} × 2</td><td>= ${decStr(f2,c.p)}</td><td class="bit">→ ${b}</td></tr>`).join('');
+  return `<div style="overflow-x:auto"><table class="x2">${rows}</table></div>${done?`<span class="notice">The fraction reached 0, so the remaining ${c.rows.length-z} bit${c.rows.length-z>1?'s are':' is'} 0.</span>`:c.rows.length>maxRows?`<span class="notice">… ${c.rows.length-maxRows} more rows</span>`:''}`;
+}
+function intBin(n){if(n===0n)return'Integer part: 0';const b=n.toString(2);const parts=[];for(let i=0;i<b.length;i++)if(b[i]==='1')parts.push((p2(b.length-1-i)).toString());return `Integer part: ${n} = ${parts.length>1?parts.join(' + ')+' = ':''}${b}`}
+function encodeSteps(o,fmt,opts={}){
+  // o: operand. returns {html, word, hex, ok}
+  const {k,f}=fmt; const bias=biasOf(k); const out=[];
+  if(o.m===0n){return{html:'<p>Zero is stored as all-zero exponent and fraction: '+fieldHTML(o.neg?1:0,'0'.repeat(k),'0'.repeat(f))+'</p>',ok:true,word:(o.neg?'1':'0')+'0'.repeat(k+f)}}
+  // 1 convert
+  if(o.src==='dec'){
+    const c=o.conv; const lim=o.exact?'exact (bits until the pattern is clear)':`${o.N} bits after the point, as instructed`;
+    const shownBits=o.exact?c.bits.slice(0,40).replace(/0+$/,''):c.bits;
+    out.push(`<li class="hl"><div><b class="k">Convert to binary</b>
+      <span class="mono">${intBin(c.intPart)}</span>
+      <span>Fraction part, ${lim}:</span>${x2Table(c,o.exact?16:Math.min(c.rows.length,30))}
+      <div class="math">${esc(o.txt.replace(/^[+-]/,''))} = ${c.intPart.toString(2)}.${shownBits}${o.exact&&c.rest?'…':''}</div></div></li>`);
+  } else {
+    out.push(`<li class="hl"><div><b class="k">Already binary</b><div class="math">${esc(o.txt.replace(/^[+-]/,''))} × 2${sup(o.pow||0)}</div></div></li>`);
+  }
+  // 2 normalize
+  const n=normalizeDy(o.m,o.e); const fb=n.fracBits; const written=o.src==='bin'?(o.pow||0):0; const shift=n.E-written;
+  const shownNorm='1.'+((fb.replace(/0+$/,'').slice(0,40))||'0')+(fb.replace(/0+$/,'').length>40?'…':'');
+  out.push(`<li class="hl"><div><b class="k">Normalize</b><div class="math">= ${shownNorm} × 2${sup(n.E)}</div><span>${shift>0?`Point moved ${shift} place${shift>1?'s':''} left → exponent ${minus(written)} + ${shift} = ${minus(n.E)}`:shift<0?`Point moved ${-shift} place${shift<-1?'s':''} right → exponent ${minus(written)} − ${-shift} = ${minus(n.E)}`:'No move needed'}. Actual exponent = <b>${minus(n.E)}</b>.</span></div></li>`);
+  // 3 biased
+  const be=n.E+bias; const rc=rangeCheck(be,k);
+  out.push(`<li class="${rc.ok?'hl':'bad'}"><div><b class="k">Biased exponent</b><div class="math">bias   = 2^(${k}−1) − 1 = ${bias}
+biased = ${minus(n.E)} + ${bias} = ${minus(be)}${rc.ok?` = <span class="e-c">${be.toString(2).padStart(k,'0')}</span>  (${k} bits)`:''}</div>${rc.ok?'':`<span class="verdict bad">${rc.kind}</span><span>${minus(be)} is outside 1 … ${rc.top}, so this number can't be stored in this format.</span>`}</div></li>`);
+  if(!rc.ok)return{html:`<ol class="steps">${out.join('')}</ol>`,ok:false,kind:rc.kind};
+  // 4 sign
+  const s=o.neg?1:0;
+  out.push(`<li class="hl"><div><b class="k">Sign bit</b><span>${o.neg?'Negative':'Positive'} → <b class="s-c">S = ${s}</b></span></div></li>`);
+  // 5 fraction
+  const fr=fracHTML(fb,f);
+  out.push(`<li class="hl"><div><b class="k">Fraction (${f} bits)</b><div class="math">${fr.html}</div><span class="notice">${fr.padded?`<span class="pad">Orange zeros</span> pad the field on the right.`:''} ${fr.dropped?'Struck-out bits don\'t fit and are cut off (truncated).':''} The leading 1 is not stored.</span></div></li>`);
+  // 6 encode
+  const eb=be.toString(2).padStart(k,'0'); const word=s+eb+fr.bits; const hx=hexOf(word);
+  const grp=hx.groups.map((g,i)=>g).join(' ');
+  out.push(`<li class="ok"><div><b class="k">Encode</b><div class="math">${wordHTML(s,eb,fr.bits)}
+${hx.pad?`pad ${hx.pad} zero${hx.pad>1?'s':''} on the left to group from the right:
+`:''}${grp}
+${hx.groups.map(g=>parseInt(g,2).toString(16).toUpperCase().padStart(4,' ')).join(' ')}</div></div></li>`);
+  // stored value
+  const stored=valueText(!!s,p2(f)+B('0b'+(fr.bits||'0')),n.E-f);
+  return{html:`<ol class="steps">${out.join('')}</ol><div class="result"><span class="eyebrow">Answer</span><span class="big">${hx.hex}</span><span>${fieldHTML(s,eb,fr.bits)}</span><span class="notice">This pattern decodes to <b>${stored}</b>.</span></div>`,ok:true,word,hex:hx.hex};
+}
+function encRender(){
+  encSync(); const fmt=en.get(); const base=+$('#enBase').value; const exact=$('#enExact').checked; $('#enN').disabled=exact;
+  const o=operand($('#enVal').value,base,$('#enP').value,Math.max(1,Math.min(200,+$('#enN').value||10)),exact);
+  if(o.err){$('#enOut').innerHTML=`<p class="err">${o.err}</p>`;return}
+  $('#enOut').innerHTML=encodeSteps(o,fmt).html;
+}
+const ENP=[
+  ['−0.75 single (slide 15)','-0.75',10,0,'single',10,false],
+  ['−0.75 double (slide 15)','-0.75',10,0,'double',10,false],
+  ['50.6749 (handout)','50.6749',10,0,'single',10,false],
+  ['−0.0232, 12-bit (handout, 7 bits)','-0.0232',10,0,'b12',7,false],
+  ['−0.0232, 12-bit, 10 bits','-0.0232',10,0,'b12',10,false],
+  ['Q6 −0.00987, 34-bit','-0.00987',10,0,'b34',10,false],
+  ['Q7 1101.1111₂ × 2⁵ single','1101.1111',2,5,'single',10,false],
+  ['Q8 1101.1111₂ × 2²¹² double','1101.1111',2,212,'double',10,false]
+];
+function chipRow(el,list,load){el.innerHTML=list.map((x,i)=>`<button class="chip" type="button" data-i="${i}">${x[0]}</button>`).join('');el.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;el.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===b));load(list[+b.dataset.i])})}
+function encLoad(x){$('#enVal').value=x[1];$('#enBase').value=x[2];$('#enP').value=x[3];en.set(x[4]);$('#enN').value=x[5];$('#enExact').checked=!!x[6];encRender()}
+chipRow($('#enChips'),ENP,encLoad); encLoad(ENP[2]);
+
+/* ---------- DECODER ---------- */
+const de=fmtPicker('de','single',()=>decRender(),{noSlide:true});
+['deVal','deBase'].forEach(id=>$('#'+id).addEventListener('input',()=>decRender()));
+function decRender(){
+  const {k,f}=de.get(); const total=1+k+f; const base=+$('#deBase').value; let t=$('#deVal').value.trim().replace(/\s/g,'').replace(/_/g,'');
+  const out=$('#deOut'); let v;
+  try{
+    if(base===16){t=t.replace(/^0x/i,'');if(!/^[0-9a-f]+$/i.test(t))throw 0;v=B('0x'+t)}
+    else if(base===2){t=t.replace(/^0b/i,'');if(!/^[01]+$/.test(t))throw 0;v=B('0b'+t)}
+    else if(base===8){t=t.replace(/^0o/i,'').replace(/8$/,'');if(!/^[0-7]+$/.test(t))throw 0;v=B('0o'+t)}
+    else{if(!/^\d+$/.test(t))throw 0;v=B(t)}
+  }catch(e){out.innerHTML=`<p class="err">That isn't a valid ${({16:'hex',2:'binary',10:'decimal',8:'octal'})[base]} number.</p>`;return}
+  if(v>=p2(total)){out.innerHTML=`<p class="err">That needs ${blen(v)} bits, but this format has only ${total}.</p>`;return}
+  const bits=v.toString(2).padStart(total,'0'); const r=decodeBits(bits,k,f); const st=[];
+  const conv=base===16?`Each hex digit → 4 bits`:base===2?'Already binary':base===10?`${v} (decimal) → hex ${'0x'+v.toString(16).toUpperCase()} → binary`:`Each octal digit → 3 bits (${t}₈ = 0x${v.toString(16).toUpperCase()})`;
+  st.push(`<li class="hl"><div><b class="k">Binary</b><span>${conv}, padded to ${total} bits.</span><div class="math">${group4(bits)}</div></div></li>`);
+  st.push(`<li class="hl"><div><b class="k">Split 1 · ${k} · ${f}</b><div class="math">${wordHTML(r.s,r.eb,r.fb)}</div></div></li>`);
+  st.push(`<li class="hl"><div><b class="k">Sign</b><span class="s-c"><b>S = ${r.s} → ${r.s?'negative':'positive'}</b></span></div></li>`);
+  if(r.special){st.push(`<li class="bad"><div><b class="k">Special pattern</b><span>${r.special.includes('Inf')?'Exponent all 1s and fraction 0 → <b>'+r.special+'</b>':r.special==='NaN'?'Exponent all 1s and fraction ≠ 0 → <b>NaN</b>':'Exponent and fraction all 0 → <b>'+r.special+'</b>'}</span></div></li>`);out.innerHTML=`<ol class="steps">${st.join('')}</ol>`;return}
+  if(r.denorm){st.push(`<li class="bad"><div><b class="k">Exponent field is 0</b><span>This is a denormal number, which is outside slides 9–21. Value = (−1)${sup(r.s)} × 0.F × 2${sup(1-r.bias)}.</span></div></li>`);out.innerHTML=`<ol class="steps">${st.join('')}</ol><div class="result"><span class="big">${valueText(!!r.s,r.m,r.e)}</span></div>`;return}
+  st.push(`<li class="hl"><div><b class="k">Actual exponent</b><div class="math">biased = <span class="e-c">${r.eb}</span> = ${r.be}
+bias   = 2^(${k}−1) − 1 = ${r.bias}
+actual = ${r.be} − ${r.bias} = ${minus(r.actual)}</div></div></li>`);
+  const fd=fracDec(r.fb); const ones=[...r.fb].map((c,i)=>c==='1'?`2${sup(-(i+1))}`:null).filter(Boolean);
+  st.push(`<li class="hl"><div><b class="k">Fraction to decimal</b><div class="math">0.${r.fb.replace(/0+$/,'')||'0'}₂ = ${ones.length?ones.slice(0,8).join(' + ')+(ones.length>8?' + …':''):'0'}
+     = ${fd}</div></div></li>`);
+  const val=valueText(!!r.s,r.m,r.e);
+  st.push(`<li class="ok"><div><b class="k">Final number</b><div class="math">x = (−1)${sup(r.s)} × (1 + ${fd}) × 2${sup(r.actual)}
+  = ${r.s?'−':''}${plain(false,r.m,p2(f),10)} × 2${sup(r.actual)}
+  = ${val}</div></div></li>`);
+  out.innerHTML=`<ol class="steps">${st.join('')}</ol><div class="result"><span class="eyebrow">Answer</span><span class="big">${val.split('  (')[0]}</span>${val.includes('  (')?`<span class="notice">${val.split('  (')[1].replace(/\)$/,'')}</span>`:''}</div>`;
+}
+const DEP=[['0xC0A00000 (slide 16)','0xC0A00000',16,'single'],['0xF2400120 (handout)','0xF2400120',16,'single'],['Q9 i 0xFF1205BA','0xFF1205BA',16,'single'],['Q9 ii 3457890989₁₀','3457890989',10,'single'],['Q9 iii 23245613451₈','23245613451',8,'single'],['0x880 (12-bit)','0x880',16,'b12'],['0x2FC200000 (34-bit, Q6)','0x2FC200000',16,'b34']];
+function decLoad(x){$('#deVal').value=x[1];$('#deBase').value=x[2];de.set(x[3]);decRender()}
+chipRow($('#deChips'),DEP,decLoad);decLoad(DEP[0]);
+
+/* ---------- ADD ---------- */
+const ad=fmtPicker('ad','slide',()=>addRender());
+['adA','adAb','adAp','adOp','adB','adBb','adBp','adN'].forEach(id=>$('#'+id).addEventListener('input',()=>addRender()));
+function convNote(o,name){
+  if(o.src==='bin')return `${name} = ${esc(o.txt)}₂ × 2${sup(o.pow)}`;
+  return `${name} = ${esc(o.txt)} → ${o.neg?'−':''}${binPoint(o.m,o.e,false)}  (${o.N} bits)`;
+}
+function sigStr(m,L,shiftRight=0){ // significand M (L bits, 1.xxx) shown at exponent +shiftRight
+  return binPoint(m,-(L-1)-shiftRight,true);
+}
+function addRender(){
+  const fmt=ad.get(),{k,f}=fmt,bias=biasOf(k),N=Math.max(1,Math.min(200,+$('#adN').value||10));
+  let A=operand($('#adA').value,+$('#adAb').value,$('#adAp').value,N,false), Bo=operand($('#adB').value,+$('#adBb').value,$('#adBp').value,N,false);
+  const out=$('#adOut'); if(A.err||Bo.err){out.innerHTML=`<p class="err">${A.err||Bo.err}</p>`;return}
+  if(A.m===0n||Bo.m===0n){out.innerHTML='<p class="notice">Adding zero leaves the other number unchanged.</p>';return}
+  const sub=$('#adOp').value==='-'; const bNeg=sub?!Bo.neg:Bo.neg; const st=[];
+  const na=normalizeDy(A.m,A.e), nb=normalizeDy(Bo.m,Bo.e);
+  const sgn=x=>x?'−':'+';
+  st.push(`<li class="hl"><div><b class="k">Binary and normalize</b><div class="math">${convNote(A,'A')}
+${convNote(Bo,'B')}
+
+A = ${sgn(A.neg)}1.${na.fracBits.replace(/0+$/,'')||'0'} × 2${sup(na.E)}
+${sub?'−B':'B'} = ${sgn(bNeg)}1.${nb.fracBits.replace(/0+$/,'')||'0'} × 2${sup(nb.E)}${sub?`      (A − B = A + (−B), so B's sign flips${Bo.neg?': −(−) = +':''})`:''}</div></div></li>`);
+  const big=na.E>=nb.E?'A':'B'; const Emax=Math.max(na.E,nb.E), d=Math.abs(na.E-nb.E);
+  const sa=sigStr(na.sig,na.L,Emax-na.E), sb=sigStr(nb.sig,nb.L,Emax-nb.E);
+  st.push(`<li class="hl"><div><b class="k">Align binary points</b><span>${d?`Shift the number with the smaller exponent (<b>${big==='A'?(sub?'−B':'B'):'A'}</b>) right by ${minus(Emax)} − (${minus(Math.min(na.E,nb.E))}) = ${d} place${d>1?'s':''}.`:'Exponents already match.'}</span><div class="math">A = ${sgn(A.neg)}${sa} × 2${sup(Emax)}
+${sub?'−B':'B'} = ${sgn(bNeg)}${sb} × 2${sup(Emax)}</div></div></li>`);
+  // exact sum on common scale
+  const ea=na.E-(na.L-1), eb=nb.E-(nb.L-1), e0=Math.min(ea,eb);
+  const va=(A.neg?-1n:1n)*(na.sig<<B(ea-e0)), vb=(bNeg?-1n:1n)*(nb.sig<<B(eb-e0)); const S=va+vb;
+  const fracDigits=Emax-e0; const show=(v)=>binPoint(v<0n?-v:v,-fracDigits,false);
+  const w=Math.max(show(va).length,show(vb).length,show(S).length)+1;
+  const col=(sg,v)=>`${sg} ${show(v).padStart(w)}`;
+  const sameSign=A.neg===bNeg;
+  st.push(`<li class="hl"><div><b class="k">${sameSign?'Add':'Subtract'} significands</b><span>${sameSign?'Same signs: add the magnitudes, keep the sign.':'Different signs: subtract the smaller magnitude from the larger, keep the larger one\'s sign.'}</span><div class="math">  ${show(va<0n?-va:va).padStart(w)}   ${A.neg?'(−)':''}
+${sameSign?'+':'−'} ${show(vb<0n?-vb:vb).padStart(w)}   ${bNeg?'(−)':''}
+  ${'─'.repeat(w)}
+  ${show(S<0n?-S:S).padStart(w)}   × 2${sup(Emax)}${S<0n?'  (negative)':''}</div></div></li>`);
+  if(S===0n){st.push('<li class="ok"><div><b class="k">Result is exactly 0</b><span>Zero is stored with exponent and fraction all 0.</span></div></li>');out.innerHTML=`<ol class="steps">${st.join('')}</ol>`;return}
+  const neg=S<0n, mag=neg?-S:S; const nr=normalizeDy(mag,e0); const shift=nr.E-Emax; const be=nr.E+bias; const rc=rangeCheck(be,k);
+  st.push(`<li class="${rc.ok?'hl':'bad'}"><div><b class="k">Normalize, check over/underflow</b><div class="math">${show(mag)} × 2${sup(Emax)} = 1.${nr.fracBits.replace(/0+$/,'')||'0'} × 2${sup(nr.E)}   ${shift>0?`(point ${shift} left)`:shift<0?`(point ${-shift} right)`:'(already normalized)'}
+biased = ${minus(nr.E)} + ${bias} = ${minus(be)}   valid 1 … ${rc.top}</div><span class="verdict ${rc.ok?'ok':'bad'}">${rc.kind}</span></div></li>`);
+  if(!rc.ok){out.innerHTML=`<ol class="steps">${st.join('')}</ol>`;return}
+  const fr=fracHTML(nr.fracBits,f); const eb2=be.toString(2).padStart(k,'0'); const word=(neg?'1':'0')+eb2+fr.bits; const hx=hexOf(word).hex;
+  st.push(`<li class="${fr.dropped?'hl':'ok'}"><div><b class="k">Round to ${f} fraction bits</b><div class="math">${fr.html}</div><span class="notice">${fr.dropped?'Struck-out bits don\'t fit. The course cuts them off (truncates).':'Nothing is lost: the result fits.'}</span></div></li>`);
+  const stored=valueText(neg,p2(f)+B('0b'+fr.bits),nr.E-f), exact=valueText(neg,mag,e0);
+  out.innerHTML=`<ol class="steps">${st.join('')}</ol><div class="result"><span class="eyebrow">Answer</span><span class="big">${neg?'−':''}1.${fr.bits.replace(/0+$/,'')||'0'} × 2${sup(nr.E)}</span><span>${fieldHTML(neg?1:0,eb2,fr.bits)} = <b class="mono">${hx}</b></span><span class="notice">Stored value ${stored}${stored!==exact?` · exact sum of the converted inputs ${exact}`:''}</span></div>`;
+}
+const ADP=[
+  ['Slide 19: 0.5 + (−0.4375)',['1.000',2,-1],'+',['-1.110',2,-2],'slide',10],
+  ['Q13 7.01 + 0.71',['7.01',10,0],'+',['0.71',10,0],'single',10],
+  ['Q14 18.71 − 7.01',['18.71',10,0],'-',['7.01',10,0],'single',10],
+  ['Q15 18.71 − (−7.01)',['18.71',10,0],'-',['-7.01',10,0],'single',10],
+  ['3.25 + 0.375',['3.25',10,0],'+',['0.375',10,0],'single',10],
+  ['5.5 − 2.75',['5.5',10,0],'-',['2.75',10,0],'single',10],
+  ['1.5 + 0.375',['1.5',10,0],'+',['0.375',10,0],'single',10]
+];
+function adLoad(x){$('#adA').value=x[1][0];$('#adAb').value=x[1][1];$('#adAp').value=x[1][2];$('#adOp').value=x[2];$('#adB').value=x[3][0];$('#adBb').value=x[3][1];$('#adBp').value=x[3][2];ad.set(x[4]);$('#adN').value=x[5];addRender()}
+chipRow($('#adChips'),ADP,adLoad);adLoad(ADP[0]);
+
+/* ---------- MULTIPLY ---------- */
+const mu=fmtPicker('mu','slide',()=>mulRender());
+['muA','muAb','muAp','muB','muBb','muBp','muN'].forEach(id=>$('#'+id).addEventListener('input',()=>mulRender()));
+function mulRender(){
+  const fmt=mu.get(),{k,f}=fmt,bias=biasOf(k),N=Math.max(1,Math.min(200,+$('#muN').value||10));
+  const A=operand($('#muA').value,+$('#muAb').value,$('#muAp').value,N,false), Bo=operand($('#muB').value,+$('#muBb').value,$('#muBp').value,N,false);
+  const out=$('#muOut'); if(A.err||Bo.err){out.innerHTML=`<p class="err">${A.err||Bo.err}</p>`;return}
+  if(A.m===0n||Bo.m===0n){out.innerHTML='<p class="notice">Anything times zero is zero.</p>';return}
+  const na=normalizeDy(A.m,A.e), nb=normalizeDy(Bo.m,Bo.e); const st=[]; const sgn=x=>x?'−':'';
+  st.push(`<li class="hl"><div><b class="k">Binary and normalize</b><div class="math">${convNote(A,'A')}
+${convNote(Bo,'B')}
+
+A = ${sgn(A.neg)}1.${na.fracBits.replace(/0+$/,'')||'0'} × 2${sup(na.E)}
+B = ${sgn(Bo.neg)}1.${nb.fracBits.replace(/0+$/,'')||'0'} × 2${sup(nb.E)}</div></div></li>`);
+  const E=na.E+nb.E;
+  st.push(`<li class="hl"><div><b class="k">Add exponents</b><div class="math">unbiased: ${minus(na.E)} + ${minus(nb.E)} = ${minus(E)}
+biased:   (${minus(na.E)} + ${bias}) + (${minus(nb.E)} + ${bias}) − ${bias} = ${minus(E)} + ${bias}</div></div></li>`);
+  const P=na.sig*nb.sig, fd=(na.L-1)+(nb.L-1);
+  let pp='';
+  if(na.L<=12&&nb.L<=12&&nb.L>1){
+    const a=na.sig.toString(2), bstr=nb.sig.toString(2); const width=a.length+bstr.length; const rows=[];
+    for(let i=bstr.length-1;i>=0;i--){const sh=bstr.length-1-i;rows.push((bstr[i]==='1'?a:'0'.repeat(a.length)).padStart(width-sh)+' '.repeat(sh))}
+    pp=`\n\npartial products (point ignored):\n${'  '+a.padStart(width)}\n× ${bstr.padStart(width)}\n  ${'─'.repeat(width)}\n${rows.map(r=>'  '+r).join('\n')}\n  ${'─'.repeat(width)}\n  ${P.toString(2).padStart(width)}   → point ${fd} from the right`;
+  }
+  st.push(`<li class="hl"><div><b class="k">Multiply significands</b><div class="math">1.${na.fracBits.replace(/0+$/,'')||'0'} × 1.${nb.fracBits.replace(/0+$/,'')||'0'} = ${binPoint(P,-fd,true)}${pp}</div></div></li>`);
+  const nr=normalizeDy(P,-fd+E); const shift=nr.E-E; const be=nr.E+bias; const rc=rangeCheck(be,k);
+  st.push(`<li class="${rc.ok?'hl':'bad'}"><div><b class="k">Normalize, check over/underflow</b><div class="math">${binPoint(P,-fd,true)} × 2${sup(E)} = 1.${nr.fracBits.replace(/0+$/,'')||'0'} × 2${sup(nr.E)}   ${shift?`(point 1 left, exponent +1)`:'(already normalized)'}
+biased = ${minus(nr.E)} + ${bias} = ${minus(be)}     valid range 1 … ${rc.top}</div><span class="verdict ${rc.ok?'ok':'bad'}">${rc.kind}</span>${rc.ok?'':`<span>${be<1?`${minus(be)} &lt; 1`:`${be} &gt; ${rc.top}`}, so the result can't be stored. That is the answer to "check for overflow or underflow".</span>`}</div></li>`);
+  const neg=A.neg!==Bo.neg;
+  if(!rc.ok){st.push(`<li class="hl"><div><b class="k">Sign</b><span>${sgn(A.neg)||'+'} × ${sgn(Bo.neg)||'+'} → ${neg?'negative':'positive'}</span></div></li>`);out.innerHTML=`<ol class="steps">${st.join('')}</ol><div class="result"><span class="eyebrow">Answer</span><span class="big">${neg?'−':''}1.${nr.fracBits.replace(/0+$/,'').slice(0,24)||'0'} × 2${sup(nr.E)}</span><span class="verdict bad">${rc.kind}</span></div>`;return}
+  const fr=fracHTML(nr.fracBits,f);
+  st.push(`<li class="hl"><div><b class="k">Round to ${f} fraction bits</b><div class="math">${fr.html}</div><span class="notice">${fr.dropped?'Struck-out bits don\'t fit. The course truncates them.':'Fits exactly, no change.'}</span></div></li>`);
+  st.push(`<li class="ok"><div><b class="k">Sign</b><span>${A.neg?'−':'+'} × ${Bo.neg?'−':'+'} → <b class="s-c">${neg?'negative, S = 1':'positive, S = 0'}</b></span></div></li>`);
+  const eb2=be.toString(2).padStart(k,'0'); const word=(neg?'1':'0')+eb2+fr.bits; const hx=hexOf(word).hex;
+  const stored=valueText(neg,p2(f)+B('0b'+fr.bits),nr.E-f), exact=valueText(neg,P,-fd+E);
+  out.innerHTML=`<ol class="steps">${st.join('')}</ol><div class="result"><span class="eyebrow">Answer</span><span class="big">${neg?'−':''}1.${fr.bits.replace(/0+$/,'')||'0'} × 2${sup(nr.E)}</span><span>${fieldHTML(neg?1:0,eb2,fr.bits)} = <b class="mono">${hx}</b></span><span class="verdict ok">${rc.kind}</span><span class="notice">Stored value ${stored}${stored!==exact?` · exact product of the converted inputs ${exact}`:''}</span></div>`;
+}
+const MUP=[
+  ['Slide 21: 0.5 × (−0.4375)',['1.000',2,-1],['-1.110',2,-2],'slide',10],
+  ['Q10 i 7.01 × 0.71',['7.01',10,0],['0.71',10,0],'single',10],
+  ['Q10 ii 0.000101₂ × 10.1₂',['0.000101',2,0],['10.1',2,0],'single',10],
+  ['Q10 iii (2⁷⁰ × 2⁶⁰)',['0.000101',2,70],['10010.000101',2,60],'single',10],
+  ['Q10 iv 1584.234²',['1584.234',10,0],['1584.234',10,0],'single',10],
+  ['Q10 vi',['1101.1111',2,5],['110.000101',2,6],'single',10],
+  ['Q11 i double',['7.01',10,0],['0.71',10,0],'double',10],
+  ['Q11 ii (2⁻⁸⁵⁰ × 2⁻⁹⁰⁰)',['0.000101',2,-850],['10.1',2,-900],'double',10],
+  ['Q11 iii (2⁷⁹⁰ × 2⁶⁸⁰)',['0.0101',2,790],['10010.0101',2,680],'double',10],
+  ['Q12 i 18-bit',['7.01',10,0],['0.71',10,0],'b18',10],
+  ['Q12 ii 18-bit',['0.000101',2,-85],['10.1',2,-90],'b18',10],
+  ['Q12 iii 18-bit',['0.0101',2,79],['10010.0101',2,68],'b18',10],
+  ['2.5 × (−0.75)',['2.5',10,0],['-0.75',10,0],'single',10]
+];
+function muLoad(x){$('#muA').value=x[1][0];$('#muAb').value=x[1][1];$('#muAp').value=x[1][2];$('#muB').value=x[2][0];$('#muBb').value=x[2][1];$('#muBp').value=x[2][2];mu.set(x[3]);$('#muN').value=x[4];mulRender()}
+chipRow($('#muChips'),MUP,muLoad);muLoad(MUP[0]);
+
+/* ---------- static steppers ---------- */
+$$('[data-stepper]').forEach(sp=>{const lis=[...sp.querySelectorAll('.steps>li')];let i=1;const draw=()=>lis.forEach((li,j)=>li.classList.toggle('future',j>=i));
+  sp.querySelector('[data-next]').addEventListener('click',()=>{i=Math.min(lis.length,i+1);draw()});sp.querySelector('[data-prev]').addEventListener('click',()=>{i=Math.max(1,i-1);draw()});sp.querySelector('[data-all]').addEventListener('click',()=>{i=lis.length;draw()});draw()});
+
+/* ---------- practice sheet ---------- */
+const QT=[
+ {id:'norm',name:'Normalize a number',qs:'Q1',n:1,
+  recipe:['Find the first non-zero digit.','Move the point to just after it.','Each place left adds 1 to the exponent; each place right subtracts 1.'],
+  solved:`<div class="tbl"><table><tr><th></th><th>Given</th><th>Normalized</th></tr>
+   <tr><td>i</td><td class="mono">0.0000124678₁₀</td><td class="mono">1.24678 × 10⁻⁵</td></tr>
+   <tr><td>ii</td><td class="mono">1584.234₁₀ × 10⁵</td><td class="mono">1.584234 × 10⁸</td></tr>
+   <tr><td>iii</td><td class="mono">4782.2354₁₀</td><td class="mono">4.7822354 × 10³</td></tr>
+   <tr><td>iv</td><td class="mono">110101.1111₂</td><td class="mono">1.101011111 × 2⁵</td></tr>
+   <tr><td>v</td><td class="mono">0.001100₂</td><td class="mono">1.100 × 2⁻³</td></tr>
+   <tr><td>vi</td><td class="mono">1101.1111₂ × 2⁵</td><td class="mono">1.1011111 × 2⁸</td></tr></table></div>`,
+  tool:['start',null],
+  practice:[['Normalize 0.0000111₂','1.11 × 2⁻⁵ (point moves 5 right)'],['Normalize 1011.01₂ × 2⁻³','1.01101 × 2⁰ (point moves 3 left: −3 + 3 = 0)']]},
+ {id:'bias',name:'Find the biased exponent',qs:'Q2–Q5',n:4,
+  recipe:['Normalize first, so you know the actual exponent.','bias = 2^(k−1) − 1, where k is the exponent field size.','biased = actual + bias, then write it in k bits.'],
+  solved:`<div class="tbl"><table><tr><th>Q</th><th>Number · format</th><th>Bias</th><th>Biased</th></tr>
+   <tr><td>2</td><td class="mono">1.1011 × 2³⁴ · single (k=8)</td><td class="num">127</td><td class="mono">161 = 10100001</td></tr>
+   <tr><td>3</td><td class="mono">1.1011 × 2⁴ · 12-bit, k=4</td><td class="num">7</td><td class="mono">11 = 1011</td></tr>
+   <tr><td>4</td><td class="mono">1.1011 × 2³⁴ · 64-bit (k=11)</td><td class="num">1023</td><td class="mono">1057 = 10000100001</td></tr>
+   <tr><td>5</td><td class="mono">5678.898 · 34-bit, k=10</td><td class="num">511</td><td class="mono">523 = 1000001011</td></tr></table></div>
+   <p class="notice">Q5: 5678 = 1011000101110₂ (13 bits), so 5678.898 = 1.0110001011101… × 2¹². Only the exponent is asked, so the fraction bits don't matter.</p>`,
+  tool:['range',{fmt:'single',E:34}],
+  practice:[['Biased exponent of 1.0101 × 2⁻²⁰ in single precision','−20 + 127 = 107 = 01101011'],['Biased exponent of 1.11 × 2⁹ in a 16-bit format with a 5-bit exponent','bias 15 → 9 + 15 = 24 = 11000']]},
+ {id:'enc',name:'Decimal → IEEE (hex)',qs:'Q6–Q8',n:3,
+  recipe:['Convert to binary, keeping the number of bits the question states.','Normalize.','Biased exponent in k bits.','Sign bit.','Fraction: bits after the 1, zero-padded on the right to f bits.','Write S|E|F, group 4s from the right, convert to hex.'],
+  solved:`<div class="tbl"><table><tr><th>Q</th><th>Number · format</th><th>Answer</th><th></th></tr>
+   <tr><td>6</td><td class="mono">−0.00987 · 34-bit (k=10, f=23), 10 bits</td><td class="mono">0x2FC200000</td><td><button class="chip" data-open="enc:5">Open</button></td></tr>
+   <tr><td>7</td><td class="mono">1101.1111₂ × 2⁵ · single</td><td class="mono">0x43DF0000</td><td><button class="chip" data-open="enc:6">Open</button></td></tr>
+   <tr><td>8</td><td class="mono">1101.1111₂ × 2²¹² · double</td><td class="mono">0x4D6BE00000000000</td><td><button class="chip" data-open="enc:7">Open</button></td></tr>
+   <tr><td>H</td><td class="mono">50.6749 · single, 10 bits (handout)</td><td class="mono">0x424AB300</td><td><button class="chip" data-open="enc:2">Open</button></td></tr></table></div>
+   <p class="notice">The faculty solved only Q6 and left Q7–Q8 as "try yourself". Q7 = 446.0, so check: 1.1011111 × 2⁸ = 110111111₂ = 446 ✓.</p>`,
+  practice:[['12.375 in single precision','1100.011 = 1.100011 × 2³ → 0 10000010 10001100000000000000000 = 0x41460000',{v:'12.375',b:10,p:0,fmt:'single',n:10}],['−0.15625 in 16-bit (k=5, f=10)','0.00101 = 1.01 × 2⁻³ → biased 12 → 1 01100 0100000000 = 0xB100',{v:'-0.15625',b:10,p:0,fmt:'b16',n:10}],['9.3 in single, consider 10 bits','1001.0100110011 = 1.0010100110011 × 2³ → 0x4114CC00',{v:'9.3',b:10,p:0,fmt:'single',n:10}]]},
+ {id:'dec',name:'IEEE → decimal',qs:'Q9',n:1,
+  recipe:['Turn the pattern into binary (hex: 4 bits per digit; decimal or octal: convert first).','Split 1 · k · f.','actual exponent = biased − bias.','Fraction to decimal (0.5, 0.25, 0.125 …).','(−1)^S × (1 + fraction) × 2^actual.'],
+  solved:`<div class="tbl"><table><tr><th></th><th>Pattern</th><th>Decimal</th><th></th></tr>
+   <tr><td>i</td><td class="mono">0xFF1205BA</td><td class="mono">−1.940970214 × 10³⁸</td><td><button class="chip" data-open="dec:2">Open</button></td></tr>
+   <tr><td>ii</td><td class="mono">3457890989₁₀ = 0xCE1B3AAD</td><td class="mono">−651078464 (−6.510784640 × 10⁸)</td><td><button class="chip" data-open="dec:3">Open</button></td></tr>
+   <tr><td>iii</td><td class="mono">23245613451₈ = 0x9A971729</td><td class="mono">−6.248955350 × 10⁻²³</td><td><button class="chip" data-open="dec:4">Open</button></td></tr>
+   <tr><td>H</td><td class="mono">0xF2400120 (handout)</td><td class="mono">−3.803038843 × 10³⁰</td><td><button class="chip" data-open="dec:1">Open</button></td></tr></table></div>
+   <p class="notice">The faculty solved only part i. Parts ii and iii give the same 32 bits written in decimal and octal: convert to binary first, then decode as usual.</p>`,
+  practice:[['0x42C80000 (single)','S=0, exp 10000101 = 133 → 6, fraction .1001 = 0.5625 → 1.5625 × 2⁶ = 100',{h:'0x42C80000',b:16,fmt:'single'}],['0xBE200000 (single)','S=1, exp 124 → −3, fraction .01 = 0.25 → −1.25 × 2⁻³ = −0.15625',{h:'0xBE200000',b:16,fmt:'single'}],['0x5A0 in 12-bit (k=4, f=7)','0 1011 0100000 → exp 11 − 7 = 4, fraction 0.25 → 1.25 × 2⁴ = 20',{h:'0x5A0',b:16,fmt:'b12'}]]},
+ {id:'mul',name:'Multiply + overflow / underflow',qs:'Q10–Q12',n:3,
+  recipe:['Convert both to binary and normalize.','Add the exponents (biased: add both biased exponents, subtract the bias once).','Multiply the significands.','Normalize the product (at most one place).','Biased exponent in 1 … 2^k − 2? Otherwise overflow (too big) or underflow (too small).','Round to f bits, then the sign: same signs +, different −.'],
+  solved:`<div class="tbl"><table><tr><th>Q</th><th>Numbers · format</th><th>Result</th><th>Verdict</th><th></th></tr>
+   <tr><td>10 i</td><td class="mono">7.01 × 0.71 · single</td><td class="mono">1.00111110100000011001100 × 2² = 0x409F40CC</td><td>none</td><td><button class="chip" data-open="mul:1">Open</button></td></tr>
+   <tr><td>10 ii</td><td class="mono">0.000101₂ × 10.1₂ · single</td><td class="mono">1.1001 × 2⁻³ = 0x3E480000</td><td>none</td><td><button class="chip" data-open="mul:2">Open</button></td></tr>
+   <tr><td>10 iii</td><td class="mono">…× 2⁷⁰ × …× 2⁶⁰ · single</td><td class="mono">1.011010011001 × 2¹³⁰, biased 257</td><td><b>Overflow</b></td><td><button class="chip" data-open="mul:3">Open</button></td></tr>
+   <tr><td>10 iv</td><td class="mono">1584.234² · single</td><td class="mono">1.00110010010111110001101 × 2²¹, biased 148</td><td>none</td><td><button class="chip" data-open="mul:4">Open</button></td></tr>
+   <tr><td>10 vi</td><td class="mono">1101.1111×2⁵ × 110.000101×2⁶</td><td class="mono">1.0101001011011011 × 2¹⁷ = 0x48296D80</td><td>none</td><td><button class="chip" data-open="mul:5">Open</button></td></tr>
+   <tr><td>11 i</td><td class="mono">7.01 × 0.71 · double</td><td class="mono">biased 1025 = 0x4013E81980000000</td><td>none</td><td><button class="chip" data-open="mul:6">Open</button></td></tr>
+   <tr><td>11 ii</td><td class="mono">…× 2⁻⁸⁵⁰ × …× 2⁻⁹⁰⁰ · double</td><td class="mono">1.1001 × 2⁻¹⁷⁵³, biased −730</td><td><b>Underflow</b></td><td><button class="chip" data-open="mul:7">Open</button></td></tr>
+   <tr><td>11 iii</td><td class="mono">…× 2⁷⁹⁰ × …× 2⁶⁸⁰ · double</td><td class="mono">1.0110111001 × 2¹⁴⁷², biased 2495</td><td><b>Overflow</b></td><td><button class="chip" data-open="mul:8">Open</button></td></tr>
+   <tr><td>12 i</td><td class="mono">7.01 × 0.71 · 18-bit</td><td class="mono">biased 17 → 0x113E8</td><td>none</td><td><button class="chip" data-open="mul:9">Open</button></td></tr>
+   <tr><td>12 ii</td><td class="mono">…× 2⁻⁸⁵ × …× 2⁻⁹⁰ · 18-bit</td><td class="mono">1.1001 × 2⁻¹⁷⁸, biased −163</td><td><b>Underflow</b></td><td><button class="chip" data-open="mul:10">Open</button></td></tr>
+   <tr><td>12 iii</td><td class="mono">…× 2⁷⁹ × …× 2⁶⁸ · 18-bit</td><td class="mono">1.0110111001 × 2¹⁴⁹, biased 164</td><td><b>Overflow</b></td><td><button class="chip" data-open="mul:11">Open</button></td></tr></table></div>
+   <p class="notice">"10 bits" conversion: 7.01 → 111.0000001010, 0.71 → 0.1011010111, 1584.234 → 11000110000.0011101111. Q10 v is skipped (only one number given).</p>`,
+  practice:[['1.1₂ × 2³ × 1.01₂ × 2⁻⁵ in single','exps 3 + (−5) = −2; 1.1 × 1.01 = 1.111 → 1.111 × 2⁻², biased 125, no overflow → 0x3EF00000 = 0.46875',{a:['1.1',2,3],b:['1.01',2,-5],fmt:'single'}],['1.1₂ × 2¹⁰⁰ × 1.1₂ × 2⁴⁰ in single','1.1 × 1.1 = 10.01 → 1.001 × 2¹⁴¹, biased 268 > 254 → Overflow',{a:['1.1',2,100],b:['1.1',2,40],fmt:'single'}],['1.0₂ × 2⁻¹⁰ × 1.0₂ × 2⁻⁸ in 16-bit (k=5)','exponent −18, biased −18 + 15 = −3 < 1 → Underflow',{a:['1.0',2,-10],b:['1.0',2,-8],fmt:'b16'}]]},
+ {id:'add',name:'Add / subtract',qs:'Q13–Q15',n:3,
+  recipe:['Convert both to binary and normalize.','Shift the one with the smaller exponent right until the exponents match.','Add (or subtract) the significands. A − B = A + (−B).','Normalize the result and check the exponent.','Round to f bits.'],
+  solved:`<div class="tbl"><table><tr><th>Q</th><th>Sum</th><th>Result</th><th></th></tr>
+   <tr><td>13</td><td class="mono">7.01 + 0.71</td><td class="mono">1.111011100001 × 2² = 0x40F70800 (7.7197…)</td><td><button class="chip" data-open="add:1">Open</button></td></tr>
+   <tr><td>14</td><td class="mono">18.71 − 7.01</td><td class="mono">1.0111011001101 × 2³ = 0x413B3400 (11.7001…)</td><td><button class="chip" data-open="add:2">Open</button></td></tr>
+   <tr><td>15</td><td class="mono">18.71 − (−7.01)</td><td class="mono">1.10011011100001 × 2⁴ = 0x41CDC200 (25.7197…)</td><td><button class="chip" data-open="add:3">Open</button></td></tr></table></div>
+   <p class="notice">The faculty didn't solve Q13–Q15. These follow the slide 19 method with "10 bits" conversion, so the results differ slightly from 7.72, 11.70 and 25.72. That is expected: 0.71 and 0.01 have no exact binary form. None of them overflow.</p>`,
+  practice:[['3.25 + 0.375 in single','11.01 + 0.011 = 11.101 = 1.1101 × 2¹ → 0x40680000 = 3.625',{a:['3.25',10,0],op:'+',b:['0.375',10,0],fmt:'single'}],['5.5 − 2.75 in single','1.011 × 2² − 1.011 × 2¹ → 101.1 − 10.11 = 10.11 = 1.011 × 2¹ → 0x40300000 = 2.75',{a:['5.5',10,0],op:'-',b:['2.75',10,0],fmt:'single'}]]}
+];
+$('#freq').innerHTML=QT.map(t=>`<div class="r"><span>${t.name}</span><i style="width:${t.n/4*100}%"></i><span class="c">${t.n}</span></div>`).join('');
+$('#qtypes').innerHTML=QT.map((t,ti)=>`<div class="qtype" id="qt-${t.id}">
+  <div class="meta"><h3>${t.name}</h3><span class="pill">${t.qs}</span></div>
+  <div class="grid2"><div class="card"><b>Recipe</b><ol class="clean">${t.recipe.map(r=>`<li>${r}</li>`).join('')}</ol></div>
+  <div class="card" style="overflow:hidden"><b>Sheet answers</b>${t.solved}</div></div>
+  <div class="card"><b>Try these (new questions)</b>${t.practice.map((p,pi)=>`<details class="sol"><summary>${p[0]}</summary><div><div class="math" style="white-space:pre-wrap">${p[1]}</div>${p[2]?`<button class="btn" type="button" data-try="${ti}:${pi}">Work it in the tool</button>`:''}</div></details>`).join('')}</div>
+</div>`).join('');
+document.addEventListener('click',e=>{
+  const o=e.target.closest('[data-open]'); if(o){const [kind,i]=o.dataset.open.split(':');
+    if(kind==='enc'){go('encode');encLoad(ENP[+i])} if(kind==='dec'){go('decode');decLoad(DEP[+i])} if(kind==='mul'){go('multiply');muLoad(MUP[+i])} if(kind==='add'){go('add');adLoad(ADP[+i])}}
+  const t=e.target.closest('[data-try]'); if(t){const [a,b]=t.dataset.try.split(':').map(Number);const q=QT[a],p=q.practice[b][2];
+    if(q.id==='enc'){go('encode');encLoad(['',p.v,p.b,p.p,p.fmt,p.n,false])}
+    if(q.id==='dec'){go('decode');decLoad(['',p.h,p.b,p.fmt])}
+    if(q.id==='mul'){go('multiply');muLoad(['',p.a,p.b,p.fmt,10])}
+    if(q.id==='add'){go('add');adLoad(['',p.a,p.op,p.b,p.fmt,10])}}
+});
+
+/* ---------- review ---------- */
+const DEFS=[
+ ['Floating point','A number stored as sign × significand × 2^exponent; the point "floats".','±1.xxx × 2^y'],
+ ['Normalized','Exactly one non-zero digit before the point. In binary that digit is always 1.','1.01 × 2⁵ ✓ · 11.01 × 2⁴ ✗'],
+ ['IEEE 754','The 1985 standard almost every CPU uses: single (32-bit) and double (64-bit).','float · double'],
+ ['Sign bit S','Leftmost bit. 0 = non-negative, 1 = negative.','1 bit'],
+ ['Exponent field','Actual exponent + bias, stored as an unsigned number.','8 bits · 11 bits'],
+ ['Fraction field','The bits after the leading 1 of the normalized number.','23 bits · 52 bits'],
+ ['Significand','1 + fraction: the fraction with the hidden 1 restored. 1.0 ≤ significand < 2.0.','1.F'],
+ ['Hidden bit','The leading 1 is never stored, which buys one extra bit of precision.','free bit'],
+ ['Bias','2^(k−1) − 1 for k exponent bits. Makes the stored exponent unsigned.','127 · 1023 · 15 · 7'],
+ ['Biased exponent','actual + bias. Valid values are 1 to 2^k − 2.','single 1…254'],
+ ['Reserved exponents','All 0s (zero) and all 1s (∞, NaN) never hold normal numbers.','0 and 2^k − 1'],
+ ['±Infinity','Exponent all 1s, fraction 0. Usable in later calculations.','0x7F800000'],
+ ['NaN','Not a Number: exponent all 1s, fraction ≠ 0. From illegal operations like 0.0/0.0.','0x7FC00000'],
+ ['Overflow','Biased exponent above 2^k − 2: the number is too big to store.','> 254 single'],
+ ['Underflow','Biased exponent below 1: the number is too close to zero to store.','< 1'],
+ ['Single range','±1.2 × 10⁻³⁸ to ±3.4 × 10³⁸ (actual exponent −126 to +127).','slide 12'],
+ ['Double range','±2.2 × 10⁻³⁰⁸ to ±1.8 × 10³⁰⁸ (actual exponent −1022 to +1023).','slide 13'],
+ ['Precision','Single ≈ 6 decimal digits (2⁻²³); double ≈ 16 (2⁻⁵²).','slide 14'],
+ ['FP addition','Align (shift the smaller exponent right) → add → normalize → round.','4 steps'],
+ ['FP multiplication','Add exponents → multiply significands → normalize → round → sign.','5 steps']
+];
+$('#defs').innerHTML=DEFS.map(d=>`<div class="def"><b>${d[0]}</b><span>${d[1]}</span><code>${d[2]}</code></div>`).join('');
+const TRAPS=[
+ ['Reading the exponent before normalizing: 11.1011 × 2⁻⁸','Normalize first: 1.11011 × 2⁻⁷'],
+ ['Writing the leading 1 into the fraction field','Store only the bits after the 1'],
+ ['Using bias 1203 from slide 11','Double bias is 1023'],
+ ['Treating 2^k − 1 (e.g. 255) as a valid exponent','Valid stops at 2^k − 2 (254); all 1s means ∞/NaN'],
+ ['Adding two biased exponents and stopping','Subtract the bias once: b₁ + b₂ − bias'],
+ ['Shifting the bigger number when aligning','Always shift the smaller-exponent number right'],
+ ['Forgetting the sign in multiplication','+ × − = −; set S at the end'],
+ ['Padding the fraction on the left','Pad with zeros on the right'],
+ ['Grouping an odd-size word (18-, 34-bit) from the left','Group 4s from the right, pad the left group'],
+ ['Keeping more bits than "consider 10 bits" says','Stop the ×2 table at exactly 10 bits'],
+ ['18.71 − (−7.01) treated as a subtraction','Minus a negative is plus: 18.71 + 7.01']
+];
+$('#traps').innerHTML=TRAPS.map(t=>`<li><span class="no">✗</span> ${t[0]}<br><span class="yes">✓</span> ${t[1]}</li>`).join('');
+
+/* ---------- quiz ---------- */
+const QZ=[
+ ['How many bits does single precision use for sign · exponent · fraction?',['1 · 8 · 23','1 · 11 · 52','1 · 7 · 24','2 · 8 · 22'],0,'Single is 32 bits: 1 sign, 8 exponent, 23 fraction ("1 ate 23").'],
+ ['What is the bias for a 5-bit exponent field?',['31','16','15','32'],2,'bias = 2^(k−1) − 1 = 2⁴ − 1 = 15.'],
+ ['Biased exponent of 1.1011 × 2³⁴ in single precision?',['34','161','127','93'],1,'34 + 127 = 161 = 10100001 (Practice Q2).'],
+ ['Exponent all 1s with a non-zero fraction means…',['+∞','−0','the largest number','NaN'],3,'All-1s exponent: fraction 0 is ±∞, fraction ≠ 0 is NaN (slide 17).'],
+ ['0xC0A00000 in single precision is…',['−5.0','+5.0','−2.5','−10.0'],0,'S=1, exponent 129 → 2, fraction .01 = 0.25 → −1.25 × 2² = −5.0 (slide 16).'],
+ ['Why isn\'t the leading 1 stored?',['It changes with the sign','A normalized binary number always starts with 1, so it\'s free','It is stored in the exponent','To make the bias work'],1,'1.0 ≤ significand < 2.0 always, so the 1 is implied. That\'s the hidden bit.'],
+ ['Valid biased exponents in double precision run from…',['0 to 2047','1 to 2047','1 to 2046','0 to 2046'],2,'k = 11: 0 and 2047 are reserved, so 1 … 2046. (The Q11 solution writes 2047/2048, which is a typo.)'],
+ ['First step of FP addition?',['Multiply the significands','Shift the number with the smaller exponent right to align the points','Add the exponents','Normalize the result'],1,'You can only add significands with equal exponents (slide 18).'],
+ ['Multiplying with biased exponents b₁ and b₂, the new biased exponent is…',['b₁ + b₂','b₁ + b₂ + bias','b₁ × b₂','b₁ + b₂ − bias'],3,'Each biased value carries one bias; the sum has two, so subtract one (slide 21).'],
+ ['1.01 × 2⁻⁸⁹ × 1.01 × 2⁻⁸⁹ in 18-bit IEEE (k = 5). Result?',['No overflow / underflow','Overflow','Underflow','NaN'],2,'Exponent −178, bias 15 → biased −163 < 1 → underflow (Practice Q12 ii).'],
+ ['Single precision gives roughly how many decimal digits of precision?',['3','6','16','23'],1,'2⁻²³ → 23 × 0.3 ≈ 6 to 7 digits (slide 14).'],
+ ['Normalize 0.001100₂',['1.100 × 2³','11.00 × 2⁻⁴','1.100 × 2⁻³','0.1100 × 2⁻²'],2,'The point moves 3 places right, so the exponent drops by 3 (Practice Q1 v).'],
+ ['−0.75 in single precision (hex)?',['0xBF400000','0x3F400000','0xBF000000','0xBFC00000'],0,'−0.75 = −1.1 × 2⁻¹ → S=1, exp 126 = 01111110, fraction 1000… → 0xBF400000 (slide 15).'],
+ ['Smallest positive normalized single-precision value is about…',['1.2 × 10⁻³⁸','3.4 × 10⁻³⁸','2.2 × 10⁻³⁰⁸','1.4 × 10⁻⁴⁵'],0,'1.0 × 2⁻¹²⁶ ≈ 1.2 × 10⁻³⁸ (slide 12).']
+];
+let qOrder=QZ.map((_,i)=>i), qState={};
+function quizRender(){
+  const keys=Object.keys(qState).filter(k=>!k.startsWith('p')),right=keys.filter(k=>qState[k]).length;
+  $('#qScore').textContent=`${right} / ${keys.length}`;
+  $('#quiz').innerHTML=qOrder.map(i=>{const q=QZ[i];const a=qState[i];return `<div class="q" data-q="${i}"><b>${q[0]}</b><div class="opts">${q[1].map((o,j)=>`<button type="button" data-j="${j}" ${a!==undefined?'disabled':''} class="${a!==undefined?(j===q[2]?'right':(qState['p'+i]===j?'wrong':'')):''}">${o}</button>`).join('')}</div>${a!==undefined?`<div class="why"><b>${a?'Right.':'Not quite.'}</b> ${q[3]}</div>`:''}</div>`}).join('');
+}
+$('#quiz').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const i=+b.closest('[data-q]').dataset.q,j=+b.dataset.j;if(qState[i]!==undefined)return;qState[i]=j===QZ[i][2];qState['p'+i]=j;
+  const wrong=store.get('wrong',[]);if(!qState[i]&&!wrong.includes(i))wrong.push(i);if(qState[i]){const k=wrong.indexOf(i);if(k>=0)wrong.splice(k,1)}store.set('wrong',wrong);quizRender()});
+$('#qReset').addEventListener('click',()=>{qOrder=QZ.map((_,i)=>i);qState={};quizRender()});
+$('#qRetry').addEventListener('click',()=>{const w=store.get('wrong',[]);if(!w.length){$('#qScore').textContent='No saved mistakes';return}qOrder=w.slice();qState={};quizRender()});
+quizRender();
+// flashcards
+let fc=DEFS.map((_,i)=>i),fi=0;
+function fcRender(){const d=DEFS[fc[fi]];$('#fcT').textContent=d[0];$('#fcD').textContent=d[1];$('#fcN').textContent=`${fi+1} / ${fc.length}`;$('#flash').classList.remove('flip')}
+$('#flash').addEventListener('click',()=>$('#flash').classList.toggle('flip'));
+$('#fcNext').addEventListener('click',()=>{fi=(fi+1)%fc.length;fcRender()});$('#fcPrev').addEventListener('click',()=>{fi=(fi-1+fc.length)%fc.length;fcRender()});
+$('#fcShuf').addEventListener('click',()=>{fc.sort(()=>Math.random()-.5);fi=0;fcRender()});fcRender();
+
+
+/* ---------- midterm formats ---------- */
+const M3FMT=[
+ ['True / False','The bias for double precision is 1023. (T/F)','Find the one rule tested. For a False, write the correct version in one line.','test'],
+ ['Analytical','Why is the exponent stored with a bias instead of in two\'s complement?','Name the rule from the slide, then connect it to the example.','format'],
+ ['Scenario-based justification','A product in 18-bit IEEE has actual exponent 20. Can it be stored?','Verdict first, then the reason with the numbers, then what happens instead.','range'],
+ ['Mathematical problems','Encode, decode, add or multiply in single, double or a custom size; overflow / underflow.','Show every step: binary, normalized form, bias, biased exponent, fraction, hex.','encode'],
+ ['Coding','Chapter 3 slides 9–21 have no RISC-V coding. Coding questions come from Chapter 2.','Practise them in the Chapter 2 page\'s code labs.',null],
+ ['Tracing','Trace the steps of an FP addition or multiplication.','One line per step: align or add exponents, add or multiply, normalize, round, sign.','add']];
+$('#m3fmt').innerHTML=M3FMT.map(f=>`<div class="card fmtc"><h3>${f[0]}</h3><span class="lbl">Looks like</span><div class="eg">${f[1]}</div><span class="lbl">How to answer</span><p>${f[2]}</p>${f[3]?`<a class="btn" href="#${f[3]}" style="width:fit-content;text-decoration:none">Practise</a>`:''}</div>`).join('');
+const M3TF=[
+ ['Single precision has an 8-bit exponent and a 23-bit fraction.',true,'1 + 8 + 23 = 32 bits.'],
+ ['The leading 1 of the significand is stored in the fraction field.',false,'It is the hidden bit: always 1, so never stored.'],
+ ['The bias for double precision is 1023.',true,'2¹⁰ − 1 = 1023. Slide 11 misprints it as 1203.'],
+ ['Exponent all 1s with fraction 0 represents NaN.',false,'That pattern is ±∞. NaN has a non-zero fraction.'],
+ ['A biased exponent of 255 is valid for a normal single-precision number.',false,'255 (all 1s) is reserved. The largest valid value is 254.'],
+ ['Double precision gives about 16 decimal digits of precision.',true,'52 × 0.3 ≈ 16 (slide 14).'],
+ ['To add two floats, you first add their exponents.',false,'Adding the exponents is multiplication. Addition first aligns the binary points.'],
+ ['When aligning for addition, shift the number with the smaller exponent right.',true,'That way no significant bits of the larger number are lost.'],
+ ['In FP multiplication with biased exponents, new biased = E₁ + E₂ − bias.',true,'Each biased exponent carries one bias, so subtract one.'],
+ ['The product of two negative numbers has sign bit 0.',true,'− × − = +.'],
+ ['0.1 can be stored exactly in IEEE 754 double precision.',false,'0.1 is a repeating fraction in binary; only the nearest value is stored.'],
+ ['For a 5-bit exponent field, the bias is 15.',true,'2⁴ − 1 = 15.'],
+ ['A result whose biased exponent comes out as −3 is an overflow.',false,'Below 1 means too small: that is underflow.'],
+ ['Normalizing 0.00101₂ gives 1.01 × 2⁻³.',true,'The point moves 3 places right, so the exponent drops by 3.'],
+ ['The smallest positive normal single-precision value is about 1.2 × 10⁻³⁸.',true,'1.0 × 2⁻¹²⁶ (slide 12).']];
+let m3A={};
+function m3tf(){$('#m3tf').innerHTML=M3TF.map((t,i)=>{const a=m3A[i],d=a!==undefined;return `<div class="tf"><span class="n">${i+1}</span><div>${t[0]}</div><div class="btns">${[true,false].map(v=>`<button class="btn" type="button" data-t="${i}" data-v="${v?1:0}" ${d?'disabled':''} class="${d?(v===t[1]?'right':(a===v?'wrong':'')):''}">${v?'True':'False'}</button>`).join('')}</div>${d?`<div class="why"><b>${a===t[1]?'Right.':'Not quite.'}</b> It's ${t[1]?'true':'false'}. ${t[2]}</div>`:''}</div>`}).join('');
+ const ks=Object.keys(m3A);$('#m3tfScore').textContent=`${ks.filter(i=>m3A[i]===M3TF[i][1]).length} / ${ks.length}`;
+ $$('#m3tf button').forEach(b=>{const i=+b.dataset.t;const a=m3A[i];if(a!==undefined){const v=b.dataset.v==='1';b.classList.toggle('right',v===M3TF[i][1]);b.classList.toggle('wrong',a===v&&v!==M3TF[i][1])}})}
+$('#m3tf').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(!b)return;m3A[+b.dataset.t]=b.dataset.v==='1';m3tf()});
+$('#m3tfReset').addEventListener('click',()=>{m3A={};m3tf()});m3tf();
+const sol=(q,a)=>`<details class="sol"><summary>${q}</summary><div><div>${a}</div></div></details>`;
+$('#m3ana').innerHTML=[
+ ['Why is the exponent stored with a bias instead of two\'s complement?','The bias makes the exponent field <b>unsigned</b> (slide 11). A larger exponent is then simply a larger bit pattern, so two floats of the same sign compare the same way as unsigned integers, which keeps comparison hardware simple.'],
+ ['Why does double precision have both a wider range and more precision than single?','Range comes from the exponent field and precision from the fraction field. Double widens both: 11 exponent bits (±10³⁰⁸ instead of ±10³⁸) and 52 fraction bits (≈16 digits instead of ≈6).'],
+ ['Why does IEEE 754 have a hidden bit?','A normalized binary number always starts with 1. Storing a bit that is always 1 wastes space, so it is implied and the freed bit adds one more bit of precision.']].map(x=>sol(x[0],x[1])).join('');
+$('#m3scen').innerHTML=[
+ ['A program checks <code>if (0.1 + 0.2 == 0.3)</code> and the test is false. Justify.','<b>Expected behaviour.</b> None of 0.1, 0.2, 0.3 has an exact binary form, so each is stored as a nearby value and the rounded sum differs from the stored 0.3 in the last bits. Compare floats with a small tolerance instead of ==.'],
+ ['In 18-bit IEEE (k = 5, f = 12), a product comes out as 1.01 × 2²⁰. A student writes it as a normal result. Justify.','<b>Wrong: it overflows.</b> Bias = 15, biased exponent = 20 + 15 = 35. The valid range is 1 … 30, and 35 &gt; 30, so the result cannot be stored.'],
+ ['A student adds 1.0 × 2⁵ + 1.0 × 2⁻²⁰ in single precision and says the result equals 1.0 × 2⁵. Justify.','<b>Correct.</b> Aligning shifts the small number 25 places right, past the 23 fraction bits. Its bit falls off when the result is cut to 23 bits, so the stored sum is still 0x42000000 = 32.'],
+ ['To store −0.15625 = −1.01 × 2⁻³ in single precision, a student writes the exponent field as −3 in two\'s complement. Justify.','<b>Wrong.</b> The exponent is stored biased: −3 + 127 = 124 = 01111100. Correct word: 1 01111100 0100…0 = 0xBE200000.']].map(x=>sol(x[0],x[1])).join('');
+$('#m3tr').innerHTML=[
+ ['Trace 1.5 + 0.375 in single precision.','1.5 = 1.1 × 2⁰, 0.375 = 1.1 × 2⁻². Align: 0.011 × 2⁰. Add: 1.1 + 0.011 = 1.111 × 2⁰. Already normalized, biased 127. Result 1.111 × 2⁰ = 1.875 = <b>0x3FF00000</b>.','add',6],
+ ['Trace 2.5 × (−0.75) in single precision.','2.5 = 1.01 × 2¹, −0.75 = −1.1 × 2⁻¹. Exponents: 1 + (−1) = 0. Significands: 1.01 × 1.1 = 1.111. Normalized already, biased 127. Sign − . Result −1.111 × 2⁰ = −1.875 = <b>0xBFF00000</b>.','mul',12]].map(x=>sol(x[0],x[1]+`<button class="btn" type="button" data-open="${x[2]}:${x[3]}" style="margin-top:8px">Check it in the stepper</button>`)).join('');
+
+route();hdr();
+</script>
+
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs";mermaid.initialize({startOnLoad:true,theme:"neutral"});</script>
+</body>
+</html>
