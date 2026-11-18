@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CSE422 Study Pages</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{--bg:#f4f6fa;--surface:#fff;--ink:#141a26;--muted:#5a6375;--line:#d8dde8;--accent:#2f5be0;--accent-soft:#e6ecfc;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10141c;--surface:#171d28;--ink:#e6eaf2;--muted:#9aa4b8;--line:#2a3242;--accent:#8aa8ff;--accent-soft:#1e2a48;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10141c;--surface:#171d28;--ink:#e6eaf2;--muted:#9aa4b8;--line:#2a3242;--accent:#8aa8ff;--accent-soft:#1e2a48;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:48px 64px}
+main{max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:32px}
+.eyebrow{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+h1{font-family:"Chakra Petch","Arial Narrow",sans-serif;font-size:clamp(32px,6vw,48px);line-height:1.05;margin:8px 0 12px;text-wrap:balance}
+h2{font-family:"Chakra Petch","Arial Narrow",sans-serif;font-size:22px;margin:0 0 12px}
+p{margin:0;max-width:66ch}
+.sub{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:14px}
+a.card{display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;color:inherit;text-decoration:none;min-width:0}
+a.card:hover,a.card:focus-visible{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.tag{align-self:flex-start;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;padding:2px 9px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
+.card b{font-family:"Chakra Petch","Arial Narrow",sans-serif;font-size:20px}
+.card span{color:var(--muted);font-size:15px}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-size:15px;color:var(--muted)}
+.note b{color:var(--ink)}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="eyebrow">BRAC University · CSE422 Artificial Intelligence</div>
+  <h1>CSE422 study pages</h1>
+  <p class="sub">Mid-term material for informed search, local search and adversarial search: interactive steppers you can click through, real-Python lab drills that mark your code, and printable notes. Each page remembers your progress on your own device.</p>
+</header>
+
+<div class="note"><b>Mid-term syllabus (Fall 2026).</b> Theory: Informed Search (GBFS, A*, heuristics), Local Search (hill climbing, simulated annealing, genetic algorithm) and Adversarial Search (minimax, alpha–beta). Lab: Lab 1 A*, Lab 2 Genetic Algorithm, Lab 3 Alpha–beta. Every short video in the folder's README shows what a page does before you open it.</div>
+
+<section>
+  <h2>Theory mid</h2>
+  <div class="grid">
+    <a class="card" href="pdf/CSE422_Mid_Notes.pdf"><span class="tag">Start here · PDF</span><b>Mid-term study notes (40 pages)</b><span>Every assignment question solved, every problem-set question type worked through, an exam map from question type to section, a practice set with solutions and a one-page night-before sheet. Made for black-and-white printing.</span></a>
+    <a class="card" href="mid-theory-practice.html"><span class="tag">Practise</span><b>Mid practice lab</b><span>GBFS and A* stepper with editable heuristics, heuristic lab, hill climbing on a grid, simulated-annealing probability, crossover and 8-queens tools, a minimax and alpha–beta stepper, a 32-question self-test and flashcards.</span></a>
+  </div>
+</section>
+
+<section>
+  <h2>Lab mid</h2>
+  <div class="grid">
+    <a class="card" href="lab-mid-drills.html"><span class="tag">Practise</span><b>Lab mid drills (24 drills)</b><span>Fill-the-blank Python programs in the exact shape of past lab assessments. Type your answer, press Run &amp; check, and real Python marks it against the expected output and random tests. Includes a timed mock exam, a Python cheat sheet and viva questions. Needs internet once to load Python.</span></a>
+    <a class="card" href="offline/README.md"><span class="tag">Offline</span><b>Offline drill pack</b><span>The same 24 drills as .py files plus check.py. Edit a file in VS Code and run <code>python check.py &lt;file&gt;</code> to be marked, just like on the lab machine. Needs only Python 3.8+.</span></a>
+  </div>
+</section>
+
+<div class="note" style="margin-top:0"><b>Check your course materials.</b> These pages follow the BRACU CSE422 lecture notes, slides, assignment and problem sets, and every trace and numeric answer was checked by running it in code. They are study aids, not official course material, so confirm with your faculty when in doubt.</div>
+</main>
+</body>
+</html>

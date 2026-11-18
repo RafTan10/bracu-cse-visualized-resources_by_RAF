@@ -2,7 +2,7 @@
 
 **Interactive, visual study resources for BRAC University CSE courses: pages you can click, run and test yourself on, plus printable exam notes. Made by a student, for the juniors coming next.**
 
-Most course notes are walls of text. These are built around one idea: if you can *see* it happen (a register change, a bit flip, a branch jump), you understand it instead of memorizing it.
+Most course notes are walls of text. These are built around one idea: if you can *see* it happen (a register change, a bit flip, a branch jump, an A\* node being popped), you understand it instead of memorizing it.
 
 ---
 
@@ -11,10 +11,13 @@ Most course notes are walls of text. These are built around one idea: if you can
 | Course | What's there | Open |
 |---|---|---|
 | **CSE340** · Computer Architecture | 6 interactive pages and 3 printable exam-note PDFs covering Chapters 1–3 (RISC-V, IEEE 754), every Practice Sheet 1–3 question solved, midterm guides and self-tests | [`CSE340/`](CSE340/) |
+| **CSE422** · Artificial Intelligence | Mid-term material: a 40-page printable notes PDF, an 8-tab practice lab (A\*, heuristics, hill climbing, simulated annealing, GA, alpha–beta, quiz) and 24 Python lab drills marked by real Python, with short demo videos of every interactive part | [`CSE422/`](CSE422/) |
 
 More courses will be added folder by folder.
 
 ![CSE340 study pages](CSE340/media/index.png)
+
+![CSE422: step through A* one pop at a time](CSE422/media/theory-search-stepper.gif)
 
 ---
 

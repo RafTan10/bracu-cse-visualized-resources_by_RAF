@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSE422 Mid Practice Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* layout idea: a lab bench — sticky tab rail on top, each tab = one instrument panel (controls left/top, drawing right/below), notes under it */
+:root{
+  --paper:#f2f4ef; --panel:#ffffff; --ink:#17231d; --muted:#5d6b63; --line:#cfd6cd;
+  --accent:#1f5fbf; --accent-soft:#dce8fb;
+  --cur:#e2930b; --cur-soft:#fdecc8; --ok:#178a55; --ok-soft:#d6f1e2; --bad:#c2372d; --bad-soft:#f9dcd8; --done:#8693a0; --done-soft:#e6eaee;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif; --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#111815; --panel:#18211d; --ink:#e6ece7; --muted:#9aa89f; --line:#2f3b35;
+  --accent:#7fb0ff; --accent-soft:#1c2d4a;
+  --cur:#f2b23a; --cur-soft:#4a3a12; --ok:#4fcf8e; --ok-soft:#143a28; --bad:#ff7d72; --bad-soft:#4a1c18; --done:#7d8a96; --done-soft:#252e35; color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --paper:#111815; --panel:#18211d; --ink:#e6ece7; --muted:#9aa89f; --line:#2f3b35;
+  --accent:#7fb0ff; --accent-soft:#1c2d4a;
+  --cur:#f2b23a; --cur-soft:#4a3a12; --ok:#4fcf8e; --ok-soft:#143a28; --bad:#ff7d72; --bad-soft:#4a1c18; --done:#7d8a96; --done-soft:#252e35; color-scheme:dark; }
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+h1{font-size:1.45rem;font-weight:700}
+h2{font-size:1.25rem;font-weight:700;margin-bottom:.35rem}
+h3{font-size:1rem;font-weight:700;margin:.2rem 0 .3rem}
+p{margin:.4rem 0}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px 60px}
+header.top{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--line)}
+.topin{max-width:1080px;margin:0 auto;padding:10px 16px 0;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between}
+.sub{color:var(--muted);font-size:.85rem}
+nav{max-width:1080px;margin:0 auto;padding:8px 16px;display:flex;gap:6px;overflow-x:auto}
+nav a{flex:none;text-decoration:none;color:var(--ink);font-weight:600;font-size:.9rem;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel)}
+nav a.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+nav a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,.cell:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+section.tab{display:none;padding-top:18px}
+section.tab.on{display:block}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin:12px 0}
+.grid2{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px;align-items:start}
+.grid2.even{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+@media (max-width:760px){.grid2,.grid2.even{grid-template-columns:minmax(0,1fr)}}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0}
+label{font-size:.85rem;font-weight:600;color:var(--muted)}
+select,input[type=text],input[type=number]{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+input[type=number]{width:4.6rem}
+input[type=range]{accent-color:var(--accent);width:min(240px,100%)}
+button{font:inherit;font-weight:600;color:var(--ink);background:var(--panel);border:1px solid var(--ink);border-radius:6px;padding:6px 12px;cursor:pointer}
+button.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] button.pri{color:#0b1220}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) button.pri{color:#0b1220}}
+button:disabled{opacity:.45;cursor:default}
+button.ghost{border-color:var(--line);font-weight:500}
+.say{border-left:4px solid var(--cur);background:var(--cur-soft);padding:8px 12px;border-radius:0 8px 8px 0;margin:10px 0;min-height:2.6em}
+.say.ok{border-color:var(--ok);background:var(--ok-soft)} .say.bad{border-color:var(--bad);background:var(--bad-soft)}
+.note{color:var(--muted);font-size:.87rem}
+.notice{font-size:.87rem;border-top:1px dashed var(--line);margin-top:10px;padding-top:8px}
+.notice b{color:var(--accent)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.86rem}
+th,td{border:1px solid var(--line);padding:4px 7px;text-align:left;vertical-align:top}
+th{background:var(--done-soft);font-family:var(--f-display);font-size:.8rem}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
+.mono{font-family:var(--f-mono)}
+.pill{display:inline-block;font-size:.76rem;font-weight:600;padding:1px 8px;border-radius:999px;border:1px solid}
+.pill.ok{color:var(--ok);background:var(--ok-soft);border-color:var(--ok)} .pill.bad{color:var(--bad);background:var(--bad-soft);border-color:var(--bad)} .pill.cur{color:var(--cur);background:var(--cur-soft);border-color:var(--cur)}
+svg{max-width:100%;height:auto;display:block}
+svg text{font-family:var(--f-body);fill:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:4px;border:2px solid var(--ink)}
+.hgrid{display:grid;gap:3px;justify-content:start}
+.cell{width:44px;height:38px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:6px;background:var(--panel);font-family:var(--f-mono);font-weight:600;cursor:pointer;position:relative;color:var(--ink)}
+.cell.path{background:var(--cur-soft);border-color:var(--cur)} .cell.cur{background:var(--cur);color:#1b1300;border-color:var(--cur)}
+.cell.top{box-shadow:inset 0 0 0 2px var(--ok)} .cell.reach{background:var(--ok-soft)} .cell.stuck{background:var(--bad-soft)}
+.cell small{position:absolute;top:1px;right:3px;font-size:.6rem;color:var(--muted);font-weight:400}
+.bar{height:22px;background:var(--done-soft);border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+.bar>div{height:100%;background:var(--accent)}
+.big{font-family:var(--f-display);font-size:2rem;font-weight:700;font-variant-numeric:tabular-nums}
+.gene{display:inline-flex;min-width:1.7em;height:1.9em;align-items:center;justify-content:center;border:1px solid var(--line);margin:1px;border-radius:4px;font-family:var(--f-mono);font-weight:600;background:var(--panel)}
+.gene.a{background:var(--accent-soft);border-color:var(--accent)} .gene.b{background:var(--cur-soft);border-color:var(--cur)} .gene.dup{background:var(--bad-soft);border-color:var(--bad)}
+.board{display:grid;grid-template-columns:repeat(8,1fr);width:min(320px,100%);border:2px solid var(--ink)}
+.sq{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:1.25rem;cursor:pointer;border:0;border-radius:0;padding:0;background:var(--panel);color:var(--ink)}
+.sq.dk{background:var(--done-soft)} .sq.att{background:var(--bad-soft);color:var(--bad)}
+.q{border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0;background:var(--panel)}
+.q .opts{display:grid;gap:6px;margin-top:8px}
+.q .opts button{text-align:left;font-weight:500;border-color:var(--line)}
+.q .opts button.right{background:var(--ok-soft);border-color:var(--ok)} .q .opts button.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.q .why{margin-top:8px;font-size:.9rem;display:none} .q.done .why{display:block}
+.tag{font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.card{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:10px 12px}
+.card b{font-family:var(--f-display)}
+.card .fx{font-family:var(--f-mono);font-size:.82rem;color:var(--accent);display:block;margin-top:4px}
+.flash{min-height:150px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:8px;cursor:pointer}
+details{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:8px 0;background:var(--panel)}
+summary{cursor:pointer;font-weight:600}
+ol.traps{padding-left:1.2rem;margin:.3rem 0}
+ol.traps li{margin:.25rem 0}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="topin"><h1>CSE422 Mid Practice Lab</h1><span class="sub">Informed search · Local search · Adversarial search — step through, predict, check</span></div>
+  <nav id="nav">
+    <a href="#search">Search stepper</a><a href="#heuristics">Heuristic lab</a><a href="#hill">Hill climbing</a><a href="#anneal">Simulated annealing</a><a href="#genetic">Genetic tools</a><a href="#alphabeta">Alpha–beta</a><a href="#quiz">Quiz</a><a href="#cram">Cram</a>
+  </nav>
+</header>
+<div class="wrap">
+
+<!-- ================= SEARCH ================= -->
+<section class="tab" id="search">
+  <h2>GBFS and A* stepper</h2>
+  <p class="note">Pick a graph from your course material, step one pop at a time, and try to name the next node before you press Next. Edit any h-value to see how admissibility and consistency change the result.</p>
+  <div class="panel">
+    <div class="row">
+      <label for="s-graph">Graph</label>
+      <select id="s-graph"></select>
+      <label for="s-algo">Algorithm</label>
+      <select id="s-algo"><option value="astar">A* (f = g + h)</option><option value="gbfs">Greedy best-first (f = h)</option></select>
+      <label><input type="checkbox" id="s-predict"> Predict mode (click the node you think is popped next)</label>
+    </div>
+    <div class="grid2">
+      <div>
+        <div id="s-svg"></div>
+        <div class="legend"><span><i style="background:var(--cur)"></i>just popped</span><span><i style="background:var(--done-soft);border-color:var(--done)"></i>expanded</span><span><i style="background:var(--accent-soft);border-color:var(--accent)"></i>in frontier</span><span><i style="background:var(--ok-soft);border-color:var(--ok)"></i>goal / final path</span></div>
+      </div>
+      <div>
+        <div class="row"><button id="s-prev" class="ghost">◀ Prev</button><button id="s-next" class="pri">Next pop ▶</button><button id="s-reset" class="ghost">Restart</button><span class="note" id="s-count"></span></div>
+        <div class="say" id="s-say" aria-live="polite"></div>
+        <h3>Frontier (priority queue)</h3>
+        <div class="scroll"><table id="s-front"></table></div>
+        <h3 style="margin-top:10px">Heuristic check</h3>
+        <div class="scroll"><table id="s-h"></table></div>
+        <div id="s-cons" class="note" style="margin-top:6px"></div>
+      </div>
+    </div>
+    <div class="notice"><b>What to notice:</b> A* does not stop when the goal first enters the frontier — only when it is popped. On Assignment Q1 the given h overestimates at A and E, so A* returns cost 17 although a cost-12 path exists; lower h(E) to 8 or less and step again.</div>
+  </div>
+</section>
+
+<!-- ================= HEURISTICS ================= -->
+<section class="tab" id="heuristics">
+  <h2>Heuristic lab</h2>
+  <div class="panel">
+    <h3>Grid distances: which heuristic is admissible?</h3>
+    <div class="grid2 even">
+      <div>
+        <div class="row"><label for="h-move">Moves allowed</label>
+          <select id="h-move"><option value="4">4 directions, cost 1</option><option value="8r">8 directions, diagonal costs √2</option><option value="8u">8 directions, diagonal costs 1</option></select></div>
+        <div class="row"><label for="h-dx">dx = <span id="h-dxv"></span></label><input type="range" id="h-dx" min="0" max="8" value="4"></div>
+        <div class="row"><label for="h-dy">dy = <span id="h-dyv"></span></label><input type="range" id="h-dy" min="0" max="8" value="1"></div>
+        <div id="h-svg"></div>
+      </div>
+      <div>
+        <div class="scroll"><table id="h-tab"></table></div>
+        <div class="say" id="h-say"></div>
+      </div>
+    </div>
+    <div class="notice"><b>What to notice:</b> the best heuristic is the largest one that never exceeds the true cost. Switch the move model and watch Manhattan go from "best" to "inadmissible".</div>
+  </div>
+  <div class="panel">
+    <h3>Combining heuristics (Assignment Q2 type)</h3>
+    <p class="note">h₁ and h₂ are admissible, h₃ is inadmissible. Set values at one node and the true cost; see which combinations stay at or below it. Then read the general rule.</p>
+    <div class="row">
+      <label for="c-t">true cost h*</label><input type="number" id="c-t" value="10" min="1">
+      <label for="c-1">h₁</label><input type="number" id="c-1" value="6" min="0">
+      <label for="c-2">h₂</label><input type="number" id="c-2" value="9" min="0">
+      <label for="c-3">h₃</label><input type="number" id="c-3" value="13" min="0">
+    </div>
+    <div class="scroll"><table id="c-tab"></table></div>
+  </div>
+</section>
+
+<!-- ================= HILL ================= -->
+<section class="tab" id="hill">
+  <h2>Hill climbing on a grid</h2>
+  <p class="note">Click any cell to start there. Hill climbing moves to the best neighbour and stops when no neighbour is higher.</p>
+  <div class="panel">
+    <div class="row">
+      <label for="hc-grid">Grid</label><select id="hc-grid"><option value="q6">Assignment Q6 treasure grid</option><option value="p5">Practice grid (notes P5)</option><option value="rand">Random 6 × 6</option></select>
+      <label for="hc-nb">Neighbours</label><select id="hc-nb"><option value="8">edge + corner (8)</option><option value="4">edge only (4)</option></select>
+      <button id="hc-step" class="pri">Step</button><button id="hc-run" class="ghost">Run to the end</button><button id="hc-map" class="ghost">Show which starts succeed</button><button id="hc-new" class="ghost">New random grid</button>
+    </div>
+    <div class="grid2 even">
+      <div><div class="hgrid" id="hc-cells"></div>
+        <div class="legend"><span><i style="background:var(--cur)"></i>current</span><span><i style="background:var(--cur-soft);border-color:var(--cur)"></i>path</span><span><i style="background:var(--panel);border-color:var(--ok)"></i>global maximum</span><span><i style="background:var(--ok-soft);border-color:var(--ok)"></i>start reaches it</span><span><i style="background:var(--bad-soft);border-color:var(--bad)"></i>start gets stuck</span></div>
+      </div>
+      <div><div class="say" id="hc-say">Click a start cell.</div><div id="hc-stats" class="note"></div></div>
+    </div>
+    <div class="notice"><b>What to notice:</b> on the Q6 grid only the bottom-left corner reaches 15; the other three corners stop at a 10. "Show which starts succeed" paints the basin of the global maximum — the fraction of green cells is p, and random-restart needs about 1/p tries.</div>
+  </div>
+</section>
+
+<!-- ================= SA ================= -->
+<section class="tab" id="anneal">
+  <h2>Simulated annealing: acceptance probability</h2>
+  <div class="panel">
+    <div class="grid2 even">
+      <div>
+        <div class="row"><label for="sa-de">ΔE (how much worse) = <span id="sa-dev"></span></label><input type="range" id="sa-de" min="0" max="60" value="9"></div>
+        <div class="row"><label for="sa-t">Temperature T = <span id="sa-tv"></span></label><input type="range" id="sa-t" min="1" max="150" value="100"></div>
+        <p class="mono" id="sa-form"></p>
+        <div class="big" id="sa-p"></div>
+        <div class="bar"><div id="sa-bar"></div></div>
+        <div class="row"><button id="sa-roll" class="pri">Draw a random number</button><span id="sa-res"></span></div>
+      </div>
+      <div><div id="sa-plot"></div><p class="note">Curve: P(accept) against T for the chosen ΔE. Dot = current T.</p></div>
+    </div>
+    <div class="notice"><b>What to notice:</b> drag T down with ΔE fixed — P falls to 0 (SA turns into hill climbing). Drag T up — P approaches 1 (random walk). A better neighbour (ΔE &lt; 0) is always accepted, whatever T is.</div>
+  </div>
+  <div class="panel">
+    <h3>Cooling schedule T(k) = T₀ · αᵏ</h3>
+    <div class="row"><label for="sa-t0">T₀</label><input type="number" id="sa-t0" value="100" min="1"><label for="sa-a">α</label><input type="number" id="sa-a" value="0.5" step="0.05" min="0.05" max="0.99"><label for="sa-d2">ΔE of the move</label><input type="number" id="sa-d2" value="18" min="0"></div>
+    <div class="scroll"><table id="sa-cool"></table></div>
+    <p class="note">PSET 2 uses T₀ = 100, α = 0.5 and random numbers 0.2, 0.5, 1: accept a worse move when P is greater than the random number.</p>
+  </div>
+  <div class="panel">
+    <h3>Drill: compute P yourself</h3>
+    <p id="sa-drill-q"></p>
+    <div class="row"><label for="sa-drill-a">P (2 decimals)</label><input type="number" id="sa-drill-a" step="0.01"><button id="sa-drill-check" class="pri">Check</button><button id="sa-drill-new" class="ghost">New question</button></div>
+    <div class="say" id="sa-drill-say"></div>
+  </div>
+</section>
+
+<!-- ================= GA ================= -->
+<section class="tab" id="genetic">
+  <h2>Genetic algorithm tools</h2>
+  <div class="panel">
+    <h3>Crossover workbench</h3>
+    <div class="row">
+      <label for="g-p1">Parent 1</label><input type="text" id="g-p1" value="ABCDEFGH" size="12">
+      <label for="g-p2">Parent 2</label><input type="text" id="g-p2" value="AFGEDBCH" size="12">
+      <label for="g-type">Type</label><select id="g-type"><option value="ox">Order crossover (OX)</option><option value="sp">Single-point</option><option value="tp">Two-point</option></select>
+    </div>
+    <div class="row"><label for="g-c1">cut 1 = <span id="g-c1v"></span></label><input type="range" id="g-c1" min="1" max="7" value="3"><label for="g-c2">cut 2 = <span id="g-c2v"></span></label><input type="range" id="g-c2" min="1" max="8" value="5"></div>
+    <div id="g-out"></div>
+    <div class="notice"><b>What to notice:</b> with the two tours above, single-point crossover produces children with repeated cities (red). Order crossover never does: it copies a slice from one parent and fills the gaps in the other parent's order.</div>
+  </div>
+  <div class="panel">
+    <h3>8-queens fitness counter</h3>
+    <div class="grid2 even">
+      <div><div class="board" id="q-board"></div>
+        <div class="row"><label for="q-str">Chromosome</label><input type="text" id="q-str" value="24748552" size="10" maxlength="8"><button id="q-rand" class="ghost">Random</button></div>
+        <p class="note">Digit i = row of the queen in column i (row 1 at the bottom). Click a square to move that column's queen.</p></div>
+      <div><div class="scroll"><table id="q-tab"></table></div><div class="say" id="q-say"></div></div>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Drill: one GA iteration, course convention</h3>
+    <p class="note">0/1 knapsack from the notes: capacity 15 kg; items (weight, value) 1 (6, 30), 2 (3, 14), 3 (4, 16), 4 (2, 9). Population 1101, 1010, 0110, 1001. Do each step on paper, then open the answer.</p>
+    <details><summary>Step 1 — fitness of each chromosome</summary><p>1101 → 11 kg, <b>53</b> · 1010 → 10 kg, <b>46</b> · 0110 → 7 kg, <b>30</b> · 1001 → 8 kg, <b>39</b>.</p></details>
+    <details><summary>Step 2 — selection (best 3)</summary><p>1101, 1010, 1001. The lowest (0110) is dropped.</p></details>
+    <details><summary>Step 3 — crossover after bit 2: best with each of the other two</summary><p>11|01 × 10|10 → 1110 and 1001. &nbsp; 11|01 × 10|01 → 1101 and 1001.</p></details>
+    <details><summary>Step 4 — mutation: flip bit 4, bit 2, bit 1, bit 3 of the four offspring</summary><p>1110 → 1111 (15 kg, <b>69</b>) · 1001 → 1101 (53) · 1101 → 0101 (23) · 1001 → 1011 (12 kg, 55). New population: 1111, 1101, 0101, 1011. Best so far 1111 = 69, which is the optimum (all four items weigh exactly 15 kg).</p></details>
+  </div>
+</section>
+
+<!-- ================= ALPHA BETA ================= -->
+<section class="tab" id="alphabeta">
+  <h2>Minimax and alpha–beta stepper</h2>
+  <div class="panel">
+    <div class="row">
+      <label for="ab-pre">Tree</label><select id="ab-pre"></select>
+      <label for="ab-root">Root</label><select id="ab-root"><option value="max">MAX</option><option value="min">MIN</option></select>
+      <label for="ab-leaves">Leaves</label><input type="text" id="ab-leaves" size="28">
+      <button id="ab-apply" class="ghost">Apply leaves</button><button id="ab-rand" class="ghost">Random leaves</button>
+    </div>
+    <div class="row" id="ab-xrow" style="display:none"><label for="ab-x">X = <span id="ab-xv"></span></label><input type="range" id="ab-x" min="0" max="16" value="10"><span class="note">Assignment Q19: for which X is the branch C → G explored?</span></div>
+    <div class="row"><button id="ab-prev" class="ghost">◀ Prev</button><button id="ab-next" class="pri">Next ▶</button><button id="ab-play" class="ghost">Play</button><button id="ab-end" class="ghost">Jump to end</button><button id="ab-reset" class="ghost">Restart</button><label><input type="checkbox" id="ab-test"> Test me (hide values until I answer)</label><span class="note" id="ab-count"></span></div>
+    <div class="scroll"><div id="ab-svg"></div></div>
+    <div class="legend"><span><i style="background:var(--cur)"></i>being evaluated</span><span><i style="background:var(--accent-soft);border-color:var(--accent)"></i>finished</span><span><i style="background:var(--bad-soft);border-color:var(--bad)"></i>pruned</span><span>△ MAX &nbsp; ▽ MIN</span></div>
+    <div class="say" id="ab-say" aria-live="polite"></div>
+    <div id="ab-testbox" style="display:none"><div class="row"><label for="ab-ans-v">Root value</label><input type="number" id="ab-ans-v"><label for="ab-ans-p">Leaves pruned</label><input type="number" id="ab-ans-p"><button id="ab-check" class="pri">Check my answer</button></div></div>
+    <div id="ab-sum" class="note"></div>
+    <div class="notice"><b>What to notice:</b> α changes only at MAX nodes and β only at MIN nodes; a child starts with a copy of its parent's current α and β; a node stops as soon as α ≥ β. Only the value travels back up.</div>
+  </div>
+</section>
+
+<!-- ================= QUIZ ================= -->
+<section class="tab" id="quiz">
+  <h2>Self-test</h2>
+  <div class="panel">
+    <div class="row"><span class="big" id="z-score">0 / 0</span><button id="z-retry" class="ghost">Retry my mistakes</button><button id="z-all" class="ghost">All questions</button><button id="z-shuffle" class="ghost">Shuffle</button><span class="note" id="z-info"></span></div>
+  </div>
+  <div id="z-list"></div>
+</section>
+
+<!-- ================= CRAM ================= -->
+<section class="tab" id="cram">
+  <h2>Cram: definitions, formulas, traps</h2>
+  <div class="panel"><h3>Flashcards</h3><div class="card flash" id="f-card" tabindex="0" role="button" aria-label="Flip card"></div><div class="row"><button id="f-prev" class="ghost">◀</button><button id="f-flip" class="pri">Flip</button><button id="f-next" class="ghost">▶</button><span class="note" id="f-pos"></span></div></div>
+  <div class="cards" id="d-cards"></div>
+  <div class="panel"><h3>Fifteen traps that cost marks</h3>
+    <ol class="traps">
+      <li>GBFS path cost is the sum of edge costs, never of h-values.</li>
+      <li>A*: stop when the goal is popped, not when it is first generated.</li>
+      <li>A*: f(m) uses h(m), and g must be updated when a cheaper route appears.</li>
+      <li>Admissibility must hold at every node; one counter-example is enough for "no".</li>
+      <li>Consistency is checked on edges, both directions in an undirected graph.</li>
+      <li>Admissible does not imply consistent.</li>
+      <li>Manhattan is inadmissible once diagonal moves are allowed.</li>
+      <li>"Bigger h is better" only among admissible heuristics.</li>
+      <li>Hill climbing also stops on equal neighbours, so a plateau stops it.</li>
+      <li>SA always accepts a better move; T matters only for worse ones.</li>
+      <li>SA is like hill climbing at low T and like a random walk at high T.</li>
+      <li>In a GA, a minimisation problem needs an inverted fitness (1/cost).</li>
+      <li>Never use single-point crossover on a permutation; use OX.</li>
+      <li>Alpha–beta: MAX changes only α, MIN only β; children copy the parent's current values.</li>
+      <li>State your choices: tie-breaking, encoding, crossover point, mutation type, OX fill order.</li>
+    </ol>
+  </div>
+</section>
+</div>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const el=(t,a={},h="")=>{const e=document.createElement(t);for(const k in a)e.setAttribute(k,a[k]);e.innerHTML=h;return e};
+const fmt=x=>x===Infinity?"+∞":x===-Infinity?"−∞":(Math.round(x*100)/100).toString().replace("-","−");
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+/* ---------- tabs ---------- */
+const TABS=["search","heuristics","hill","anneal","genetic","alphabeta","quiz","cram"];
+function showTab(){let h=location.hash.replace("#","");if(!TABS.includes(h))h="search";
+  $$("section.tab").forEach(s=>s.classList.toggle("on",s.id===h));
+  $$("#nav a").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+h));}
+addEventListener("hashchange",showTab);
+
+/* =====================================================  SEARCH  */
+const GRAPHS={
+ asg1:{name:"Assignment Q1 (S → G)",start:"S",goal:"G",w:360,ht:250,
+  pos:{S:[150,26],F:[262,26],C:[52,122],A:[150,122],D:[232,82],E:[318,122],H:[288,182],B:[24,224],G:[196,226]},
+  edges:[["S","F",2],["S","C",5],["S","A",7],["C","A",5],["C","B",9],["A","G",8],["F","D",3],["F","E",2],["D","H",5],["E","H",1],["H","G",7]],
+  h:{S:12,A:14,B:16,C:10,D:8,E:15,F:9,H:5,G:0}},
+ pset:{name:"PSET 1 Q12 (A → G)",start:"A",goal:"G",w:360,ht:200,
+  pos:{A:[26,100],B:[122,30],C:[122,100],D:[122,170],E:[228,56],F:[228,144],G:[330,100]},
+  edges:[["A","B",3],["A","C",6],["A","D",7],["B","E",5],["C","E",4],["D","F",3],["E","F",2],["E","G",6],["F","G",4],["C","F",8]],
+  h:{A:10,B:8,C:7,D:9,E:5,F:3,G:0}},
+ prac:{name:"Practice P1 (S → G)",start:"S",goal:"G",w:340,ht:170,
+  pos:{S:[26,86],A:[112,30],B:[112,140],C:[208,86],G:[304,86]},
+  edges:[["S","A",1],["S","B",4],["A","B",2],["A","C",5],["B","C",2],["C","G",3],["B","G",9]],
+  h:{S:7,A:6,B:4,C:2,G:0}},
+ rom:{name:"Romania (Arad → Bucharest)",start:"Arad",goal:"Bucharest",w:470,ht:300,small:true,
+  pos:{Oradea:[76,22],Zerind:[46,60],Arad:[28,100],Timisoara:[36,168],Lugoj:[98,198],Mehadia:[102,234],Drobeta:[98,270],Craiova:[176,278],Sibiu:[134,112],Rimnicu:[162,158],Fagaras:[220,116],Pitesti:[234,194],Bucharest:[306,234],Giurgiu:[288,278],Urziceni:[354,212],Hirsova:[416,212],Eforie:[436,266],Vaslui:[398,136],Iasi:[372,82],Neamt:[318,48]},
+  edges:[["Arad","Zerind",75],["Arad","Sibiu",140],["Arad","Timisoara",118],["Zerind","Oradea",71],["Oradea","Sibiu",151],["Timisoara","Lugoj",111],["Lugoj","Mehadia",70],["Mehadia","Drobeta",75],["Drobeta","Craiova",120],["Craiova","Rimnicu",146],["Craiova","Pitesti",138],["Rimnicu","Sibiu",80],["Rimnicu","Pitesti",97],["Sibiu","Fagaras",99],["Fagaras","Bucharest",211],["Pitesti","Bucharest",101],["Bucharest","Giurgiu",90],["Bucharest","Urziceni",85],["Urziceni","Hirsova",98],["Hirsova","Eforie",86],["Urziceni","Vaslui",142],["Vaslui","Iasi",92],["Iasi","Neamt",87]],
+  h:{Arad:366,Bucharest:0,Craiova:160,Drobeta:242,Eforie:161,Fagaras:176,Giurgiu:77,Hirsova:151,Iasi:226,Lugoj:244,Mehadia:241,Neamt:234,Oradea:380,Pitesti:100,Rimnicu:193,Sibiu:253,Timisoara:329,Urziceni:80,Vaslui:199,Zerind:374}}
+};
+const S={g:null,h:{},steps:[],i:0};
+function adjOf(g){const a={};for(const n in g.pos)a[n]={};for(const [x,y,c] of g.edges){a[x][y]=c;a[y][x]=c}return a}
+function trueCosts(g){const a=adjOf(g),d={};for(const n in g.pos)d[n]=Infinity;d[g.goal]=0;const todo=new Set(Object.keys(g.pos));
+  while(todo.size){let u=null;for(const n of todo)if(u===null||d[n]<d[u])u=n;todo.delete(u);for(const v in a[u])if(d[u]+a[u][v]<d[v])d[v]=d[u]+a[u][v]}return d}
+function runSearch(g,h,algo){const a=adjOf(g),steps=[];const gs={[g.start]:0},par={};let fr=[{n:g.start,f:algo==="astar"?h[g.start]:h[g.start]}];const closed=new Set();
+  const snap=(pop,msg,done)=>steps.push({pop,msg,done,closed:new Set(closed),fr:fr.map(x=>({...x,g:gs[x.n]})).sort((p,q)=>p.f-q.f||(p.n<q.n?-1:1)),par:{...par},gs:{...gs}});
+  snap(null,`Start: put <b>${g.start}</b> in the frontier with ${algo==="astar"?"f = 0 + "+h[g.start]+" = "+h[g.start]:"h = "+h[g.start]}.`,false);
+  let guard=0;
+  while(fr.length&&guard++<500){fr.sort((p,q)=>p.f-q.f||(p.n<q.n?-1:1));const cur=fr.shift();
+    if(cur.n===g.goal){const path=[g.goal];while(path[0]!==g.start)path.unshift(par[path[0]]);let cost=0;for(let k=1;k<path.length;k++)cost+=a[path[k-1]][path[k]];
+      closed.add(cur.n);snap(cur.n,`Pop <b>${cur.n}</b> — it is the goal, so stop. Path <b>${path.join(" → ")}</b>, cost <b>${cost}</b>.`,{path,cost});return steps}
+    closed.add(cur.n);const ups=[];
+    for(const m of Object.keys(a[cur.n]).sort()){
+      if(algo==="gbfs"){if(closed.has(m)||fr.some(x=>x.n===m))continue;par[m]=cur.n;gs[m]=gs[cur.n]+a[cur.n][m];fr.push({n:m,f:h[m]});ups.push(`${m} (h = ${h[m]})`)}
+      else{const ng=gs[cur.n]+a[cur.n][m];if(gs[m]===undefined||ng<gs[m]){const was=gs[m]!==undefined;gs[m]=ng;par[m]=cur.n;fr=fr.filter(x=>x.n!==m);closed.delete(m);fr.push({n:m,f:ng+h[m]});ups.push(`${m}: ${ng} + ${h[m]} = ${ng+h[m]}${was?" (cheaper, updated)":""}`)}}}
+    snap(cur.n,`Pop <b>${cur.n}</b> (${algo==="astar"?"g = "+gs[cur.n]+", f = "+cur.f:"h = "+cur.f}). ${ups.length?"Push "+ups.join("; ")+".":"Nothing new to push."}`,false)}
+  snap(null,"Frontier is empty: no path.",{path:[],cost:null});return steps}
+function sInit(){const sel=$("#s-graph");for(const k in GRAPHS)sel.append(el("option",{value:k},GRAPHS[k].name));
+  sel.onchange=()=>sLoad(sel.value);$("#s-algo").onchange=sRun;$("#s-prev").onclick=()=>{if(S.i>0){S.i--;sDraw()}};
+  $("#s-next").onclick=()=>{if(S.i<S.steps.length-1){S.i++;sDraw()}};$("#s-reset").onclick=()=>{S.i=0;sDraw()};$("#s-predict").onchange=sDraw;sLoad("asg1")}
+function sLoad(k){S.g=GRAPHS[k];S.h={...S.g.h};sRun()}
+function sRun(){S.steps=runSearch(S.g,S.h,$("#s-algo").value);S.i=0;sDraw();sHeur()}
+function sDraw(){const g=S.g,st=S.steps[S.i],r=g.small?9:15,fs=g.small?9:12;let o="";
+  const inFr=new Set(st.fr.map(x=>x.n)),pathSet=new Set(),pe=new Set();
+  if(st.done&&st.done.path){st.done.path.forEach(n=>pathSet.add(n));for(let k=1;k<st.done.path.length;k++){pe.add(st.done.path[k-1]+"|"+st.done.path[k]);pe.add(st.done.path[k]+"|"+st.done.path[k-1])}}
+  for(const [a,b,c] of g.edges){const [x1,y1]=g.pos[a],[x2,y2]=g.pos[b],on=pe.has(a+"|"+b);
+    o+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${on?"var(--ok)":"var(--done)"}" stroke-width="${on?4:1.4}"/>`;
+    const mx=(x1+x2)/2,my=(y1+y2)/2;o+=`<rect x="${mx-10}" y="${my-8}" width="20" height="15" fill="var(--panel)"/><text x="${mx}" y="${my+4}" font-size="${g.small?9:11}" text-anchor="middle" font-weight="600">${c}</text>`}
+  for(const n in g.pos){const [x,y]=g.pos[n];let fill="var(--panel)",stroke="var(--ink)";
+    if(pathSet.has(n)){fill="var(--ok-soft)";stroke="var(--ok)"}else if(n===st.pop){fill="var(--cur)";stroke="var(--cur)"}else if(st.closed.has(n)){fill="var(--done-soft)";stroke="var(--done)"}else if(inFr.has(n)){fill="var(--accent-soft)";stroke="var(--accent)"}
+    o+=`<g class="snode" data-n="${n}" style="cursor:pointer"><circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="2"/>`;
+    if(g.small)o+=`<text x="${x}" y="${y-r-3}" font-size="${fs}" text-anchor="middle" font-weight="600">${n}</text>`;
+    else o+=`<text x="${x}" y="${y+4}" font-size="${fs}" text-anchor="middle" font-weight="700" ${n===st.pop&&!pathSet.has(n)?'style="fill:#1b1300"':""}>${n}</text><text x="${x}" y="${y-r-4}" font-size="10" text-anchor="middle" style="fill:var(--muted)">h=${S.h[n]}</text>`;
+    o+=`</g>`}
+  $("#s-svg").innerHTML=`<svg viewBox="0 0 ${g.w} ${g.ht}" width="${g.w*1.5}" role="img" aria-label="Search graph">${o}</svg>`;
+  const say=$("#s-say");say.className="say"+(st.done?" ok":"");say.innerHTML=st.msg;
+  const algo=$("#s-algo").value;let t=`<tr><th>Node</th>${algo==="astar"?'<th class="num">g</th><th class="num">h</th>':'<th class="num">h</th>'}<th class="num">f</th><th>reached from</th></tr>`;
+  if(!st.fr.length)t+=`<tr><td colspan="5" class="note">empty</td></tr>`;
+  st.fr.forEach((x,k)=>{t+=`<tr><td>${k===0&&!st.done?'<span class="pill cur">next</span> ':""}<b>${x.n}</b></td>${algo==="astar"?`<td class="num">${st.gs[x.n]}</td><td class="num">${S.h[x.n]}</td>`:`<td class="num">${S.h[x.n]}</td>`}<td class="num"><b>${x.f}</b></td><td>${st.par[x.n]||"—"}</td></tr>`});
+  $("#s-front").innerHTML=t;$("#s-count").textContent=`step ${S.i} of ${S.steps.length-1}`;
+  $("#s-prev").disabled=S.i===0;$("#s-next").disabled=S.i>=S.steps.length-1;
+  const pred=$("#s-predict").checked&&!st.done;
+  if(pred){$("#s-front").querySelectorAll(".pill").forEach(p=>p.remove());$("#s-next").disabled=true;say.innerHTML+=`<br><b>Your turn:</b> click the node that will be popped next.`}
+  $$("#s-svg .snode").forEach(nd=>nd.onclick=()=>{if(!$("#s-predict").checked||st.done)return;const want=st.fr[0]&&st.fr[0].n;
+    if(nd.dataset.n===want){S.i++;sDraw();$("#s-say").innerHTML="✔ Correct. "+$("#s-say").innerHTML}else{say.className="say bad";say.innerHTML=`✘ Not ${nd.dataset.n}. Look for the lowest ${algo==="astar"?"f = g + h":"h"} in the frontier (ties: alphabetical). Try again.`}})}
+function sHeur(){const g=S.g,hs=trueCosts(g),a=adjOf(g);let t=`<tr><th>Node</th><th>h (edit)</th><th class="num">h* true</th><th>h ≤ h*?</th></tr>`,bad=0;
+  for(const n of Object.keys(g.pos).sort()){const ok=S.h[n]<=hs[n];if(!ok)bad++;
+    t+=`<tr><td><b>${n}</b></td><td><input type="number" id="sh-${n}" data-n="${n}" value="${S.h[n]}" min="0" aria-label="h of ${n}" ${n===g.goal?"disabled":""}></td><td class="num">${hs[n]}</td><td>${ok?'<span class="pill ok">ok</span>':'<span class="pill bad">overestimates</span>'}</td></tr>`}
+  $("#s-h").innerHTML=t;const inc=[];for(const x in a)for(const y in a[x])if(S.h[x]>a[x][y]+S.h[y])inc.push(`h(${x}) = ${S.h[x]} &gt; c(${x},${y}) + h(${y}) = ${a[x][y]} + ${S.h[y]}`);
+  $("#s-cons").innerHTML=`<span class="pill ${bad?"bad":"ok"}">${bad?"not admissible":"admissible"}</span> <span class="pill ${inc.length?"bad":"ok"}">${inc.length?"not consistent":"consistent"}</span>`+(inc.length?`<br>Failing edges: ${inc.slice(0,4).join("; ")}${inc.length>4?" …":""}`:"");
+  $$("#s-h input").forEach(inp=>inp.onchange=()=>{const v=Math.max(0,+inp.value||0);S.h[inp.dataset.n]=v;sRun()})}
+
+/* =====================================================  HEURISTIC LAB  */
+function hDraw(){const dx=+$("#h-dx").value,dy=+$("#h-dy").value,mv=$("#h-move").value;$("#h-dxv").textContent=dx;$("#h-dyv").textContent=dy;
+  const man=dx+dy,euc=Math.hypot(dx,dy),oct=(Math.SQRT2-1)*Math.min(dx,dy)+Math.max(dx,dy),che=Math.max(dx,dy);
+  const tr=mv==="4"?man:mv==="8r"?oct:che;const rows=[["Manhattan  dx + dy",man],["Euclidean  √(dx² + dy²)",euc],["Octile  (√2 − 1)·min + max",oct],["Chebyshev  max(dx, dy)",che]];
+  let best=-1;rows.forEach(r=>{if(r[1]<=tr+1e-9&&r[1]>best)best=r[1]});
+  let t=`<tr><th>Heuristic</th><th class="num">value</th><th>vs true cost ${fmt(tr)}</th></tr>`;
+  rows.forEach(r=>{const ok=r[1]<=tr+1e-9;t+=`<tr><td>${r[0]}</td><td class="num">${fmt(r[1])}</td><td>${ok?'<span class="pill ok">admissible</span>':'<span class="pill bad">overestimates</span>'}${ok&&Math.abs(r[1]-best)<1e-9?' <span class="pill cur">best</span>':""}</td></tr>`});
+  $("#h-tab").innerHTML=t;
+  $("#h-say").innerHTML=mv==="4"?"4-direction moves: every path needs dx horizontal + dy vertical steps, so the true cost is dx + dy. <b>Manhattan is exact</b> and dominates Euclidean.":mv==="8r"?"Diagonal = √2: the cheapest route makes min(dx, dy) diagonal moves, then straight moves. <b>Octile is exact</b>; Euclidean is admissible but smaller; Manhattan overestimates whenever both dx and dy are above 0.":"Diagonal = 1: a diagonal covers one row and one column for the price of one move, so the true cost is max(dx, dy). Manhattan and Euclidean both overestimate when dx and dy are above 0.";
+  const s=24,W=9*s+20,H=9*s+20;let o="";for(let i=0;i<=9;i++){o+=`<line x1="${10+i*s}" y1="10" x2="${10+i*s}" y2="${10+9*s}" stroke="var(--line)"/><line x1="10" y1="${10+i*s}" x2="${10+9*s}" y2="${10+i*s}" stroke="var(--line)"/>`}
+  const cx=c=>10+c*s+s/2,cy=r=>10+(8-r)*s+s/2;let pts=[[0,0]],x=0,y=0;
+  if(mv==="4"){while(x<dx){x++;pts.push([x,y])}while(y<dy){y++;pts.push([x,y])}}else{while(x<dx&&y<dy){x++;y++;pts.push([x,y])}while(x<dx){x++;pts.push([x,y])}while(y<dy){y++;pts.push([x,y])}}
+  o+=`<polyline points="${pts.map(p=>cx(p[0])+","+cy(p[1])).join(" ")}" fill="none" stroke="var(--accent)" stroke-width="3"/>`;
+  o+=`<line x1="${cx(0)}" y1="${cy(0)}" x2="${cx(dx)}" y2="${cy(dy)}" stroke="var(--cur)" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+  o+=`<circle cx="${cx(0)}" cy="${cy(0)}" r="7" fill="var(--panel)" stroke="var(--ink)" stroke-width="2"/><circle cx="${cx(dx)}" cy="${cy(dy)}" r="7" fill="var(--ok)" stroke="var(--ok)"/><text x="${cx(0)}" y="${cy(0)+20}" font-size="10" text-anchor="middle">n</text><text x="${cx(dx)}" y="${cy(dy)-11}" font-size="10" text-anchor="middle">G</text>`;
+  $("#h-svg").innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="${W}" role="img" aria-label="Grid with cheapest path">${o}</svg><p class="note">Blue = a cheapest path. Dashed = straight line (Euclidean).</p>`}
+function cDraw(){const T=+$("#c-t").value,a=+$("#c-1").value,b=+$("#c-2").value,c=+$("#c-3").value;
+  const rows=[["h₄ = 0",0,"Always admissible (0 ≤ h*), but gives no guidance."],["h₅ = 2·h₂",2*b,"Not guaranteed: scaling up can exceed h*."],["h₆ = (h₁ + h₂) / 2",(a+b)/2,"Admissible: an average lies between two admissible values."],["h₇ = max(h₁, h₂)",Math.max(a,b),"Admissible, and dominates h₁, h₂, h₆, h₈ — the best choice."],["h₈ = min(h₁, h₂)",Math.min(a,b),"Admissible but the weakest."],["h₉ = min(h₁, h₃)",Math.min(a,c),"Admissible: it can never exceed h₁."],["h₁₀ = max(h₂, h₃)",Math.max(b,c),"Inadmissible wherever h₃ overestimates."],["h₁ + h₂",a+b,"Not guaranteed: a sum can exceed h*."]];
+  let t=`<tr><th>Heuristic</th><th class="num">value here</th><th>here</th><th>general rule</th></tr>`;
+  rows.forEach(r=>{t+=`<tr><td>${r[0]}</td><td class="num">${fmt(r[1])}</td><td>${r[1]<=T?'<span class="pill ok">≤ h*</span>':'<span class="pill bad">&gt; h*</span>'}</td><td>${r[2]}</td></tr>`});
+  $("#c-tab").innerHTML=t+(a>T||b>T?`<tr><td colspan="4" class="note">Note: you set h₁ or h₂ above h*, so they are no longer admissible — the rules assume h₁, h₂ ≤ h*.</td></tr>`:"")+(c<=T?`<tr><td colspan="4" class="note">Note: h₃ is supposed to overestimate somewhere; here it does not, so h₁₀ looks fine at this node. Inadmissible means "too high at some node", not at every node.</td></tr>`:"")}
+
+/* =====================================================  HILL CLIMBING  */
+const HG={q6:{g:[[1,4,3,2],[6,10,5,1],[2,9,8,4],[3,1,8,15],[5,7,3,6],[4,6,5,10]],nb:"8"},p5:{g:[[3,5,4,2],[6,8,7,1],[2,9,12,3],[1,4,10,16]],nb:"4"}};
+const HC={g:null,path:[],done:false,map:null};
+function hcNbrs(r,c){const n=[],g=HC.g,eight=$("#hc-nb").value==="8";for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){if(!dr&&!dc)continue;if(!eight&&dr&&dc)continue;const rr=r+dr,cc=c+dc;if(rr>=0&&rr<g.length&&cc>=0&&cc<g[0].length)n.push([rr,cc])}return n}
+function hcBest(r,c){let b=null;for(const [rr,cc] of hcNbrs(r,c))if(!b||HC.g[rr][cc]>HC.g[b[0]][b[1]])b=[rr,cc];return b}
+function hcClimb(r,c){const p=[[r,c]];for(;;){const b=hcBest(r,c);if(!b||HC.g[b[0]][b[1]]<=HC.g[r][c])return p;[r,c]=b;p.push(b)}}
+function hcMax(){return Math.max(...HC.g.flat())}
+function hcLoad(k){if(k==="rand"){HC.g=Array.from({length:6},()=>Array.from({length:6},()=>1+Math.floor(Math.random()*30)))}else{HC.g=HG[k].g;$("#hc-nb").value=HG[k].nb}HC.path=[];HC.done=false;HC.map=null;$("#hc-say").className="say";$("#hc-say").textContent="Click a start cell.";$("#hc-stats").textContent="";hcDraw()}
+function hcDraw(){const g=HC.g,box=$("#hc-cells");box.style.gridTemplateColumns=`repeat(${g[0].length},44px)`;box.innerHTML="";const mx=hcMax();const last=HC.path[HC.path.length-1];
+  g.forEach((row,r)=>row.forEach((v,c)=>{const idx=HC.path.findIndex(p=>p[0]===r&&p[1]===c);const b=el("button",{class:"cell"+(v===mx?" top":"")+(idx>=0?" path":"")+(last&&last[0]===r&&last[1]===c?" cur":"")+(HC.map?(HC.map[r][c]?" reach":" stuck"):""),"aria-label":`row ${r+1} column ${c+1} value ${v}`},v+(idx>=0?`<small>${idx+1}</small>`:""));
+    b.onclick=()=>{HC.path=[[r,c]];HC.done=false;HC.map=null;hcSay();hcDraw()};box.append(b)}))}
+function hcSay(){const s=$("#hc-say"),p=HC.path;if(!p.length)return;const [r,c]=p[p.length-1],v=HC.g[r][c],nb=hcNbrs(r,c).map(x=>HC.g[x[0]][x[1]]),b=hcBest(r,c),bv=HC.g[b[0]][b[1]];
+  const trail=p.map(x=>HC.g[x[0]][x[1]]).join(" → ");
+  if(bv>v){s.className="say";s.innerHTML=`Path: <b>${trail}</b>. At ${v}; neighbours are ${nb.join(", ")}. Best neighbour is <b>${bv}</b> — press Step.`;HC.done=false}
+  else{HC.done=true;const mx=hcMax();if(v===mx){s.className="say ok";s.innerHTML=`Path: <b>${trail}</b>. No neighbour is higher than ${v}, and ${v} is the <b>global maximum</b>.`}
+    else if(bv===v){s.className="say bad";s.innerHTML=`Path: <b>${trail}</b>. Best neighbour equals ${v}: a <b>plateau</b>. Hill climbing stops (it only moves to a strictly better neighbour). Global maximum is ${mx}.`}
+    else{s.className="say bad";s.innerHTML=`Path: <b>${trail}</b>. Neighbours ${nb.join(", ")} are all lower than ${v}: stuck on a <b>local maximum</b>. The global maximum is ${mx}.`}}}
+function hcInit(){$("#hc-grid").onchange=e=>hcLoad(e.target.value);$("#hc-nb").onchange=()=>{HC.path=[];HC.map=null;hcDraw();$("#hc-say").textContent="Click a start cell."};
+  $("#hc-step").onclick=()=>{if(!HC.path.length||HC.done)return;const [r,c]=HC.path[HC.path.length-1],b=hcBest(r,c);if(HC.g[b[0]][b[1]]>HC.g[r][c])HC.path.push(b);hcSay();hcDraw()};
+  $("#hc-run").onclick=()=>{if(!HC.path.length)return;const [r,c]=HC.path[0];HC.path=hcClimb(r,c);hcSay();hcDraw()};
+  $("#hc-map").onclick=()=>{const mx=hcMax();let ok=0,tot=0;HC.map=HC.g.map((row,r)=>row.map((v,c)=>{const p=hcClimb(r,c),e=p[p.length-1];const good=HC.g[e[0]][e[1]]===mx;tot++;if(good)ok++;return good}));HC.path=[];hcDraw();
+    $("#hc-stats").innerHTML=`<b>${ok} of ${tot}</b> start cells reach the global maximum, so p = ${(ok/tot).toFixed(2)}. Random-restart hill climbing needs about 1/p = <b>${(tot/ok).toFixed(1)}</b> runs on average.`};
+  $("#hc-new").onclick=()=>{$("#hc-grid").value="rand";hcLoad("rand")};hcLoad("q6")}
+
+/* =====================================================  SIMULATED ANNEALING  */
+let saDrill=null;
+function saDraw(){const d=+$("#sa-de").value,T=+$("#sa-t").value,p=Math.exp(-d/T);$("#sa-dev").textContent=d;$("#sa-tv").textContent=T;
+  $("#sa-form").innerHTML=`P = e<sup>−ΔE / T</sup> = e<sup>−${d} / ${T}</sup> = e<sup>−${(d/T).toFixed(3)}</sup>`;$("#sa-p").textContent=p.toFixed(3);$("#sa-bar").style.width=(p*100)+"%";$("#sa-res").textContent="";
+  const W=340,H=190,x=t=>40+(t-1)/149*(W-55),y=v=>H-28-v*(H-45);let pts="";for(let t=1;t<=150;t++)pts+=`${x(t).toFixed(1)},${y(Math.exp(-d/t)).toFixed(1)} `;
+  let o=`<line x1="40" y1="${y(0)}" x2="${W-12}" y2="${y(0)}" stroke="var(--ink)"/><line x1="40" y1="${y(0)}" x2="40" y2="${y(1)}" stroke="var(--ink)"/>`;
+  [0,.5,1].forEach(v=>o+=`<line x1="36" y1="${y(v)}" x2="${W-12}" y2="${y(v)}" stroke="var(--line)"/><text x="32" y="${y(v)+4}" font-size="10" text-anchor="end">${v}</text>`);
+  [1,50,100,150].forEach(t=>o+=`<text x="${x(t)}" y="${H-12}" font-size="10" text-anchor="middle">${t}</text>`);
+  o+=`<text x="${W/2}" y="${H-1}" font-size="10" text-anchor="middle">temperature T</text><polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.5"/><circle cx="${x(T)}" cy="${y(p)}" r="6" fill="var(--cur)" stroke="var(--ink)"/>`;
+  $("#sa-plot").innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="${W*1.3}" role="img" aria-label="Acceptance probability against temperature">${o}</svg>`;saCool()}
+function saCool(){const T0=+$("#sa-t0").value||100,a=Math.min(.99,Math.max(.05,+$("#sa-a").value||.5)),d=+$("#sa-d2").value||0;let t=`<tr><th class="num">k</th><th class="num">T(k)</th><th class="num">P for ΔE = ${d}</th><th>with r = 0.2</th><th>with r = 0.5</th></tr>`;
+  for(let k=0;k<7;k++){const T=T0*Math.pow(a,k),p=Math.exp(-d/T);const v=r=>p>r?'<span class="pill ok">accept</span>':'<span class="pill bad">reject</span>';t+=`<tr><td class="num">${k}</td><td class="num">${fmt(T)}</td><td class="num">${p.toFixed(3)}</td><td>${v(.2)}</td><td>${v(.5)}</td></tr>`}$("#sa-cool").innerHTML=t}
+function saNew(){const T=[10,20,25,40,50,100][Math.floor(Math.random()*6)],cur=20+Math.floor(Math.random()*60),d=1+Math.floor(Math.random()*Math.min(40,T*1.5));saDrill={T,cur,nw:cur+d,d};
+  $("#sa-drill-q").innerHTML=`Minimising. Current cost <b>${cur}</b>, random neighbour costs <b>${cur+d}</b>, temperature <b>T = ${T}</b>. What is the probability that the neighbour is accepted?`;$("#sa-drill-a").value="";$("#sa-drill-say").className="say";$("#sa-drill-say").textContent="Compute ΔE first, then e^(−ΔE/T).";}
+function saInit(){["sa-de","sa-t"].forEach(i=>$("#"+i).oninput=saDraw);["sa-t0","sa-a","sa-d2"].forEach(i=>$("#"+i).oninput=saCool);
+  $("#sa-roll").onclick=()=>{const p=Math.exp(-(+$("#sa-de").value)/(+$("#sa-t").value)),r=Math.random();$("#sa-res").innerHTML=`r = ${r.toFixed(3)} → ${p>r?'<span class="pill ok">accept the worse move</span>':'<span class="pill bad">reject, stay</span>'}`};
+  $("#sa-drill-new").onclick=saNew;$("#sa-drill-check").onclick=()=>{const p=Math.exp(-saDrill.d/saDrill.T),a=+$("#sa-drill-a").value,s=$("#sa-drill-say");const ok=Math.abs(a-p)<=0.011;s.className="say "+(ok?"ok":"bad");
+    s.innerHTML=`${ok?"✔ Correct.":"✘ Not quite."} ΔE = ${saDrill.nw} − ${saDrill.cur} = ${saDrill.d}; P = e<sup>−${saDrill.d}/${saDrill.T}</sup> = e<sup>−${(saDrill.d/saDrill.T).toFixed(2)}</sup> = <b>${p.toFixed(2)}</b>.`};saDraw();saNew()}
+
+/* =====================================================  GA  */
+function oxChild(p1,p2,c1,c2){const n=p1.length,ch=Array(n).fill(null);for(let i=c1-1;i<c2;i++)ch[i]=p1[i];const order=[];for(let i=0;i<n;i++)order.push(p2[(c2+i)%n]);const fill=order.filter(x=>!ch.includes(x));let j=0;for(let i=0;i<n;i++)if(ch[i]===null)ch[i]=fill[j++];return {ch,order,fill}}
+function genes(arr,cls){const seen={};arr.forEach(x=>seen[x]=(seen[x]||0)+1);return arr.map((x,i)=>`<span class="gene ${seen[x]>1?"dup":cls(i)}">${x}</span>`).join("")}
+function gDraw(){const p1=[...$("#g-p1").value.trim().toUpperCase()],p2=[...$("#g-p2").value.trim().toUpperCase()],out=$("#g-out"),type=$("#g-type").value;
+  if(p1.length<3||p1.length!==p2.length){out.innerHTML=`<div class="say bad">Both parents need the same length (at least 3 genes).</div>`;return}
+  const n=p1.length;$("#g-c1").max=n-1;$("#g-c2").max=n;let c1=Math.min(+$("#g-c1").value,n-1),c2=Math.min(Math.max(+$("#g-c2").value,c1),n);if(type==="ox"&&c2<c1)c2=c1;$("#g-c1v").textContent=c1;$("#g-c2v").textContent=type==="sp"?"—":c2;$("#g-c2").disabled=type==="sp";
+  const perm=new Set(p1).size===n&&[...p1].sort().join()===[...p2].sort().join();let h="";
+  const row=(lab,arr,cls)=>`<div class="row"><span style="min-width:5.5rem" class="note">${lab}</span><span>${genes(arr,cls)}</span></div>`;
+  if(type==="ox"){if(!perm){out.innerHTML=`<div class="say bad">Order crossover needs two permutations of the same symbols, each used once.</div>`;return}
+    const a=oxChild(p1,p2,c1,c2),b=oxChild(p2,p1,c1,c2);const inseg=i=>i>=c1-1&&i<c2?"a":"b";
+    h+=row("Parent 1",p1,i=>inseg(i)==="a"?"a":"")+row("Parent 2",p2,i=>inseg(i)==="a"?"b":"");
+    h+=`<p><b>Child 1.</b> Copy positions ${c1}–${c2} of Parent 1. Read Parent 2 starting after position ${c2}: <span class="mono">${a.order.join(" ")}</span>. Drop what is already copied → <span class="mono">${a.fill.join(" ")}</span>. Fill the blanks left to right:</p>`+row("Child 1",a.ch,inseg);
+    h+=`<p><b>Child 2.</b> Same with the parents swapped (copy from Parent 2, fill from Parent 1: <span class="mono">${b.fill.join(" ")}</span>):</p>`+row("Child 2",b.ch,i=>inseg(i)==="a"?"b":"a");
+    h+=`<div class="say ok">Both children use every symbol exactly once — valid permutations.</div>`}
+  else{let k1,k2;if(type==="sp"){k1=[...p1.slice(0,c1),...p2.slice(c1)];k2=[...p2.slice(0,c1),...p1.slice(c1)]}else{k1=[...p1.slice(0,c1),...p2.slice(c1,c2),...p1.slice(c2)];k2=[...p2.slice(0,c1),...p1.slice(c1,c2),...p2.slice(c2)]}
+    const fromA=i=>type==="sp"?(i<c1?"a":"b"):(i>=c1&&i<c2?"b":"a");
+    h+=row("Parent 1",p1,()=>"a")+row("Parent 2",p2,()=>"b")+row("Child 1",k1,fromA)+row("Child 2",k2,i=>fromA(i)==="a"?"b":"a");
+    const dup=new Set(k1).size<n||new Set(k2).size<n;
+    h+=perm?(dup?`<div class="say bad">Red genes are repeated, so other symbols are missing. For a permutation problem (TSP, seating, ordering) this child is <b>invalid</b> — use order crossover.</div>`:`<div class="say ok">These cut points happened to give valid permutations — but that is luck, not a guarantee. Move the cut.</div>`):`<div class="say ok">Repeats are allowed in this encoding (binary or integer strings), so single-point and two-point crossover are fine here.</div>`}
+  out.innerHTML=h}
+function qAtt(s){const n=s.length,pairs=[];for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){if(s[i]===s[j])pairs.push([i,j,"row"]);else if(Math.abs(s[i]-s[j])===j-i)pairs.push([i,j,"diag"])}return pairs}
+function qDraw(){let str=$("#q-str").value.replace(/[^1-8]/g,"").padEnd(8,"1").slice(0,8);const s=[...str].map(Number),pairs=qAtt(s),bad=new Set();pairs.forEach(p=>{bad.add(p[0]);bad.add(p[1])});const b=$("#q-board");b.innerHTML="";
+  for(let r=8;r>=1;r--)for(let c=0;c<8;c++){const q=s[c]===r;const sq=el("button",{class:"sq"+((r+c)%2?" dk":"")+(q&&bad.has(c)?" att":""),"aria-label":`column ${c+1} row ${r}${q?" queen":""}`},q?"♛":"");sq.onclick=()=>{s[c]=r;$("#q-str").value=s.join("");qDraw()};b.append(sq)}
+  const rows=pairs.filter(p=>p[2]==="row").length,dg=pairs.length-rows;
+  $("#q-tab").innerHTML=`<tr><th>column</th>${s.map((_,i)=>`<td class="num">${i+1}</td>`).join("")}</tr><tr><th>row</th>${s.map(v=>`<td class="num"><b>${v}</b></td>`).join("")}</tr><tr><th>row − col</th>${s.map((v,i)=>`<td class="num">${fmt(v-i-1)}</td>`).join("")}</tr><tr><th>row + col</th>${s.map((v,i)=>`<td class="num">${v+i+1}</td>`).join("")}</tr>`;
+  const say=$("#q-say");say.className="say"+(pairs.length?"":" ok");say.innerHTML=`Same row: <b>${rows}</b> pair${rows===1?"":"s"}. Same diagonal (equal row − col or equal row + col): <b>${dg}</b>. Attacking pairs = ${pairs.length}. <b>Fitness = 28 − ${pairs.length} = ${28-pairs.length}</b>${pairs.length?"":" — a solution"}.`+(pairs.length?`<br><span class="note">Pairs (columns): ${pairs.map(p=>`${p[0]+1}–${p[1]+1}`).join(", ")}</span>`:"")}
+function gInit(){["g-p1","g-p2","g-type","g-c1","g-c2"].forEach(i=>$("#"+i).oninput=gDraw);$("#q-str").oninput=qDraw;$("#q-rand").onclick=()=>{$("#q-str").value=Array.from({length:8},()=>1+Math.floor(Math.random()*8)).join("");qDraw()};gDraw();qDraw()}
+
+/* =====================================================  ALPHA-BETA  */
+const ABP={
+ notes:{name:"Lecture notes example (3 × 3)",shape:[[0,0,0],[0,0,0],[0,0,0]],leaves:[3,12,8,2,4,6,14,5,2]},
+ q17:{name:"Assignment Q17 (16 leaves)",shape:[[[[0,0],[0,0]],[[0,0],[0,0]]],[[[0,0],[0,0]],[[0,0],[0,0]]]],leaves:[8,4,2,7,4,5,3,2,5,1,2,4,6,3,5,7]},
+ q19:{name:"Assignment Q19 (find X)",shape:[[[0,0],[0,0]],[[0,0],[0,0]]],leaves:[13,12,7,9,10,7,11,5],x:4},
+ p1:{name:"PSET 3 tree 1",shape:[[[0,0],[0,0]],[[0,0],[0,0]]],leaves:[3,5,2,9,0,7,4,8]},
+ p2:{name:"PSET 3 tree 2",shape:[[[0,0],[0,0]],[[0,0],[0,0]]],leaves:[3,12,8,2,4,6,5,7]},
+ p3:{name:"PSET 3 tree 3",shape:[[[0,0],[0,0]],[[0,0],[0,0]]],leaves:[3,5,6,9,1,2,0,4]},
+ worst:{name:"Worst ordering (no pruning)",shape:[[0,0,0],[0,0,0],[0,0,0]],leaves:[5,4,3,8,7,4,9,8,5]},
+ best:{name:"Best ordering (same leaves)",shape:[[0,0,0],[0,0,0],[0,0,0]],leaves:[5,8,9,4,7,8,3,4,5]}
+};
+const AB={nodes:[],root:null,snaps:[],i:0,timer:null,key:"notes",leaves:[]};
+function abBuild(shape,leaves,rootType){const nodes=[];let li=0,ni=0;const names="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  function mk(s,type,depth){const n={id:nodes.length,kids:[],depth};nodes.push(n);if(Array.isArray(s)){n.type=type;for(const k of s)n.kids.push(mk(k,type==="max"?"min":"max",depth+1))}else{n.type="leaf";n.val=leaves[li++]}return n}
+  const root=mk(shape,rootType,0);const q=[root];while(q.length){const n=q.shift();if(n.type!=="leaf"){n.name=names[ni++]||"?";q.push(...n.kids)}}return {nodes,root}}
+function abRun(root,nodes,prune){const st=nodes.map(()=>({s:"new"})),snaps=[];let leavesSeen=0;const snap=(msg,active)=>snaps.push({st:st.map(x=>({...x})),msg,active});
+  const markPruned=n=>{st[n.id].s="pruned";n.kids.forEach(markPruned)};
+  snap("Start at the root with α = −∞, β = +∞. Search depth-first, left to right.",root.id);
+  function go(n,a,b){if(n.type==="leaf"){st[n.id].s="done";leavesSeen++;return n.val}
+    const mx=n.type==="max";let v=mx?-Infinity:Infinity;Object.assign(st[n.id],{s:"open",a,b,v:null});snap(`Enter <b>${n.name}</b> (${n.type.toUpperCase()}) with α = ${fmt(a)}, β = ${fmt(b)} copied from its parent.`,n.id);
+    for(let i=0;i<n.kids.length;i++){const k=n.kids[i],kv=go(k,a,b);const what=k.type==="leaf"?`leaf ${fmt(kv)}`:`${k.name} returns ${fmt(kv)}`;
+      if(mx){v=Math.max(v,kv);a=Math.max(a,v)}else{v=Math.min(v,kv);b=Math.min(b,v)}Object.assign(st[n.id],{a,b,v});
+      const cut=prune&&(mx?v>=b:v<=a);
+      if(cut&&i<n.kids.length-1){for(let j=i+1;j<n.kids.length;j++)markPruned(n.kids[j]);snap(`<b>${n.name}</b> (${n.type.toUpperCase()}): ${what} → v = ${fmt(v)}, α = ${fmt(a)}, β = ${fmt(b)}. Now α ≥ β, so <b>prune</b> the rest of ${n.name}: ${mx?"the MIN node above will never let the value rise to this":"MAX already has an option worth "+fmt(a)+" elsewhere"}.`,n.id);break}
+      snap(`<b>${n.name}</b> (${n.type.toUpperCase()}): ${what} → v = ${fmt(v)}, ${mx?"α = max(α, v) = "+fmt(a):"β = min(β, v) = "+fmt(b)}${prune?`; α = ${fmt(a)}, β = ${fmt(b)}, so α &lt; β — keep going`:""}.`,n.id)}
+    st[n.id].s="done";return v}
+  const val=go(root,-Infinity,Infinity);snap(`Done. Root value = <b>${fmt(val)}</b>.`,root.id);return {snaps,val,leavesSeen}}
+function abLoad(key,keepLeaves){AB.key=key;const P=ABP[key];if(!keepLeaves)AB.leaves=[...P.leaves];$("#ab-leaves").value=AB.leaves.join(",");
+  $("#ab-xrow").style.display=key==="q19"?"flex":"none";if(key==="q19"){$("#ab-x").value=AB.leaves[4];$("#ab-xv").textContent=AB.leaves[4]}abStart()}
+function abStart(){clearInterval(AB.timer);AB.timer=null;$("#ab-play").textContent="Play";const P=ABP[AB.key];const t=abBuild(P.shape,AB.leaves,$("#ab-root").value);AB.nodes=t.nodes;AB.root=t.root;
+  const r=abRun(t.root,t.nodes,true);AB.snaps=r.snaps;AB.val=r.val;AB.seen=r.leavesSeen;AB.total=AB.leaves.length;AB.i=0;AB.revealed=!$("#ab-test").checked;
+  $("#ab-testbox").style.display=$("#ab-test").checked?"block":"none";abLayout();abDraw()}
+function abLayout(){const leaves=AB.nodes.filter(n=>n.type==="leaf"),lw=Math.max(34,Math.min(52,660/leaves.length));let c=0;const depth=Math.max(...AB.nodes.map(n=>n.depth));AB.lv=70;
+  (function place(n){n.y=30+n.depth*AB.lv;if(n.type==="leaf"){n.x=58+lw*(c+++.5)}else{n.kids.forEach(place);n.x=(n.kids[0].x+n.kids[n.kids.length-1].x)/2}})(AB.root);AB.W=58+lw*leaves.length+60;AB.H=30+depth*AB.lv+34}
+function abDraw(){const sn=AB.snaps[AB.i],hide=$("#ab-test").checked&&!AB.revealed;let o="";const R=15;
+  const types={};AB.nodes.forEach(n=>{if(n.type!=="leaf")types[n.depth]=n.type.toUpperCase()});for(const d in types)o+=`<text x="4" y="${34+d*AB.lv}" font-size="11" font-weight="700">${types[d]}</text>`;
+  AB.nodes.forEach(n=>n.kids.forEach(k=>{const pr=sn.st[k.id].s==="pruned"&&!hide,fresh=sn.st[k.id].s==="new"||hide;o+=`<line x1="${n.x}" y1="${n.y+R}" x2="${k.x}" y2="${k.y-(k.type==="leaf"?12:R)}" stroke="${pr?"var(--bad)":fresh?"var(--line)":"var(--ink)"}" stroke-width="${pr?1.6:1.3}" ${pr?'stroke-dasharray="4 3"':""}/>`;
+    if(pr&&sn.st[n.id].s!=="pruned"){const mx=(n.x+k.x)/2,my=(n.y+R+k.y-R)/2;o+=`<text x="${mx}" y="${my+5}" font-size="16" font-weight="700" text-anchor="middle" style="fill:var(--bad)">✕</text>`}}));
+  AB.nodes.forEach(n=>{const s=sn.st[n.id],act=n.id===sn.active&&!hide;let fill="var(--panel)",stroke="var(--ink)";
+    if(!hide){if(s.s==="pruned"){fill="var(--bad-soft)";stroke="var(--bad)"}else if(act){fill="var(--cur)";stroke="var(--cur)"}else if(s.s==="done"){fill="var(--accent-soft)";stroke="var(--accent)"}else if(s.s==="open"){fill="var(--cur-soft)";stroke="var(--cur)"}}
+    if(n.type==="leaf"){const isX=AB.key==="q19"&&AB.nodes.filter(m=>m.type==="leaf").indexOf(n)===4;o+=`<rect x="${n.x-15}" y="${n.y-12}" width="30" height="24" rx="3" fill="${fill}" stroke="${stroke}" stroke-width="1.6"/><text x="${n.x}" y="${n.y+5}" font-size="13" font-weight="700" text-anchor="middle" class="mono">${fmt(n.val)}</text>${isX?`<text x="${n.x}" y="${n.y+26}" font-size="10" text-anchor="middle" style="fill:var(--accent)">X</text>`:""}`}
+    else{const pts=n.type==="max"?`${n.x},${n.y-R-3} ${n.x-R-5},${n.y+R} ${n.x+R+5},${n.y+R}`:`${n.x},${n.y+R+3} ${n.x-R-5},${n.y-R} ${n.x+R+5},${n.y-R}`;
+      o+=`<polygon points="${pts}" fill="${fill}" stroke="${stroke}" stroke-width="1.8"/><text x="${n.x-R-8}" y="${n.y-6}" font-size="11" font-weight="700" text-anchor="end" font-style="italic">${n.name}</text>`;
+      if(!hide&&s.v!=null&&s.s!=="pruned")o+=`<text x="${n.x}" y="${n.y+(n.type==="max"?9:3)}" font-size="12" font-weight="700" text-anchor="middle" ${act?'style="fill:#1b1300"':""}>${fmt(s.v)}</text>`;
+      if(!hide&&s.a!==undefined&&s.s!=="pruned")o+=`<text x="${n.x+R+7}" y="${n.y-1}" font-size="10" class="mono">α=${fmt(s.a)}</text><text x="${n.x+R+7}" y="${n.y+11}" font-size="10" class="mono">β=${fmt(s.b)}</text>`}});
+  $("#ab-svg").innerHTML=`<svg viewBox="0 0 ${AB.W} ${AB.H}" width="${Math.max(AB.W,AB.W*1.25)}" style="min-width:${Math.min(AB.W,560)}px" role="img" aria-label="Game tree">${o}</svg>`;
+  const say=$("#ab-say"),end=AB.i===AB.snaps.length-1;say.className="say"+(end&&!hide?" ok":"");say.innerHTML=hide?"Work the tree out on paper, enter the root value and how many leaves are never examined, then check.":sn.msg;
+  $("#ab-count").textContent=hide?"":`step ${AB.i} of ${AB.snaps.length-1}`;["ab-prev","ab-next","ab-play","ab-end"].forEach(i=>$("#"+i).disabled=hide);if(!hide){$("#ab-prev").disabled=AB.i===0;$("#ab-next").disabled=end}
+  $("#ab-sum").innerHTML=end&&!hide?`Alpha–beta examined <b>${AB.seen}</b> of ${AB.total} leaves (pruned ${AB.total-AB.seen}). Plain minimax examines all ${AB.total} and gets the same root value, ${fmt(AB.val)}.`:""}
+function abInit(){const sel=$("#ab-pre");for(const k in ABP)sel.append(el("option",{value:k},ABP[k].name));sel.onchange=()=>abLoad(sel.value);$("#ab-root").onchange=abStart;
+  $("#ab-apply").onclick=()=>{const v=$("#ab-leaves").value.split(/[,\s]+/).filter(x=>x!=="").map(Number),need=ABP[AB.key].leaves.length;if(v.length!==need||v.some(isNaN)){$("#ab-say").className="say bad";$("#ab-say").textContent=`This tree needs exactly ${need} numbers separated by commas.`;return}AB.leaves=v;abLoad(AB.key,true)};
+  $("#ab-rand").onclick=()=>{AB.leaves=ABP[AB.key].leaves.map(()=>Math.floor(Math.random()*15));abLoad(AB.key,true)};
+  $("#ab-x").oninput=e=>{AB.leaves[4]=+e.target.value;$("#ab-xv").textContent=e.target.value;$("#ab-leaves").value=AB.leaves.join(",");abStart();AB.i=AB.snaps.length-1;abDraw();
+    const G=AB.nodes.filter(n=>n.name==="G")[0],pr=AB.snaps[AB.i].st[G.id].s==="pruned";$("#ab-say").className="say "+(pr?"bad":"ok");$("#ab-say").innerHTML=`X = ${e.target.value}: F = max(X, 7) = ${Math.max(+e.target.value,7)}. ${pr?"That is ≤ α = 9 at C, so <b>G is pruned</b>.":"That is &gt; α = 9 at C, so <b>G is explored</b>."} G is explored exactly when X &gt; 9.`};
+  $("#ab-prev").onclick=()=>{if(AB.i>0){AB.i--;abDraw()}};$("#ab-next").onclick=()=>{if(AB.i<AB.snaps.length-1){AB.i++;abDraw()}};$("#ab-end").onclick=()=>{AB.i=AB.snaps.length-1;abDraw()};$("#ab-reset").onclick=()=>{AB.i=0;abDraw()};
+  $("#ab-play").onclick=()=>{if(AB.timer){clearInterval(AB.timer);AB.timer=null;$("#ab-play").textContent="Play";return}$("#ab-play").textContent="Pause";AB.timer=setInterval(()=>{if(AB.i>=AB.snaps.length-1){clearInterval(AB.timer);AB.timer=null;$("#ab-play").textContent="Play";return}AB.i++;abDraw()},1100)};
+  $("#ab-test").onchange=abStart;$("#ab-check").onclick=()=>{const v=+$("#ab-ans-v").value,p=+$("#ab-ans-p").value,okv=$("#ab-ans-v").value!==""&&v===AB.val,okp=$("#ab-ans-p").value!==""&&p===AB.total-AB.seen;AB.revealed=true;AB.i=AB.snaps.length-1;abDraw();
+    const s=$("#ab-say");s.className="say "+(okv&&okp?"ok":"bad");s.innerHTML=`Root value: ${okv?"✔":"✘"} (correct: <b>${fmt(AB.val)}</b>). Leaves pruned: ${okp?"✔":"✘"} (correct: <b>${AB.total-AB.seen}</b>). Use Restart and Next to replay the trace.`};
+  abLoad("notes")}
+
+/* =====================================================  QUIZ  */
+const QS=[
+ {t:"Informed search",q:"A* always expands the frontier node with the lowest…",o:["h(n)","g(n)","g(n) + h(n)","number of neighbours"],a:2,w:"A* orders the frontier by f(n) = g(n) + h(n): cost paid so far plus estimated cost to go. Ordering by h alone is greedy best-first; by g alone is uniform-cost search."},
+ {t:"Informed search",q:"Frontier in A*: B (g = 4, h = 5), C (g = 2, h = 6), G (g = 9, h = 0). Which node is popped next?",o:["B","C","G","G, because it is the goal"],a:1,w:"f(B) = 9, f(C) = 8, f(G) = 9. C has the lowest f. The goal is not taken just because it is in the frontier."},
+ {t:"Informed search",q:"When does A* stop?",o:["When the goal is first generated","When the goal is popped from the frontier","When the frontier has one node","When h = 0 for some node"],a:1,w:"A cheaper route to the goal may still be found while it waits in the frontier (Romania: Bucharest enters at 450, is popped at 418)."},
+ {t:"Informed search",q:"GBFS found the path S → B → G with h(S) = 7, h(B) = 4, h(G) = 0 and edges S–B = 4, B–G = 9. What is the path cost?",o:["11","13","4","0"],a:1,w:"Path cost is the sum of edge costs: 4 + 9 = 13. Heuristic values are never added to the cost."},
+ {t:"Heuristics",q:"A heuristic is admissible when, for every node n,",o:["h(n) ≥ h*(n)","h(n) ≤ h*(n)","h(n) = g(n)","h(n) ≤ c(n, n′)"],a:1,w:"Admissible = never overestimates the true cheapest cost to the goal."},
+ {t:"Heuristics",q:"Edge A–B costs 2. h(A) = 9, h(B) = 6. For this edge the heuristic is…",o:["consistent, since 9 ≥ 6","inconsistent, since 9 > 2 + 6","consistent, since 6 ≤ 2 + 9 only","impossible to tell"],a:1,w:"Consistency needs h(A) ≤ c(A,B) + h(B) = 8. Here 9 > 8, so it fails."},
+ {t:"Heuristics",q:"Which statement is true?",o:["Admissible ⇒ consistent","Consistent ⇒ admissible","Inconsistent ⇒ inadmissible","They are the same property"],a:1,w:"Consistency is the stronger condition. The notes' example (h(B) = 10 > 2 + 7) is admissible but not consistent."},
+ {t:"Heuristics",q:"h₁ and h₂ are admissible. Which combination is NOT guaranteed admissible?",o:["max(h₁, h₂)","min(h₁, h₂)","(h₁ + h₂)/2","h₁ + h₂"],a:3,w:"A sum can exceed the true cost (for example when both equal it). Max, min and averages stay ≤ h*."},
+ {t:"Heuristics",q:"h₁ admissible, h₃ inadmissible. min(h₁, h₃) is…",o:["inadmissible","admissible","admissible only if h₃ > h₁ everywhere","consistent"],a:1,w:"min(h₁, h₃) ≤ h₁ ≤ h*, so the admissible one caps it."},
+ {t:"Heuristics",q:"On a grid where diagonal moves (cost √2) are allowed, the Manhattan distance is…",o:["admissible and best","admissible but dominated","inadmissible","always equal to Euclidean"],a:2,w:"One diagonal step costs 1.41 but Manhattan counts 2 for it, so it overestimates. Use Euclidean or the octile distance."},
+ {t:"Heuristics",q:"Both h_a and h_b are admissible and h_a(n) ≥ h_b(n) for all n. Then A* with h_a…",o:["expands at least as many nodes as with h_b","never expands more nodes than with h_b","is no longer optimal","returns a different path cost"],a:1,w:"h_a dominates h_b: fewer nodes satisfy f(n) < C*, so fewer are expanded, and the answer is still optimal."},
+ {t:"Informed search",q:"Why is tree-search GBFS incomplete?",o:["It uses too much memory","It can loop forever between states that look close to the goal","Its heuristic is inadmissible","It ignores h"],a:1,w:"Without a visited set it can bounce between two nodes with low h (a dead end). Graph search with a visited set fixes it in finite spaces."},
+ {t:"Hill climbing",q:"Hill climbing is at a state of value 10. Its neighbours have values 9, 10 and 7. What happens?",o:["Moves to the neighbour with 10","Stops: no neighbour is strictly better (plateau)","Moves to 9","Restarts automatically"],a:1,w:"The algorithm returns when the best neighbour is ≤ the current value. Equal neighbours mean a plateau."},
+ {t:"Hill climbing",q:"If one hill-climbing run finds the global optimum with probability 0.2, the expected number of random restarts needed is…",o:["2","5","20","0.2"],a:1,w:"Expected number of runs = 1/p = 1/0.2 = 5."},
+ {t:"Hill climbing",q:"First-choice hill climbing…",o:["evaluates all neighbours and takes the best","generates random neighbours and takes the first that is better","accepts worse neighbours with a probability","keeps k states"],a:1,w:"It avoids evaluating every neighbour, which helps when a state has thousands of successors."},
+ {t:"Simulated annealing",q:"Minimising: current cost 33, neighbour cost 42, T = 100. Acceptance probability?",o:["e^(−9/100) ≈ 0.91","e^(9/100) ≈ 1.09","9/100 = 0.09","1"],a:0,w:"ΔE = 42 − 33 = 9 (worse). P = e^(−ΔE/T) = e^(−0.09) ≈ 0.914. This is the notes' TSP example."},
+ {t:"Simulated annealing",q:"As the temperature T decreases, the probability of accepting a worse move…",o:["increases","decreases","stays the same","becomes 1"],a:1,w:"e^(−ΔE/T) shrinks as T shrinks. SA explores early and settles late."},
+ {t:"Simulated annealing",q:"At a very high temperature simulated annealing behaves like…",o:["hill climbing","a random walk","A*","a genetic algorithm"],a:1,w:"P ≈ 1 for every move, so almost anything is accepted. It behaves like hill climbing only when T is near 0."},
+ {t:"Simulated annealing",q:"T₀ = 100, α = 0.5, T(k) = T₀·αᵏ. What is T(3)?",o:["50","25","12.5","6.25"],a:2,w:"100 × 0.5³ = 12.5."},
+ {t:"Genetic algorithm",q:"Course convention for a GA simulation in the exam:",o:["8 chromosomes, select best 4","4 chromosomes, select best 3, cross the best with the other two","2 chromosomes, no selection","6 chromosomes, roulette wheel"],a:1,w:"Notes, p. 71: start with 4, select the best 3 (truncation), cross the best with each of the other two, then mutate."},
+ {t:"Genetic algorithm",q:"A suitable fitness function for TSP is…",o:["route length","1 / route length","number of cities","route length squared"],a:1,w:"Fitness must be higher for better solutions. TSP minimises length, so invert it."},
+ {t:"Genetic algorithm",q:"Why does single-point crossover fail for TSP chromosomes?",o:["It is too slow","Children can repeat some cities and miss others","It changes the fitness function","It needs binary strings"],a:1,w:"A tour is a permutation: every city exactly once. Use order crossover (OX) and swap mutation."},
+ {t:"Genetic algorithm",q:"8-queens chromosome 2 4 7 4 8 5 5 2 has 4 attacking pairs. Its fitness is…",o:["4","24","28","32"],a:1,w:"Fitness = non-attacking pairs = 28 − 4 = 24 (8 queens form 8·7/2 = 28 pairs)."},
+ {t:"Genetic algorithm",q:"All chromosomes in the population are identical. Which operator can still produce something new?",o:["Selection","Crossover","Mutation","Elitism"],a:2,w:"Crossing identical parents gives identical children. Only mutation introduces a new gene value."},
+ {t:"Genetic algorithm",q:"2-elitism means…",o:["two crossover points","the two best chromosomes are copied unchanged into the next generation","mutation rate 2%","the two worst are mutated"],a:1,w:"Elitism guarantees the best solution found is never lost between generations."},
+ {t:"Adversarial",q:"MAX root with MIN children B and C. B's leaves: 3, 12, 8. C's first leaf is 2. What happens to C's other leaves?",o:["They must be examined","They are pruned, because C ≤ 2 < α = 3","They are pruned only if they are larger than 12","Depends on their values"],a:1,w:"After B, α = 3. C is a MIN node already ≤ 2, so MAX will never choose it."},
+ {t:"Adversarial",q:"In alpha–beta pruning, α is updated at…",o:["MIN nodes","MAX nodes","leaves","every node"],a:1,w:"α is MAX's best guaranteed value so far; MAX nodes raise it. MIN nodes lower β."},
+ {t:"Adversarial",q:"Compared with minimax, alpha–beta pruning returns…",o:["a slightly worse move, faster","the same root value and move","a better move","an approximation"],a:1,w:"It only skips branches that cannot affect the decision."},
+ {t:"Adversarial",q:"Best-case time of alpha–beta with perfect move ordering:",o:["O(b^m)","O(b^(m/2))","O(bm)","O(m)"],a:1,w:"It can search about twice as deep as minimax in the same time. Worst case (bad ordering) is still O(b^m)."},
+ {t:"Adversarial",q:"Minimax's space complexity (b = branching, m = depth):",o:["O(b^m)","O(bm)","O(m^b)","O(1)"],a:1,w:"It is a depth-first search: O(bm) space, O(b^m) time."},
+ {t:"Adversarial",q:"MAX root; B (MIN) has leaves 5 and 8; C (MIN) has leaves X then 9. For which X is the 9 pruned?",o:["X ≥ 5","X ≤ 5","X > 9","never"],a:1,w:"B = 5 gives α = 5. At C, after X, v = X; prune when v ≤ α, i.e. X ≤ 5."},
+ {t:"Adversarial",q:"Tic-tac-toe utility = (100 − depth) for a win. Why include depth?",o:["To make utilities positive","So the agent prefers faster wins and slower losses","To make the game zero-sum","To enable pruning"],a:1,w:"A win at depth 2 is worth 98, at depth 4 only 96, so minimax picks the quickest win."}
+];
+const Z={order:QS.map((_,i)=>i),ans:{},wrong:new Set(store.get("cse422-wrong",[]))};
+function zDraw(){const list=$("#z-list");list.innerHTML="";Z.order.forEach(i=>{const Q=QS[i],d=el("div",{class:"q"+(Z.ans[i]!==undefined?" done":"")},`<span class="tag">${Q.t}</span><div><b>${Q.q}</b></div><div class="opts"></div><div class="why"></div>`);
+    Q.o.forEach((o,k)=>{const b=el("button",{},o);if(Z.ans[i]!==undefined){b.disabled=true;if(k===Q.a)b.classList.add("right");else if(k===Z.ans[i])b.classList.add("wrong")}
+      b.onclick=()=>{Z.ans[i]=k;if(k===Q.a)Z.wrong.delete(i);else Z.wrong.add(i);store.set("cse422-wrong",[...Z.wrong]);zDraw()};d.querySelector(".opts").append(b)});
+    if(Z.ans[i]!==undefined)d.querySelector(".why").innerHTML=(Z.ans[i]===Q.a?'<span class="pill ok">correct</span> ':'<span class="pill bad">not quite</span> ')+Q.w;list.append(d)});
+  const done=Z.order.filter(i=>Z.ans[i]!==undefined),right=done.filter(i=>Z.ans[i]===QS[i].a).length;$("#z-score").textContent=`${right} / ${done.length}`;$("#z-info").textContent=`${Z.order.length} questions shown · ${Z.wrong.size} saved as mistakes`;$("#z-retry").disabled=Z.wrong.size===0}
+function zInit(){$("#z-retry").onclick=()=>{Z.order=[...Z.wrong];Z.ans={};zDraw()};$("#z-all").onclick=()=>{Z.order=QS.map((_,i)=>i);Z.ans={};zDraw()};$("#z-shuffle").onclick=()=>{Z.order.sort(()=>Math.random()-.5);zDraw()};zDraw()}
+
+/* =====================================================  CRAM  */
+const DEFS=[
+ ["Heuristic h(n)","Estimate of the cheapest cost from n to the goal; h(goal) = 0.",""],
+ ["g(n), f(n)","g = exact cost from start to n. f = value used to order the frontier.","GBFS: f = h   A*: f = g + h"],
+ ["Greedy best-first","Expands the node that looks closest to the goal. Fast, not optimal.","f(n) = h(n)"],
+ ["A* search","Expands lowest g + h. Optimal if h is admissible (tree) or consistent (graph).","f(n) = g(n) + h(n)"],
+ ["Admissible","Never overestimates the true cost to the goal.","h(n) ≤ h*(n) for all n"],
+ ["Consistent","One step never lowers the estimate by more than the step cost.","h(n) ≤ c(n,n′) + h(n′)"],
+ ["Dominance","h₂ dominates h₁ if h₂ ≥ h₁ everywhere; A* then expands no more nodes.",""],
+ ["Effective branching factor","b* of a uniform tree holding the N + 1 generated nodes at depth d. Lower is better.","N+1 = 1 + b* + … + (b*)^d"],
+ ["Octile distance","Exact cost on an 8-connected grid with diagonal √2.","(√2−1)·min(dx,dy) + max(dx,dy)"],
+ ["Local search","Keeps one current state and improves it through neighbours; no path, little memory.",""],
+ ["Hill climbing","Move to the best neighbour; stop when none is better.",""],
+ ["Local maximum","Peak higher than its neighbours but lower than the global maximum.",""],
+ ["Plateau / shoulder","Flat area with equal neighbours; a shoulder leads upward further on.",""],
+ ["Ridge","Sequence of local maxima; single allowed moves all go down.",""],
+ ["Random restart","Rerun hill climbing from random starts; expected runs = 1/p.",""],
+ ["Simulated annealing","Accepts worse moves with a probability that falls as T cools.","P = e^(−ΔE/T),  T(k) = T₀·α^k"],
+ ["Genetic algorithm","Population evolves by selection, crossover and mutation.",""],
+ ["Fitness function","Score of a chromosome; higher is better. Invert for minimisation.","TSP: 1 / length"],
+ ["Order crossover (OX)","Copy a slice from parent 1, fill the rest in parent 2's order. Keeps permutations valid.",""],
+ ["Mutation","Small random change (bit flip, swap, reset) that keeps diversity.",""],
+ ["Elitism","Copy the k fittest unchanged into the next generation.",""],
+ ["Zero-sum game","One player's gain is the other's loss; utilities sum to zero.",""],
+ ["Minimax value","Utility MAX gets if both sides play optimally.","time O(b^m), space O(bm)"],
+ ["α and β","α: best for MAX so far (updated at MAX). β: best for MIN so far (updated at MIN).","prune when α ≥ β"],
+ ["Alpha–beta pruning","Minimax that skips branches which cannot change the decision.","best O(b^(m/2))"]
+];
+const F={i:0,back:false};
+function fDraw(){const d=DEFS[F.i];$("#f-card").innerHTML=F.back?`<span>${d[1]}</span>${d[2]?`<span class="mono" style="color:var(--accent)">${d[2]}</span>`:""}`:`<span class="big" style="font-size:1.5rem">${d[0]}</span><span class="note">tap to flip</span>`;$("#f-pos").textContent=`${F.i+1} / ${DEFS.length}`}
+function cramInit(){const box=$("#d-cards");DEFS.forEach(d=>box.append(el("div",{class:"card"},`<b>${d[0]}</b><div>${d[1]}</div>${d[2]?`<span class="fx">${d[2]}</span>`:""}`)));
+  const flip=()=>{F.back=!F.back;fDraw()};$("#f-card").onclick=flip;$("#f-card").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();flip()}};$("#f-flip").onclick=flip;
+  $("#f-next").onclick=()=>{F.i=(F.i+1)%DEFS.length;F.back=false;fDraw()};$("#f-prev").onclick=()=>{F.i=(F.i+DEFS.length-1)%DEFS.length;F.back=false;fDraw()};fDraw()}
+
+/* ---------- boot ---------- */
+sInit();["h-dx","h-dy","h-move"].forEach(i=>$("#"+i).oninput=hDraw);hDraw();["c-t","c-1","c-2","c-3"].forEach(i=>$("#"+i).oninput=cDraw);cDraw();
+hcInit();saInit();gInit();abInit();zInit();cramInit();showTab();
+</script>
+</body>
+</html>
