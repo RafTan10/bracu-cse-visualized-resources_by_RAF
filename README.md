@@ -16,11 +16,13 @@ Most course notes are walls of text. These are built around one idea: if you can
 
 More courses will be added folder by folder.
 
+![CSE422: step through A* one pop at a time](CSE422/media/theory-search-stepper.gif)
+
+▶ [Watch the CSE422 demo in full quality (MP4)](CSE422/media/theory-search-stepper.mp4) · [more CSE422 videos](CSE422/)
+
 ![CSE340 study pages](CSE340/media/index.png)
 
 ![CSE370: change a relationship's cardinality and watch the diagram update](CSE370/media/er-cardinality-sim.gif)
-
-![CSE422: step through A* one pop at a time](CSE422/media/theory-search-stepper.gif)
 
 ---
 
