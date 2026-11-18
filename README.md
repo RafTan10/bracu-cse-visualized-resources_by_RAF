@@ -44,4 +44,4 @@ Each course folder has its own README with what's inside, the exam syllabus it t
 
 ---
 
-<sub>By RAF ([@RafTan10](https://github.com/RafTan10)). Built with Claude. Free to use and share.</sub>
+<sub>By RAF ([@RafTan10](https://github.com/RafTan10)). Free to use and share.</sub>

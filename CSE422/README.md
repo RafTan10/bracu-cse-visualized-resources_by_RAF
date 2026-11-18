@@ -177,4 +177,4 @@ Your quiz scores, passed drills and saved code are kept in your own browser only
 
 ---
 
-<sub>Made by RAF for juniors taking CSE422 at BRAC University. Built with Claude. Free to use and share; if it helped you, pass it on.</sub>
+<sub>Made by RAF for juniors taking CSE422 at BRAC University. Free to use and share; if it helped you, pass it on.</sub>

@@ -129,4 +129,4 @@ Your quiz scores, marks and drafts are kept in your own browser only. Nothing is
 
 ---
 
-<sub>Made by RAF for juniors taking CSE370 at BRAC University. Built with Claude. Free to use and share; if it helped you, pass it on.</sub>
+<sub>Made by RAF for juniors taking CSE370 at BRAC University. Free to use and share; if it helped you, pass it on.</sub>

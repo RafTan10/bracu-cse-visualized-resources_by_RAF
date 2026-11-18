@@ -509,7 +509,6 @@ setTheme(store.get('c370-dark', false));
 
 // ---------- static sections ----------
 function renderOverview() {
-  const vids = [['Database Constraints', 'https://claude.ai/artifact/SYxiHvLZsU9gDUUpCvjvoh'], ['ER/EER to Relational Schema', 'https://claude.ai/artifact/WwU9DeNGyngw2yCrfmHFij'], ['Storage Architecture', 'https://claude.ai/artifact/Gq9uhBf4kxvHj2jgHPBZdY'], ['Normalization', 'https://claude.ai/artifact/UAgqhKPKdTup412npdktrS']];
   $('#s-overview').innerHTML = '<h2>Big picture</h2><p class="lead">Quiz and mid syllabus: Database Constraints · ER/EER to Relational Schema · Storage Architecture · Normalization. Question pattern: schema design / normalization and short theory questions.</p>' +
     '<div class="card"><svg viewBox="0 0 760 250" style="width:100%;max-width:760px" role="img" aria-label="How the four topics connect">' +
     '<path class="l" d="M190 60H250M450 60H510M350 95V150"/><path class="l" d="M240 52l12 8-12 8M500 52l12 8-12 8M342 140l8 12 8-12"/>' +
@@ -520,7 +519,7 @@ function renderOverview() {
     '<rect class="s" x="510" y="155" width="240" height="70" rx="8"/><text x="630" y="186" text-anchor="middle" font-weight="700">3 · Storage</text><text x="630" y="206" text-anchor="middle">how tables sit on disk</text>' +
     '<path class="l" d="M470 190H510" stroke-dasharray="5 5"/></svg>' +
     '<p class="note">Design the tables (mapping), protect them with rules (constraints), remove redundancy (normalization), then store them efficiently (storage).</p></div>' +
-    D.topics.filter((t) => show(t.id)).map((t, i) => '<div class="card"><span class="tn">Topic ' + t.n + ' · ' + t.src + '</span><h4>' + t.title + '</h4><p>' + t.big + '</p><p class="mini">In the notes: ' + t.concepts.map((c) => c.h).join(' · ') + '</p><p class="mini">Video: <a href="' + vids[t.n - 1][1] + '">' + vids[t.n - 1][0] + '</a></p></div>').join('');
+    D.topics.filter((t) => show(t.id)).map((t, i) => '<div class="card"><span class="tn">Topic ' + t.n + ' · ' + t.src + '</span><h4>' + t.title + '</h4><p>' + t.big + '</p><p class="mini">In the notes: ' + t.concepts.map((c) => c.h).join(' · ') + '</p></div>').join('');
 }
 function renderConcepts() {
   $('#s-concepts').innerHTML = '<h2>Core concepts</h2><p class="lead">Everything from the slides, in exam form. Tap a heading to open or close it.</p>' +
